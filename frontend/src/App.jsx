@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3 } from 'lucide-react';
+import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft } from 'lucide-react';
 
 // --- CREDENCIALES REALES SUPABASE ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
@@ -424,19 +424,19 @@ export default function App() {
     return (
       <div className="flex flex-col h-full animate-fade-in">
         <div className="bg-black p-4 sticky top-0 z-10 flex flex-col gap-3 shadow-lg">
-          <div className="flex justify-between items-center text-white">
-            <h2 className="text-xl font-black uppercase flex items-center gap-2">
+          <div className="flex items-center gap-3 text-white">
+            <button onClick={() => { setSearchQuery(''); setView('home'); }} className="p-1 -ml-2 hover:bg-gray-800 rounded-full transition-colors active:scale-90">
+              <ChevronLeft size={32} />
+            </button>
+            <h2 className="text-xl font-black uppercase flex items-center gap-2 flex-1 truncate">
               {isPersonas ? <User size={20}/> : <Map size={20}/>}
-              {isPersonas ? 'Personas' : 'Zonas'}
+              {isPersonas ? 'Búsqueda' : 'Focos'}
             </h2>
-            <div className="flex items-center gap-3">
-              {isSyncing && <RefreshCw size={14} className="animate-spin text-gray-500" />}
-              <button onClick={() => { setSearchQuery(''); setView('home'); }} className="text-sm font-bold bg-white text-black px-3 py-1 hover:bg-gray-200">Volver</button>
-            </div>
+            {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500" />}
           </div>
-          <input type="text" placeholder={isPersonas ? "Buscar nombre o descripción..." : "Buscar sector o calle..."} className="w-full p-3 text-black font-medium focus:outline-none rounded-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          <input type="text" placeholder={isPersonas ? "Escribe nombre, apellido o cédula..." : "Buscar por sector o edificio..."} className="w-full p-3 text-black font-medium focus:outline-none rounded-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')} className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2">
-            <Plus size={18}/> {isPersonas ? 'Crear Reporte de Persona' : 'Reportar Nueva Zona'}
+            <Plus size={18}/> {isPersonas ? 'Reportar Persona Desparecida' : 'Reportar Foco de Rescate'}
           </button>
         </div>
         <div className="p-4 space-y-4 bg-gray-100 min-h-screen">
@@ -473,9 +473,13 @@ export default function App() {
 
     return (
       <div className="bg-gray-100 min-h-screen animate-fade-in pb-20">
-        <div className="bg-black text-white p-4 sticky top-0 flex justify-between items-center z-10 shadow-lg">
-          <button onClick={goBack} className="font-bold flex items-center gap-1 hover:text-gray-300">← Volver</button>
-          <span className="text-xs font-mono font-bold opacity-50 truncate w-32 text-right">{selectedItem.id?.split('-')[0]}</span>
+        <div className="bg-black text-white p-4 sticky top-0 flex items-center gap-3 z-10 shadow-lg">
+          <button onClick={goBack} className="p-1 -ml-2 hover:bg-gray-800 rounded-full transition-colors active:scale-90">
+            <ChevronLeft size={32} />
+          </button>
+          <span className="font-black uppercase text-lg truncate flex-1">
+            Detalles del Reporte
+          </span>
         </div>
         <div className="p-4 space-y-4">
           <div className="bg-white border-4 border-black p-5">
@@ -552,9 +556,11 @@ export default function App() {
 
   const FormPersonaView = () => (
     <div className="bg-white min-h-screen animate-fade-in">
-      <div className="bg-black text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
-        <h2 className="font-black uppercase">Reporte: Persona</h2>
-        <button onClick={() => setView('personas')} className="text-sm font-bold text-gray-400 hover:text-white">Cancelar</button>
+      <div className="bg-black text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
+        <button onClick={() => setView('personas')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
+          <ChevronLeft size={32} />
+        </button>
+        <h2 className="font-black uppercase text-lg flex-1 truncate">Reportar Persona</h2>
       </div>
       <form onSubmit={handleSubmitPersona} className="p-4 space-y-5">
         <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">Solo llena lo que sepas. Puedes usar descripciones físicas.</div>
@@ -575,9 +581,11 @@ export default function App() {
 
   const FormZonaView = () => (
     <div className="bg-white min-h-screen animate-fade-in">
-      <div className="bg-red-600 text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
-        <h2 className="font-black uppercase">Reportar Zona Crítica</h2>
-        <button onClick={() => setView('zonas')} className="text-sm font-bold text-red-200 hover:text-white">Cancelar</button>
+      <div className="bg-red-600 text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
+        <button onClick={() => setView('zonas')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
+          <ChevronLeft size={32} />
+        </button>
+        <h2 className="font-black uppercase text-lg flex-1 truncate">Reportar Zona Crítica</h2>
       </div>
       <form onSubmit={handleSubmitZona} className="p-4 space-y-5">
         <div><label className="block text-sm font-black uppercase mb-2">1. Nombre del Sector / Zona *</label><input required type="text" placeholder="Ej: Sector El Limón" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500" value={formZona.nombre} onChange={e => setFormZona(f => ({...f, nombre: e.target.value}))} /></div>
@@ -597,9 +605,11 @@ export default function App() {
   // ─── FIX RESTAURADO: VISTAS DE APORTE ───
   const FormAportePersonaView = () => (
     <div className="bg-white min-h-screen animate-fade-in">
-      <div className="bg-black text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
-        <h2 className="font-black uppercase">Actualizar Persona</h2>
-        <button onClick={() => setView('detail')} className="text-sm font-bold text-gray-400">Cancelar</button>
+      <div className="bg-black text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
+        <button onClick={() => setView('detail')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
+          <ChevronLeft size={32} />
+        </button>
+        <h2 className="font-black uppercase text-lg flex-1 truncate">Actualizar Persona</h2>
       </div>
       <form onSubmit={handleAportarPersona} className="p-4 space-y-5">
         <div>
@@ -629,9 +639,11 @@ export default function App() {
 
   const FormAporteZonaView = () => (
     <div className="bg-white min-h-screen animate-fade-in">
-      <div className="bg-red-600 text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
-        <h2 className="font-black uppercase">Actualizar Foco</h2>
-        <button onClick={() => setView('detail')} className="text-sm font-bold text-red-200">Cancelar</button>
+      <div className="bg-red-600 text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
+        <button onClick={() => setView('detail')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
+          <ChevronLeft size={32} />
+        </button>
+        <h2 className="font-black uppercase text-lg flex-1 truncate">Actualizar Foco</h2>
       </div>
       <form onSubmit={handleAportarZona} className="p-4 space-y-5">
         <div>
