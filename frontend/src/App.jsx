@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Home, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
+import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell } from 'lucide-react';
 
 // --- CREDENCIALES REALES SUPABASE ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
@@ -12,81 +12,138 @@ const HEADERS = {
   'Prefer': 'return=representation'
 };
 
-const SWIPE_BACK_THRESHOLD = 75;
-const SWIPE_BACK_EDGE_LIMIT = 32;
+// ─────────────────────────────────────────────
+// FIX: Componentes auxiliares FUERA de App
+// para evitar que React los destruya/recree en cada render
+// ─────────────────────────────────────────────
+
+const TrustBadge = memo(({ level }) => {
+  if (level >= 3) return <span className="bg-blue-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12}/> Oficial</span>;
+  if (level === 2) return <span className="bg-green-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12}/> Rescate</span>;
+  if (level === 1) return <span className="bg-yellow-500 text-black text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><User size={12}/> Familiar</span>;
+  return <span className="bg-gray-200 text-gray-600 text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><AlertTriangle size={12}/> Civil (Nivel 0)</span>;
+});
+
+const StatusPill = memo(({ status }) => {
+  const s = status ? status.toLowerCase() : '';
+  let bg = 'bg-gray-800';
+  if (s === 'buscado') bg = 'bg-red-600';
+  if (s === 'a_salvo') bg = 'bg-green-600';
+  if (s === 'herido') bg = 'bg-orange-500';
+  return <span className={`${bg} text-white text-xs px-2 py-1 font-bold uppercase tracking-wide`}>{status.replace('_', ' ')}</span>;
+});
+
+// ─────────────────────────────────────────────
+// FIX: PersonaCard y ZonaCard como componentes
+// estables con memo para evitar re-renders innecesarios
+// ─────────────────────────────────────────────
+
+const PersonaCard = memo(({ item, onClick }) => (
+  <div onClick={onClick} className="bg-white border-2 border-black p-4 cursor-pointer active:scale-[0.98] transition-transform">
+    <div className="flex justify-between items-start mb-3">
+      <TrustBadge level={item.trust_level} />
+      <StatusPill status={item.status} />
+    </div>
+    <h3 className="text-lg font-black leading-tight mb-2 uppercase">{item.name_desc}</h3>
+    <p className="text-sm text-gray-700 font-medium line-clamp-2">
+      <MapPin size={14} className="inline mr-1 -mt-1"/>
+      {item.location_text}
+    </p>
+    <p className="text-[10px] text-gray-400 font-mono mt-3 uppercase text-right">
+      {new Date(item.created_at).toLocaleString()}
+    </p>
+  </div>
+));
+
+const ZonaCard = memo(({ item, onClick }) => (
+  <div onClick={onClick} className="bg-white border-2 border-black p-4 cursor-pointer active:scale-[0.98] transition-transform">
+    <div className="flex justify-between items-start mb-3">
+      <TrustBadge level={item.trust_level} />
+      <span className={`text-xs px-2 py-1 font-bold uppercase text-white ${item.urgency === 'alta' ? 'bg-red-600' : 'bg-orange-500'}`}>
+        Urgencia: {item.urgency}
+      </span>
+    </div>
+    <h3 className="text-lg font-black leading-tight mb-2 uppercase">{item.name}</h3>
+    <p className="text-sm text-gray-700 font-medium line-clamp-2">
+      <MapPin size={14} className="inline mr-1 -mt-1"/>
+      {item.situation}
+    </p>
+    <p className="text-[10px] text-gray-400 font-mono mt-3 uppercase text-right">
+      {new Date(item.created_at).toLocaleString()}
+    </p>
+  </div>
+));
+
+// ─────────────────────────────────────────────
+// APP PRINCIPAL
+// ─────────────────────────────────────────────
 
 export default function App() {
-  const [view, setView] = useState('home'); 
+  const [view, setView] = useState('home');
   const [activeTab, setActiveTab] = useState('personas');
-  const [touchStartX, setTouchStartX] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState(null);
-  
-  // Estado de Datos y Sincronización
+
   const [incidentId, setIncidentId] = useState(null);
   const [personas, setPersonas] = useState([]);
   const [zonas, setZonas] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // FIX: separado del loading de datos
 
-  // Formularios
   const [formPersona, setFormPersona] = useState({ nombreDesc: '', estado: 'buscado', ubicacion: '', contacto: '' });
   const [formZona, setFormZona] = useState({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
 
-  // 1. Inicializar: Obtener el ID del Incidente "terremoto-ve-2026"
+  // ── FIX SWIPE: usamos ref para no necesitar re-renders ──
+  const swipeStartX = useRef(null);
+  const swipeStartY = useRef(null);
+  const isScrolling = useRef(null);
+
+  // ─── INICIALIZACIÓN ───
   useEffect(() => {
     const initApp = async () => {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/incidents?slug=eq.terremoto-ve-2026&select=id`, { headers: HEADERS });
         const data = await res.json();
-        if (data && data.length > 0) {
-          setIncidentId(data[0].id);
-        }
+        if (data && data.length > 0) setIncidentId(data[0].id);
       } catch (err) {
-        console.error("Error conectando a Supabase:", err);
         showNotification("Error de conexión. Trabajando offline.", true);
       }
     };
     initApp();
   }, []);
 
-  // 2. Obtener Datos (Personas y Zonas)
+  // ─── FETCH DE DATOS ───
   const fetchData = useCallback(async (silent = false) => {
     if (!incidentId) return;
-    if (!silent) setIsLoading(true);
+    if (!silent) setInitialLoading(true);
     setIsSyncing(true);
-
     try {
       const [resP, resZ] = await Promise.all([
         fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&order=created_at.desc`, { headers: HEADERS }),
         fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}&order=created_at.desc`, { headers: HEADERS })
       ]);
-      
       const dataP = await resP.json();
       const dataZ = await resZ.json();
-      
-      setPersonas(dataP || []);
-      setZonas(dataZ || []);
+      setPersonas(Array.isArray(dataP) ? dataP : []);
+      setZonas(Array.isArray(dataZ) ? dataZ : []);
     } catch (err) {
       console.error("Error obteniendo datos:", err);
     } finally {
-      setIsLoading(false);
+      setInitialLoading(false);
       setIsSyncing(false);
     }
   }, [incidentId]);
 
-  // Ejecutar fetchData cuando tengamos el incidentId
   useEffect(() => {
     if (incidentId) fetchData();
   }, [incidentId, fetchData]);
 
-  // 3. POLLING INTELIGENTE (Punto 5 del Documento V2): Refresca cada 30 seg
+  // ─── POLLING 30s ───
   useEffect(() => {
     if (!incidentId) return;
-    const interval = setInterval(() => {
-      fetchData(true); // silent fetch (no bloquea la pantalla)
-    }, 30000);
+    const interval = setInterval(() => fetchData(true), 30000);
     return () => clearInterval(interval);
   }, [incidentId, fetchData]);
 
@@ -95,72 +152,85 @@ export default function App() {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  const handleBackNavigation = () => {
-    switch (view) {
-      case 'personas':
-      case 'zonas':
-        setView('home');
-        break;
-      case 'detail':
-        setView(activeTab);
-        break;
-      case 'form_persona':
-        setView('personas');
-        break;
-      case 'form_zona':
-        setView('zonas');
-        break;
-      case 'form_aporte_persona':
-      case 'form_aporte_zona':
-        setView('detail');
-        break;
-      case 'home':
-      default:
-        break;
-    }
-  };
+  // ─── NAVEGACIÓN ATRÁS ───
+  const goBack = useCallback(() => {
+    setView(prev => {
+      switch (prev) {
+        case 'personas':
+        case 'zonas': return 'home';
+        case 'detail': return activeTab;
+        case 'form_persona': return 'personas';
+        case 'form_zona': return 'zonas';
+        default: return prev;
+      }
+    });
+  }, [activeTab]);
 
-  const handleTouchStart = (e) => {
+  // ─── FIX SWIPE: lógica mejorada con detección de scroll vertical ───
+  const handleTouchStart = useCallback((e) => {
     const touch = e.targetTouches[0];
-
     if (!touch) return;
 
-    if (e.target.closest('button, a, input, textarea, select, label')) {
-      setTouchStartX(null);
+    // No iniciar swipe si el toque viene de un control interactivo
+    if (e.target.closest('button, a, input, textarea, select')) return;
+
+    // Guardar posición inicial
+    swipeStartX.current = touch.clientX;
+    swipeStartY.current = touch.clientY;
+    isScrolling.current = null; // todavía no sabemos si el usuario hace scroll o swipe
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (swipeStartX.current === null) return;
+
+    const touch = e.targetTouches[0];
+    const deltaX = touch.clientX - swipeStartX.current;
+    const deltaY = touch.clientY - swipeStartY.current;
+
+    // Determinar intención solo la primera vez que se mueve
+    if (isScrolling.current === null) {
+      // Si el movimiento vertical es mayor, es scroll. Lo ignoramos.
+      isScrolling.current = Math.abs(deltaY) > Math.abs(deltaX);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (swipeStartX.current === null) return;
+
+    // Si el usuario estaba haciendo scroll, ignoramos
+    if (isScrolling.current) {
+      swipeStartX.current = null;
+      swipeStartY.current = null;
+      isScrolling.current = null;
       return;
     }
 
-    if (touch.clientX > SWIPE_BACK_EDGE_LIMIT) {
-      setTouchStartX(null);
-      return;
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - swipeStartX.current;
+    const startedFromLeft = swipeStartX.current < 60; // FIX: zona generosa desde el borde izquierdo
+
+    // Swipe hacia la derecha desde el borde izquierdo = navegar atrás
+    if (startedFromLeft && deltaX > 60 && view !== 'home') {
+      goBack();
     }
 
-    setTouchStartX(touch.clientX);
-  };
+    swipeStartX.current = null;
+    swipeStartY.current = null;
+    isScrolling.current = null;
+  }, [view, goBack]);
 
-  const handleTouchEnd = (e) => {
-    if (touchStartX === null) return;
+  const handleTouchCancel = useCallback(() => {
+    swipeStartX.current = null;
+    swipeStartY.current = null;
+    isScrolling.current = null;
+  }, []);
 
-    const touchEndX = e.changedTouches[0].clientX;
-    const swipeDistance = touchEndX - touchStartX;
-
-    if (swipeDistance > SWIPE_BACK_THRESHOLD) {
-      handleBackNavigation();
-    }
-
-    setTouchStartX(null);
-  };
-
-  const handleTouchCancel = () => {
-    setTouchStartX(null);
-  };
-
-  // 4. Enviar Persona a Supabase
+  // ─── ENVIAR PERSONA ───
   const handleSubmitPersona = async (e) => {
     e.preventDefault();
     if (!incidentId) return showNotification("Sistema no inicializado", true);
 
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       const payload = {
         incident_id: incidentId,
@@ -170,34 +240,28 @@ export default function App() {
         reporter_contact: formPersona.contacto,
         trust_level: 0
       };
-
       const res = await fetch(`${SUPABASE_URL}/rest/v1/persons`, {
-        method: 'POST',
-        headers: HEADERS,
-        body: JSON.stringify(payload)
+        method: 'POST', headers: HEADERS, body: JSON.stringify(payload)
       });
-
-      if (!res.ok) throw new Error("Error guardando datos");
-      
+      if (!res.ok) throw new Error();
       const newData = await res.json();
-      setPersonas([newData[0], ...personas]);
-      
+      setPersonas(prev => [newData[0], ...prev]);
       setFormPersona({ nombreDesc: '', estado: 'buscado', ubicacion: '', contacto: '' });
       showNotification("Reporte publicado exitosamente");
       setView('personas');
-    } catch (err) {
+    } catch {
       showNotification("Error de red. Intente de nuevo.", true);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  // 5. Enviar Zona a Supabase
+  // ─── ENVIAR ZONA ───
   const handleSubmitZona = async (e) => {
     e.preventDefault();
     if (!incidentId) return showNotification("Sistema no inicializado", true);
 
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       const payload = {
         incident_id: incidentId,
@@ -207,68 +271,51 @@ export default function App() {
         reporter_contact: formZona.contacto,
         trust_level: 0
       };
-
       const res = await fetch(`${SUPABASE_URL}/rest/v1/zones`, {
-        method: 'POST',
-        headers: HEADERS,
-        body: JSON.stringify(payload)
+        method: 'POST', headers: HEADERS, body: JSON.stringify(payload)
       });
-
-      if (!res.ok) throw new Error("Error guardando datos");
-      
+      if (!res.ok) throw new Error();
       const newData = await res.json();
-      setZonas([newData[0], ...zonas]);
-      
+      setZonas(prev => [newData[0], ...prev]);
       setFormZona({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
       showNotification("Zona de emergencia reportada");
       setView('zonas');
-    } catch (err) {
+    } catch {
       showNotification("Error de red. Intente de nuevo.", true);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  // --- COMPONENTES UI AUXILIARES ---
-  const TrustBadge = ({ level }) => {
-    if (level >= 3) return <span className="bg-blue-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12}/> Oficial</span>;
-    if (level === 2) return <span className="bg-green-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12}/> Rescate</span>;
-    if (level === 1) return <span className="bg-yellow-500 text-black text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><User size={12}/> Familiar</span>;
-    return <span className="bg-gray-200 text-gray-600 text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><AlertTriangle size={12}/> Civil (Nivel 0)</span>;
-  };
+  // ─────────────────────────────────────────────
+  // VISTAS — definidas dentro de App para acceder
+  // al estado, pero los subcomponentes de lista
+  // están FUERA para evitar titilación
+  // ─────────────────────────────────────────────
 
-  const StatusPill = ({ status }) => {
-    const s = status ? status.toLowerCase() : '';
-    let bg = 'bg-gray-800';
-    if (s === 'buscado') bg = 'bg-red-600';
-    if (s === 'a_salvo') bg = 'bg-green-600';
-    if (s === 'herido') bg = 'bg-orange-500';
-    
-    return <span className={`${bg} text-white text-xs px-2 py-1 font-bold uppercase tracking-wide`}>{status.replace('_', ' ')}</span>;
-  };
-
-  // --- VISTAS PRINCIPALES ---
   const HomeView = () => (
     <div className="flex flex-col h-full gap-4 animate-fade-in">
       <div className="bg-black text-white p-6 pb-8">
         <div className="flex justify-between items-start">
           <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">Sistema de<br/>Respuesta</h2>
-          {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500" />}
+          {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
         </div>
-        <p className="text-gray-400 text-sm font-medium mt-1">Conectado al Incidente Activo. Seleccione módulo de operación.</p>
+        <p className="text-gray-400 text-sm font-medium mt-1">Conectado al incidente activo. Seleccione módulo.</p>
       </div>
 
       <div className="px-4 flex flex-col gap-4 -mt-6">
-        <a href="https://t.me/red_emergencia_bot" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white p-6 border-4 border-black hover:bg-blue-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+        <a href="https://t.me/red_emergencia_bot" target="_blank" rel="noopener noreferrer"
+          className="bg-blue-600 text-white p-6 border-4 border-black hover:bg-blue-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
           <Bell size={32} className="mb-2" />
           <div className="flex justify-between w-full items-center">
             <h3 className="text-2xl font-black uppercase">Alertas en Vivo</h3>
             <span className="bg-black text-white text-xs px-2 py-1 font-bold">TELEGRAM</span>
           </div>
-          <p className="text-left text-sm text-blue-100 font-medium">Toca aquí para abrir Telegram y recibir notificaciones críticas de rescates.</p>
+          <p className="text-left text-sm text-blue-100 font-medium">Recibe notificaciones críticas de rescates en Telegram.</p>
         </a>
 
-        <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+        <button onClick={() => setView('personas')}
+          className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
           <User size={32} className="mb-2" />
           <div className="flex justify-between w-full items-center">
             <h3 className="text-2xl font-black uppercase">Personas</h3>
@@ -277,13 +324,14 @@ export default function App() {
           <p className="text-left text-sm text-gray-600 font-medium">Buscar familiares o reportar personas extraviadas / encontradas.</p>
         </button>
 
-        <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+        <button onClick={() => setView('zonas')}
+          className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
           <Map size={32} className="mb-2" />
           <div className="flex justify-between w-full items-center">
             <h3 className="text-2xl font-black uppercase">Zonas Críticas</h3>
             <span className="bg-white text-red-600 text-xs px-2 py-1 font-black">{zonas.length} regs</span>
           </div>
-          <p className="text-left text-sm text-red-100 font-medium">Reportar derrumbes, vías bloqueadas o solicitud de rescate en áreas.</p>
+          <p className="text-left text-sm text-red-100 font-medium">Reportar derrumbes, vías bloqueadas o solicitud de rescate.</p>
         </button>
       </div>
     </div>
@@ -294,8 +342,8 @@ export default function App() {
     const data = isPersonas ? personas : zonas;
     const filtered = data.filter(item => {
       if (!searchQuery) return true;
-      const searchStr = isPersonas ? item.name_desc : item.name;
-      return searchStr.toLowerCase().includes(searchQuery.toLowerCase());
+      const str = isPersonas ? item.name_desc : item.name;
+      return str && str.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
     return (
@@ -303,49 +351,42 @@ export default function App() {
         <div className="bg-black p-4 sticky top-0 z-10 flex flex-col gap-3 shadow-lg">
           <div className="flex justify-between items-center text-white">
             <h2 className="text-xl font-black uppercase flex items-center gap-2">
-              {isPersonas ? <User size={20}/> : <Map size={20}/>} {isPersonas ? 'Personas' : 'Zonas'}
+              {isPersonas ? <User size={20}/> : <Map size={20}/>}
+              {isPersonas ? 'Personas' : 'Zonas'}
             </h2>
             <div className="flex items-center gap-3">
               {isSyncing && <RefreshCw size={14} className="animate-spin text-gray-500" />}
-              <button onClick={() => setView('home')} className="text-sm font-bold bg-white text-black px-3 py-1 hover:bg-gray-200">Volver</button>
+              <button onClick={() => { setSearchQuery(''); setView('home'); }}
+                className="text-sm font-bold bg-white text-black px-3 py-1 hover:bg-gray-200">
+                Volver
+              </button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <input 
-              type="text" placeholder={isPersonas ? "Buscar nombre (Búsqueda difusa)..." : "Buscar sector o calle..."}
-              className="w-full p-3 text-black font-medium focus:outline-none rounded-none"
-              value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')} className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2">
+          <input
+            type="text"
+            placeholder={isPersonas ? "Buscar nombre o descripción..." : "Buscar sector o calle..."}
+            className="w-full p-3 text-black font-medium focus:outline-none rounded-none"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')}
+            className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2">
             <Plus size={18}/> {isPersonas ? 'Crear Reporte de Persona' : 'Reportar Nueva Zona'}
           </button>
         </div>
 
         <div className="p-4 space-y-4 bg-gray-100 min-h-screen">
-          {isLoading && !personas.length && !zonas.length ? (
+          {initialLoading ? (
             <p className="text-center font-bold text-gray-500 py-10 animate-pulse">Cargando base de datos...</p>
+          ) : filtered.length === 0 ? (
+            <p className="text-center font-bold text-gray-500 py-10">No hay registros aún.</p>
           ) : (
-            <>
-              {filtered.map(item => (
-                <div key={item.id} onClick={() => { setSelectedItem(item); setView('detail'); setActiveTab(type); }} className="bg-white border-2 border-black p-4 cursor-pointer active:scale-[0.98] transition-transform">
-                  <div className="flex justify-between items-start mb-3">
-                    <TrustBadge level={item.trust_level} />
-                    {isPersonas && <StatusPill status={item.status} />}
-                    {!isPersonas && <span className={`text-xs px-2 py-1 font-bold uppercase text-white ${item.urgency === 'alta' ? 'bg-red-600' : 'bg-orange-500'}`}>Urgencia: {item.urgency}</span>}
-                  </div>
-                  <h3 className="text-lg font-black leading-tight mb-2 uppercase">{isPersonas ? item.name_desc : item.name}</h3>
-                  <p className="text-sm text-gray-700 font-medium line-clamp-2">
-                    <MapPin size={14} className="inline mr-1 -mt-1"/>
-                    {isPersonas ? item.location_text : item.situation}
-                  </p>
-                  <p className="text-[10px] text-gray-400 font-mono mt-3 uppercase text-right">
-                    {new Date(item.created_at).toLocaleString()}
-                  </p>
-                </div>
-              ))}
-              {filtered.length === 0 && <p className="text-center font-bold text-gray-500 py-10">No hay registros aún.</p>}
-            </>
+            // FIX: uso de PersonaCard / ZonaCard estables para evitar titilación
+            filtered.map(item =>
+              isPersonas
+                ? <PersonaCard key={item.id} item={item} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
+                : <ZonaCard key={item.id} item={item} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
+            )
           )}
         </div>
       </div>
@@ -359,21 +400,21 @@ export default function App() {
     return (
       <div className="bg-gray-100 min-h-screen animate-fade-in pb-20">
         <div className="bg-black text-white p-4 sticky top-0 flex justify-between items-center z-10 shadow-lg">
-          <button onClick={() => setView(activeTab)} className="font-bold flex items-center gap-1 hover:text-gray-300">← Volver</button>
-          <span className="text-xs font-mono font-bold opacity-50 truncate w-32 text-right">{selectedItem.id.split('-')[0]}</span>
+          <button onClick={goBack} className="font-bold flex items-center gap-1 hover:text-gray-300">← Volver</button>
+          <span className="text-xs font-mono font-bold opacity-50 truncate w-32 text-right">{selectedItem.id?.split('-')[0]}</span>
         </div>
 
         <div className="p-4 space-y-4">
           <div className="bg-white border-4 border-black p-5">
             <div className="flex flex-col items-start gap-3 mb-4">
               <TrustBadge level={selectedItem.trust_level} />
-              {isPersona ? <StatusPill status={selectedItem.status} /> : <StatusPill status={`Urgencia ${selectedItem.urgency}`} />}
+              {isPersona
+                ? <StatusPill status={selectedItem.status} />
+                : <StatusPill status={`Urgencia ${selectedItem.urgency}`} />}
             </div>
-            
             <h2 className="text-2xl font-black uppercase mb-4 leading-tight border-b-2 border-gray-100 pb-4">
               {isPersona ? selectedItem.name_desc : selectedItem.name}
             </h2>
-
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{isPersona ? 'Ubicación' : 'Situación'}</p>
@@ -382,7 +423,9 @@ export default function App() {
               <div className="bg-gray-50 p-3 border border-gray-200">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Contacto del reporte</p>
                 <p className="font-bold">{selectedItem.reporter_contact}</p>
-                <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">Reg: {new Date(selectedItem.created_at).toLocaleString()}</p>
+                <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">
+                  Reg: {new Date(selectedItem.created_at).toLocaleString()}
+                </p>
               </div>
             </div>
           </div>
@@ -403,16 +446,25 @@ export default function App() {
       </div>
 
       <form onSubmit={handleSubmitPersona} className="p-4 space-y-5">
+        <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">
+          Solo llena lo que sepas. Puedes usar descripciones físicas.
+        </div>
+
         <div>
           <label className="block text-sm font-black uppercase mb-2">1. Nombre o Descripción *</label>
-          <input required type="text" placeholder="Ej: Luis, o Niño de camisa roja" className="w-full p-4 border-2 border-black font-medium focus:outline-none" value={formPersona.nombreDesc} onChange={e => setFormPersona({...formPersona, nombreDesc: e.target.value})} />
+          <input required type="text" placeholder="Ej: Luis, o Niño de camisa roja"
+            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500"
+            value={formPersona.nombreDesc}
+            onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} />
         </div>
 
         <div>
           <label className="block text-sm font-black uppercase mb-2">2. Estado Actual *</label>
           <div className="grid grid-cols-2 gap-2">
             {['buscado', 'a_salvo', 'herido', 'fallecido'].map(s => (
-              <button key={s} type="button" onClick={() => setFormPersona({...formPersona, estado: s})} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formPersona.estado === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
+              <button key={s} type="button"
+                onClick={() => setFormPersona(f => ({...f, estado: s}))}
+                className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formPersona.estado === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
                 {s.replace('_', ' ')}
               </button>
             ))}
@@ -420,17 +472,24 @@ export default function App() {
         </div>
 
         <div>
-          <label className="block text-sm font-black uppercase mb-2">3. Ubicación (Última vista o actual) *</label>
-          <input required type="text" placeholder="Sector, calle, o refugio" className="w-full p-4 border-2 border-black font-medium focus:outline-none" value={formPersona.ubicacion} onChange={e => setFormPersona({...formPersona, ubicacion: e.target.value})} />
+          <label className="block text-sm font-black uppercase mb-2">3. Ubicación *</label>
+          <input required type="text" placeholder="Sector, calle, refugio..."
+            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500"
+            value={formPersona.ubicacion}
+            onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} />
         </div>
 
         <div>
-          <label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono (Para Rescatistas) *</label>
-          <input required type="text" placeholder="0412-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none font-mono" value={formPersona.contacto} onChange={e => setFormPersona({...formPersona, contacto: e.target.value})} />
+          <label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono *</label>
+          <input required type="tel" placeholder="0412-1234567"
+            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono"
+            value={formPersona.contacto}
+            onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} />
         </div>
 
-        <button disabled={isLoading} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50">
-          {isLoading ? 'Guardando...' : 'Publicar Reporte'}
+        <button disabled={isSubmitting} type="submit"
+          className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 transition-opacity">
+          {isSubmitting ? 'Guardando...' : 'Publicar Reporte'}
         </button>
       </form>
     </div>
@@ -446,14 +505,19 @@ export default function App() {
       <form onSubmit={handleSubmitZona} className="p-4 space-y-5">
         <div>
           <label className="block text-sm font-black uppercase mb-2">1. Nombre del Sector / Zona *</label>
-          <input required type="text" placeholder="Ej: Sector El Limón" className="w-full p-4 border-2 border-black font-medium focus:outline-none" value={formZona.nombre} onChange={e => setFormZona({...formZona, nombre: e.target.value})} />
+          <input required type="text" placeholder="Ej: Sector El Limón"
+            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500"
+            value={formZona.nombre}
+            onChange={e => setFormZona(f => ({...f, nombre: e.target.value}))} />
         </div>
 
         <div>
           <label className="block text-sm font-black uppercase mb-2">2. Nivel de Urgencia *</label>
           <div className="grid grid-cols-3 gap-2">
             {['alta', 'media', 'baja'].map(u => (
-              <button key={u} type="button" onClick={() => setFormZona({...formZona, urgencia: u})} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formZona.urgencia === u ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
+              <button key={u} type="button"
+                onClick={() => setFormZona(f => ({...f, urgencia: u}))}
+                className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formZona.urgencia === u ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
                 {u}
               </button>
             ))}
@@ -461,44 +525,53 @@ export default function App() {
         </div>
 
         <div>
-          <label className="block text-sm font-black uppercase mb-2">3. Situación (Describa la emergencia) *</label>
-          <textarea required rows="4" placeholder="Ej: Edificio colapsado, personas atrapadas" className="w-full p-4 border-2 border-black font-medium focus:outline-none resize-none" value={formZona.situacion} onChange={e => setFormZona({...formZona, situacion: e.target.value})}></textarea>
+          <label className="block text-sm font-black uppercase mb-2">3. Situación (Describe la emergencia) *</label>
+          <textarea required rows="4" placeholder="Ej: Edificio colapsado, personas atrapadas..."
+            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none"
+            value={formZona.situacion}
+            onChange={e => setFormZona(f => ({...f, situacion: e.target.value}))} />
         </div>
 
         <div>
-          <label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono (Para Rescatistas) *</label>
-          <input required type="text" placeholder="0414-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none font-mono" value={formZona.contacto} onChange={e => setFormZona({...formZona, contacto: e.target.value})} />
+          <label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono *</label>
+          <input required type="tel" placeholder="0414-1234567"
+            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 font-mono"
+            value={formZona.contacto}
+            onChange={e => setFormZona(f => ({...f, contacto: e.target.value}))} />
         </div>
 
-        <button disabled={isLoading} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-red-700 disabled:opacity-50">
-          {isLoading ? 'Enviando Alerta...' : 'Alertar a Rescatistas'}
+        <button disabled={isSubmitting} type="submit"
+          className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-red-700 disabled:opacity-50 transition-opacity">
+          {isSubmitting ? 'Enviando Alerta...' : 'Alertar a Rescatistas'}
         </button>
       </form>
     </div>
   );
 
+  // ─── RENDER PRINCIPAL ───
   return (
     <div
       className="max-w-md mx-auto bg-gray-100 min-h-screen font-sans relative overflow-hidden"
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchCancel}
     >
       {notification && (
-        <div className={`absolute top-0 left-0 right-0 z-50 p-4 animate-slide-down ${notification.isError ? 'bg-red-600 text-white' : 'bg-black text-white'}`}>
+        <div className={`absolute top-0 left-0 right-0 z-50 p-4 animate-slide-down ${notification.isError ? 'bg-red-600' : 'bg-black'} text-white`}>
           <div className="flex items-center gap-3 font-bold text-sm uppercase tracking-wide">
-            {notification.isError ? <AlertTriangle size={18} /> : <CheckCircle size={18} />}
+            {notification.isError ? <AlertTriangle size={18}/> : <CheckCircle size={18}/>}
             {notification.msg}
           </div>
         </div>
       )}
 
-      {view === 'home' && <HomeView />}
-      {view === 'personas' && <DashboardView type="personas" />}
-      {view === 'zonas' && <DashboardView type="zonas" />}
-      {view === 'detail' && <DetailView />}
+      {view === 'home'         && <HomeView />}
+      {view === 'personas'     && <DashboardView type="personas" />}
+      {view === 'zonas'        && <DashboardView type="zonas" />}
+      {view === 'detail'       && <DetailView />}
       {view === 'form_persona' && <FormPersonaView />}
-      {view === 'form_zona' && <FormZonaView />}
+      {view === 'form_zona'    && <FormZonaView />}
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
