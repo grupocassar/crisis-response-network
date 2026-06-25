@@ -25,6 +25,66 @@ const SUPABASE_HEADERS = {
   'Content-Type': 'application/json'
 };
 
+const SUBSCRIPTIONS_TABLE = 'telegram_subscriptions';
+
+async function upsertTelegramSubscription(tableName, recordId, chatId) {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/${SUBSCRIPTIONS_TABLE}?on_conflict=table_name,record_id,chat_id`,
+      {
+        method: 'POST',
+        headers: {
+          ...SUPABASE_HEADERS,
+          Prefer: 'resolution=merge-duplicates,return=minimal'
+        },
+        body: JSON.stringify({
+          table_name: tableName,
+          record_id: recordId,
+          chat_id: String(chatId)
+        })
+      }
+    );
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.error('Error upsert subscription:', res.status, body);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Error upsert subscription:', err.message);
+    return false;
+  }
+}
+
+async function getTelegramSubscribers(tableName, recordId, fallbackChatId) {
+  const recipients = new Set();
+  if (fallbackChatId) recipients.add(String(fallbackChatId));
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/${SUBSCRIPTIONS_TABLE}?table_name=eq.${tableName}&record_id=eq.${recordId}&select=chat_id`,
+      { headers: SUPABASE_HEADERS }
+    );
+
+    if (res.ok) {
+      const rows = await res.json();
+      if (Array.isArray(rows)) {
+        rows.forEach((row) => {
+          if (row?.chat_id) recipients.add(String(row.chat_id));
+        });
+      }
+    } else {
+      const body = await res.text();
+      console.error('Error reading subscriptions:', res.status, body);
+    }
+  } catch (err) {
+    console.error('Error reading subscriptions:', err.message);
+  }
+
+  return Array.from(recipients);
+}
+
 // --- FUNCIÓN DE ENVÍO DE TELEGRAM A UN CHAT ESPECÍFICO ---
 async function sendTelegramMessageDirect(chatId, text, retries = 3, delay = 1000) {
   if (!TELEGRAM_BOT_TOKEN || !chatId) return false;
@@ -170,14 +230,17 @@ app.post('/api/webhooks/telegram', async (req, res) => {
           if (records && records.length > 0) {
             const name = type === 'person' ? records[0].name_desc : records[0].name;
 
-            // Enlazar Chat ID de Telegram en Supabase
-            const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${recordId}`, {
+            // Guardar suscripción multi-usuario sin sobrescribir suscriptores previos
+            const subscribed = await upsertTelegramSubscription(table, recordId, chatId);
+
+            // Compatibilidad hacia atrás: mantener último chat en el campo legado
+            await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${recordId}`, {
               method: 'PATCH',
               headers: SUPABASE_HEADERS,
               body: JSON.stringify({ telegram_chat_id: chatId.toString() })
-            });
+            }).catch(() => null);
 
-            if (updateRes.ok) {
+            if (subscribed) {
               await sendTelegramMessageDirect(chatId, `🔔 *¡ENLACE DE ALERTAS EXITOSO!*\n\nTe has suscrito a las actualizaciones de:\n🪪 *${name.toUpperCase()}*\n\nTe avisaré por este chat privado inmediatamente cuando un rescatista o familiar aporte nueva información sobre este registro.`);
             } else {
               await sendTelegramMessageDirect(chatId, '❌ Error en el servidor al asociar tu Telegram.');
@@ -358,15 +421,16 @@ ${changes.join('\n')}
     sentGlobal = await sendTelegramMessage(globalText);
   }
 
-  console.log('PRIVATE CHAT:', record.telegram_chat_id);
-  console.log('PRIVATE TEXT:', privateText);
+  if (privateText) {
+    const recipients = await getTelegramSubscribers(table, record.id, record.telegram_chat_id);
+    let delivered = 0;
 
-  if (privateText && record.telegram_chat_id) {
-    const ok = await sendTelegramMessageDirect(record.telegram_chat_id, privateText);
+    for (const chatId of recipients) {
+      const ok = await sendTelegramMessageDirect(chatId, privateText);
+      if (ok) delivered += 1;
+    }
 
-    console.log('SEND RESULT:', ok);
-
-    sentPrivate = ok;
+    sentPrivate = delivered > 0;
   }
 
   res.json({ 
