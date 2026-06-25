@@ -100,6 +100,7 @@ export default function App() {
   // NUEVO: Estados para el Historial (Timeline)
   const [historyLogs, setHistoryLogs] = useState([]);
   const [showFullHistory, setShowFullHistory] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // NUEVO ESTADO DEL MODAL
 
   const swipeStartX = useRef(null);
   const swipeStartY = useRef(null);
@@ -231,21 +232,27 @@ export default function App() {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/persons`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
+      const newRecord = newData[0];
       
       // NUEVO: Registrar creación en el historial
       await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
         method: 'POST', headers: HEADERS, body: JSON.stringify({
-          record_id: newData[0].id,
+          record_id: newRecord.id,
           table_name: 'persons',
           action: 'CREADO',
           details: `Reporte inicial. Estado: ${formPersona.estado.toUpperCase()}. Ubicación: ${formPersona.ubicacion}`
         })
       }).catch(console.error);
 
-      setPersonas(prev => [newData[0], ...prev]);
+      setPersonas(prev => [newRecord, ...prev]);
       setFormPersona({ nombreDesc: '', documento: '', estado: 'buscado', ubicacion: '', contacto: '' });
       showNotification("Reporte publicado exitosamente");
-      setView('personas');
+
+      // UX EXCELENTE: Redirige directamente al detalle de la persona recién creada para cerrar el ciclo
+      setSelectedItem(newRecord);
+      setActiveTab('personas');
+      setView('detail');
+      setShowSuccessModal(true); // ACTIVAR MODAL DE ÉXITO
     } catch { showNotification("Error de red. Intente de nuevo.", true); } finally { setIsSubmitting(false); }
   };
 
@@ -258,21 +265,27 @@ export default function App() {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/zones`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
+      const newRecord = newData[0];
       
       // NUEVO: Registrar creación en el historial
       await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
         method: 'POST', headers: HEADERS, body: JSON.stringify({
-          record_id: newData[0].id,
+          record_id: newRecord.id,
           table_name: 'zones',
           action: 'CREADO',
           details: `Foco reportado. Urgencia: ${formZona.urgencia.toUpperCase()}. Situación: ${formZona.situacion}`
         })
       }).catch(console.error);
 
-      setZonas(prev => [newData[0], ...prev]);
+      setZonas(prev => [newRecord, ...prev]);
       setFormZona({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
       showNotification("Zona de emergencia reportada");
-      setView('zonas');
+
+      // UX EXCELENTE: Redirige directamente al detalle del foco recién creado
+      setSelectedItem(newRecord);
+      setActiveTab('zonas');
+      setView('detail');
+      setShowSuccessModal(true); // ACTIVAR MODAL DE ÉXITO
     } catch { showNotification("Error de red. Intente de nuevo.", true); } finally { setIsSubmitting(false); }
   };
 
@@ -655,11 +668,45 @@ export default function App() {
       {view === 'form_aporte_persona' && FormAportePersonaView()}
       {view === 'form_aporte_zona'    && FormAporteZonaView()}
 
+      {/* MODAL DE ÉXITO BRUTALISTA DE TELEGRAM */}
+      {showSuccessModal && selectedItem && (
+        <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white border-4 border-black p-6 w-full max-w-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] space-y-4 animate-slide-up">
+            <div className="flex items-center gap-2 text-blue-600 font-black uppercase text-lg border-b-4 border-black pb-2">
+              <Bell size={24} className="animate-bounce" />
+              <span>¡Reporte Creado!</span>
+            </div>
+            <p className="text-sm font-bold text-gray-800 leading-snug">
+              ¿Quieres recibir notificaciones automáticas en tu Telegram si un rescatista o familiar cambia el estado o ubicación de <span className="underline font-black">{selectedItem.name_desc || selectedItem.name}</span>?
+            </p>
+            <div className="flex flex-col gap-2 pt-2">
+              <a 
+                href={`https://t.me/red_emergencia_bot?start=${activeTab === 'personas' ? 'person' : 'zone'}_${selectedItem.id}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full bg-blue-600 text-white font-black uppercase p-4 hover:bg-blue-700 text-center border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 text-sm"
+              >
+                <Bell size={16}/> Sí, activar en Telegram
+              </a>
+              <button 
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full bg-white text-black font-black uppercase p-3 hover:bg-gray-100 text-center border-2 border-black text-xs"
+              >
+                No, ver en la web
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        @keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
         .animate-slide-down { animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-up { animation: slideUp 0.25s ease-out forwards; }
       `}} />
     </div>
   );
