@@ -12,6 +12,9 @@ const HEADERS = {
   'Prefer': 'return=representation'
 };
 
+const SWIPE_BACK_THRESHOLD = 75;
+const SWIPE_BACK_EDGE_LIMIT = 32;
+
 export default function App() {
   const [view, setView] = useState('home'); 
   const [activeTab, setActiveTab] = useState('personas');
@@ -118,7 +121,21 @@ export default function App() {
   };
 
   const handleTouchStart = (e) => {
-    setTouchStartX(e.targetTouches[0].clientX);
+    const touch = e.targetTouches[0];
+
+    if (!touch) return;
+
+    if (e.target.closest('button, a, input, textarea, select, label')) {
+      setTouchStartX(null);
+      return;
+    }
+
+    if (touch.clientX > SWIPE_BACK_EDGE_LIMIT) {
+      setTouchStartX(null);
+      return;
+    }
+
+    setTouchStartX(touch.clientX);
   };
 
   const handleTouchEnd = (e) => {
@@ -127,10 +144,14 @@ export default function App() {
     const touchEndX = e.changedTouches[0].clientX;
     const swipeDistance = touchEndX - touchStartX;
 
-    if (swipeDistance > 75) {
+    if (swipeDistance > SWIPE_BACK_THRESHOLD) {
       handleBackNavigation();
     }
 
+    setTouchStartX(null);
+  };
+
+  const handleTouchCancel = () => {
     setTouchStartX(null);
   };
 
@@ -461,6 +482,7 @@ export default function App() {
       className="max-w-md mx-auto bg-gray-100 min-h-screen font-sans relative overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
     >
       {notification && (
         <div className={`absolute top-0 left-0 right-0 z-50 p-4 animate-slide-down ${notification.isError ? 'bg-red-600 text-white' : 'bg-black text-white'}`}>
