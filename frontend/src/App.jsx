@@ -40,6 +40,9 @@ const PersonaCard = memo(({ item, onClick }) => (
       <StatusPill status={item.status} />
     </div>
     <h3 className="text-lg font-black leading-tight mb-2 uppercase">{item.name_desc}</h3>
+    {item.document_id && (
+      <p className="text-xs font-black uppercase tracking-wide text-blue-700 mb-2">C.I: {item.document_id}</p>
+    )}
     <p className="text-sm text-gray-700 font-medium line-clamp-2">
       <MapPin size={14} className="inline mr-1 -mt-1"/>
       {item.location_text}
@@ -87,11 +90,11 @@ export default function App() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formPersona, setFormPersona] = useState({ nombreDesc: '', estado: 'buscado', ubicacion: '', contacto: '' });
+  const [formPersona, setFormPersona] = useState({ nombreDesc: '', documento: '', estado: 'buscado', ubicacion: '', contacto: '' });
   const [formZona, setFormZona] = useState({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
   
   // FIX RESTAURADO: Estados para Aportar Información
-  const [formAportePersona, setFormAportePersona] = useState({ status: '', location_text: '' });
+  const [formAportePersona, setFormAportePersona] = useState({ status: '', location_text: '', documento: '' });
   const [formAporteZona, setFormAporteZona] = useState({ urgency: '', situation: '' });
 
   // NUEVO: Estados para el Historial (Timeline)
@@ -224,7 +227,7 @@ export default function App() {
     if (!incidentId) return;
     setIsSubmitting(true);
     try {
-      const payload = { incident_id: incidentId, name_desc: formPersona.nombreDesc, status: formPersona.estado, location_text: formPersona.ubicacion, reporter_contact: formPersona.contacto, trust_level: 0 };
+      const payload = { incident_id: incidentId, name_desc: formPersona.nombreDesc, document_id: formPersona.documento, status: formPersona.estado, location_text: formPersona.ubicacion, reporter_contact: formPersona.contacto, trust_level: 0 };
       const res = await fetch(`${SUPABASE_URL}/rest/v1/persons`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
@@ -240,7 +243,7 @@ export default function App() {
       }).catch(console.error);
 
       setPersonas(prev => [newData[0], ...prev]);
-      setFormPersona({ nombreDesc: '', estado: 'buscado', ubicacion: '', contacto: '' });
+      setFormPersona({ nombreDesc: '', documento: '', estado: 'buscado', ubicacion: '', contacto: '' });
       showNotification("Reporte publicado exitosamente");
       setView('personas');
     } catch { showNotification("Error de red. Intente de nuevo.", true); } finally { setIsSubmitting(false); }
@@ -278,10 +281,16 @@ export default function App() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const patchPayload = {
+        status: formAportePersona.status,
+        location_text: formAportePersona.location_text,
+        ...(formAportePersona.documento ? { document_id: formAportePersona.documento } : {})
+      };
+
       const res = await fetch(`${SUPABASE_URL}/rest/v1/persons?id=eq.${selectedItem.id}`, {
         method: 'PATCH',
         headers: HEADERS,
-        body: JSON.stringify(formAportePersona)
+        body: JSON.stringify(patchPayload)
       });
       if (!res.ok) throw new Error();
       const updatedData = await res.json();
@@ -293,7 +302,7 @@ export default function App() {
           record_id: selectedItem.id,
           table_name: 'persons',
           action: 'ACTUALIZADO',
-          details: `Nuevo Estado: ${formAportePersona.status.toUpperCase()}. Nueva Ubicación: ${formAportePersona.location_text}`
+          details: `Nuevo Estado: ${formAportePersona.status.toUpperCase()}. Nueva Ubicación: ${formAportePersona.location_text}${formAportePersona.documento ? `. Cédula/Pasaporte: ${formAportePersona.documento}` : ''}`
         })
       }).catch(console.error);
 
@@ -439,6 +448,9 @@ export default function App() {
             <h2 className="text-2xl font-black uppercase mb-4 leading-tight border-b-2 border-gray-100 pb-4">
               {isPersona ? selectedItem.name_desc : selectedItem.name}
             </h2>
+            {isPersona && selectedItem.document_id && (
+              <p className="text-sm font-black uppercase tracking-wide text-blue-700 -mt-2 mb-3">C.I: {selectedItem.document_id}</p>
+            )}
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{isPersona ? 'Ubicación' : 'Situación'}</p>
@@ -484,7 +496,7 @@ export default function App() {
           <button 
             onClick={() => {
               if (isPersona) {
-                setFormAportePersona({ status: selectedItem.status, location_text: selectedItem.location_text });
+                setFormAportePersona({ status: selectedItem.status, location_text: selectedItem.location_text, documento: selectedItem.document_id || '' });
                 setView('form_aporte_persona');
               } else {
                 setFormAporteZona({ urgency: selectedItem.urgency, situation: selectedItem.situation });
@@ -509,13 +521,14 @@ export default function App() {
       <form onSubmit={handleSubmitPersona} className="p-4 space-y-5">
         <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">Solo llena lo que sepas. Puedes usar descripciones físicas.</div>
         <div><label className="block text-sm font-black uppercase mb-2">1. Nombre o Descripción *</label><input required type="text" placeholder="Ej: Luis, o Niño de camisa roja" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.nombreDesc} onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} /></div>
+        <div><label className="block text-sm font-black uppercase mb-2">2. Cédula o Pasaporte (Opcional)</label><input type="text" placeholder="Ej: V-12345678 o P123456" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.documento} onChange={e => setFormPersona(f => ({...f, documento: e.target.value}))} /></div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">2. Estado Actual *</label>
+          <label className="block text-sm font-black uppercase mb-2">Estado Actual *</label>
           <div className="grid grid-cols-2 gap-2">
             {['buscado', 'a_salvo', 'herido', 'fallecido'].map(s => (<button key={s} type="button" onClick={() => setFormPersona(f => ({...f, estado: s}))} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formPersona.estado === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{s.replace('_', ' ')}</button>))}
           </div>
         </div>
-        <div><label className="block text-sm font-black uppercase mb-2">3. Ubicación *</label><input required type="text" placeholder="Sector, calle, refugio..." className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.ubicacion} onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} /></div>
+        <div><label className="block text-sm font-black uppercase mb-2">3. Último Lugar Visto o Refugio/Hospital Actual *</label><input required type="text" placeholder="Sector, calle, refugio u hospital..." className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.ubicacion} onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} /></div>
         <div><label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono *</label><input required type="tel" placeholder="0412-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.contacto} onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} /></div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 transition-opacity">{isSubmitting ? 'Guardando...' : 'Publicar Reporte'}</button>
       </form>
@@ -562,7 +575,11 @@ export default function App() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">Ubicación Actualizada</label>
+          <label className="block text-sm font-black uppercase mb-2">2. Cédula o Pasaporte (Opcional)</label>
+          <input type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formAportePersona.documento} onChange={e => setFormAportePersona({...formAportePersona, documento: e.target.value})} />
+        </div>
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">3. Último Lugar Visto o Refugio/Hospital Actual *</label>
           <input required type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formAportePersona.location_text} onChange={e => setFormAportePersona({...formAportePersona, location_text: e.target.value})} />
         </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase">
