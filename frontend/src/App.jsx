@@ -416,7 +416,18 @@ export default function App() {
           {initialLoading ? (
             <p className="text-center font-bold text-gray-500 py-10 animate-pulse">Cargando base de datos...</p>
           ) : filtered.length === 0 ? (
-            <p className="text-center font-bold text-gray-500 py-10">No hay registros aún.</p>
+            <div className="text-center py-10 px-4">
+              <p className="font-bold text-gray-500 mb-2">
+                {searchQuery 
+                  ? `No encontramos coincidencias para "${searchQuery}".` 
+                  : "No hay registros aún."}
+              </p>
+              {searchQuery && (
+                <p className="text-sm text-gray-600 font-medium">
+                  Si tienes información, usa el botón azul de arriba para crear este reporte.
+                </p>
+              )}
+            </div>
           ) : (
             filtered.map(item =>
               isPersonas
