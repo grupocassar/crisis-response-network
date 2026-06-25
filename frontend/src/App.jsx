@@ -436,7 +436,7 @@ export default function App() {
           </div>
           <input type="text" placeholder={isPersonas ? "Escribe nombre, apellido o cédula..." : "Buscar por sector o edificio..."} className="w-full p-3 text-black font-medium focus:outline-none rounded-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')} className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2">
-            <Plus size={18}/> {isPersonas ? 'Reportar Persona Desparecida' : 'Reportar Foco de Rescate'}
+            <Plus size={18}/> {isPersonas ? 'Crear Reporte de Persona' : 'Reportar Foco de Rescate'}
           </button>
         </div>
         <div className="p-4 space-y-4 bg-gray-100 min-h-screen">
