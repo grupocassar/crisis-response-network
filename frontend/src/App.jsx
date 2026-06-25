@@ -286,10 +286,15 @@ export default function App() {
         const data = await res.json();
         if (data && data.length > 0) {
           setIncidentId(data[0].id);
+        } else {
+          showNotification('Incidente activo no encontrado. Comprueba la configuración.', true);
         }
       } catch (err) {
         console.error('Error conectando a Supabase:', err);
         showNotification('Error de conexión. Trabajando offline.', true);
+      } finally {
+        setIsLoading(false);
+        setIsSyncing(false);
       }
     };
     initApp();
