@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft } from 'lucide-react';
+import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3 } from 'lucide-react';
 
 // --- CREDENCIALES REALES SUPABASE ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
@@ -14,6 +14,7 @@ const HEADERS = {
 
 // ─────────────────────────────────────────────
 // Componentes auxiliares FUERA de App
+// para evitar que React los destruya/recree en cada render
 // ─────────────────────────────────────────────
 
 const TrustBadge = memo(({ level }) => {
@@ -39,10 +40,8 @@ const PersonaCard = memo(({ item, onClick }) => (
       <TrustBadge level={item.trust_level} />
       <StatusPill status={item.status} />
     </div>
-    <h3 className="text-lg font-black leading-tight mb-2 uppercase">{item.name_desc}</h3>
-    {item.document_id && (
-      <p className="text-xs font-black uppercase tracking-wide text-blue-700 mb-2">C.I: {item.document_id}</p>
-    )}
+    <h3 className="text-lg font-black leading-tight mb-1 uppercase">{item.name_desc}</h3>
+    {item.document_id && <p className="text-xs font-mono font-bold text-gray-600 mb-2">C.I / Pasaporte: {item.document_id}</p>}
     <p className="text-sm text-gray-700 font-medium line-clamp-2">
       <MapPin size={14} className="inline mr-1 -mt-1"/>
       {item.location_text}
@@ -93,14 +92,12 @@ export default function App() {
   const [formPersona, setFormPersona] = useState({ nombreDesc: '', documento: '', estado: 'buscado', ubicacion: '', contacto: '' });
   const [formZona, setFormZona] = useState({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
   
-  // FIX RESTAURADO: Estados para Aportar Información
   const [formAportePersona, setFormAportePersona] = useState({ status: '', location_text: '', documento: '' });
   const [formAporteZona, setFormAporteZona] = useState({ urgency: '', situation: '' });
 
-  // NUEVO: Estados para el Historial (Timeline)
   const [historyLogs, setHistoryLogs] = useState([]);
   const [showFullHistory, setShowFullHistory] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false); // NUEVO ESTADO DEL MODAL
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // RESTAURADO: Estado del modal
 
   const swipeStartX = useRef(null);
   const swipeStartY = useRef(null);
@@ -147,14 +144,14 @@ export default function App() {
     return () => clearInterval(interval);
   }, [incidentId, fetchData]);
 
-  // NUEVO: Cargar historial al abrir los detalles de un perfil
+  // Cargar historial al abrir detalles de perfil
   useEffect(() => {
     if (view === 'detail' && selectedItem) {
       fetch(`${SUPABASE_URL}/rest/v1/history_logs?record_id=eq.${selectedItem.id}&order=created_at.desc`, { headers: HEADERS })
         .then(res => res.json())
         .then(data => {
           setHistoryLogs(data || []);
-          setShowFullHistory(false); // Resetear el botón desplegable al cambiar de perfil
+          setShowFullHistory(false);
         })
         .catch(err => console.error("Error cargando historial:", err));
     }
@@ -174,7 +171,7 @@ export default function App() {
         case 'form_persona': return 'personas';
         case 'form_zona': return 'zonas';
         case 'form_aporte_persona': 
-        case 'form_aporte_zona': return 'detail'; // FIX RESTAURADO: Soporte para volver de aporte a detail
+        case 'form_aporte_zona': return 'detail';
         default: return prev;
       }
     });
@@ -228,31 +225,39 @@ export default function App() {
     if (!incidentId) return;
     setIsSubmitting(true);
     try {
-      const payload = { incident_id: incidentId, name_desc: formPersona.nombreDesc, document_id: formPersona.documento, status: formPersona.estado, location_text: formPersona.ubicacion, reporter_contact: formPersona.contacto, trust_level: 0 };
+      const payload = { 
+        incident_id: incidentId, 
+        name_desc: formPersona.nombreDesc, 
+        document_id: formPersona.documento || null,
+        status: formPersona.estado, 
+        location_text: formPersona.ubicacion, 
+        reporter_contact: formPersona.contacto || "No especificado", 
+        trust_level: 0 
+      };
       const res = await fetch(`${SUPABASE_URL}/rest/v1/persons`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
       const newRecord = newData[0];
-      
-      // NUEVO: Registrar creación en el historial
+
+      // Registrar creación en el historial
       await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
         method: 'POST', headers: HEADERS, body: JSON.stringify({
           record_id: newRecord.id,
           table_name: 'persons',
           action: 'CREADO',
-          details: `Reporte inicial. Estado: ${formPersona.estado.toUpperCase()}. Ubicación: ${formPersona.ubicacion}`
+          details: `Reporte inicial. Estado: ${formPersona.estado.toUpperCase()}.${formPersona.documento ? ` Cédula: ${formPersona.documento}.` : ''} Ubicación: ${formPersona.ubicacion}`
         })
       }).catch(console.error);
 
       setPersonas(prev => [newRecord, ...prev]);
       setFormPersona({ nombreDesc: '', documento: '', estado: 'buscado', ubicacion: '', contacto: '' });
       showNotification("Reporte publicado exitosamente");
-
-      // UX EXCELENTE: Redirige directamente al detalle de la persona recién creada para cerrar el ciclo
+      
+      // UX EXCELENTE: Redirige al detalle, guarda en selectedItem y ACTIVA el Modal de Telegram
       setSelectedItem(newRecord);
       setActiveTab('personas');
       setView('detail');
-      setShowSuccessModal(true); // ACTIVAR MODAL DE ÉXITO
+      setShowSuccessModal(true); // <--- RESTAURADO
     } catch { showNotification("Error de red. Intente de nuevo.", true); } finally { setIsSubmitting(false); }
   };
 
@@ -261,19 +266,25 @@ export default function App() {
     if (!incidentId) return;
     setIsSubmitting(true);
     try {
-      const payload = { incident_id: incidentId, name: formZona.nombre, urgency: formZona.urgencia, situation: formZona.situacion, reporter_contact: formZona.contacto, trust_level: 0 };
+      const payload = { 
+        incident_id: incidentId, 
+        name: formZona.nombre, 
+        urgency: formZona.urgencia, 
+        situation: formZona.situacion, 
+        reporter_contact: formZona.contacto || "No especificado", 
+        trust_level: 0 
+      };
       const res = await fetch(`${SUPABASE_URL}/rest/v1/zones`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
       const newRecord = newData[0];
-      
-      // NUEVO: Registrar creación en el historial
+
       await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
         method: 'POST', headers: HEADERS, body: JSON.stringify({
           record_id: newRecord.id,
           table_name: 'zones',
           action: 'CREADO',
-          details: `Foco reportado. Urgencia: ${formZona.urgencia.toUpperCase()}. Situación: ${formZona.situacion}`
+          details: `Foco reportado. Urgencia: ${formZona.urgency.toUpperCase()}. Situación: ${formZona.situacion}`
         })
       }).catch(console.error);
 
@@ -281,41 +292,43 @@ export default function App() {
       setFormZona({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
       showNotification("Zona de emergencia reportada");
 
-      // UX EXCELENTE: Redirige directamente al detalle del foco recién creado
+      // UX EXCELENTE: Redirige al detalle y ACTIVA el Modal de Telegram
       setSelectedItem(newRecord);
       setActiveTab('zonas');
       setView('detail');
-      setShowSuccessModal(true); // ACTIVAR MODAL DE ÉXITO
+      setShowSuccessModal(true); // <--- RESTAURADO
     } catch { showNotification("Error de red. Intente de nuevo.", true); } finally { setIsSubmitting(false); }
   };
 
-  // ─── FIX RESTAURADO: LÓGICA DE ACTUALIZACIÓN (PATCH) ───
+  // ─── LÓGICA DE ACTUALIZACIÓN (PATCH) ───
   const handleAportarPersona = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const patchPayload = {
+      const payload = {
         status: formAportePersona.status,
-        location_text: formAportePersona.location_text,
-        ...(formAportePersona.documento ? { document_id: formAportePersona.documento } : {})
+        location_text: formAportePersona.location_text
       };
+      if (formAportePersona.documento) {
+        payload.document_id = formAportePersona.documento;
+      }
 
       const res = await fetch(`${SUPABASE_URL}/rest/v1/persons?id=eq.${selectedItem.id}`, {
         method: 'PATCH',
         headers: HEADERS,
-        body: JSON.stringify(patchPayload)
+        body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error();
       const updatedData = await res.json();
       const updatedRecord = updatedData[0];
-      
-      // NUEVO: Registrar actualización en el historial
+
+      // Registrar en historial
       await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
         method: 'POST', headers: HEADERS, body: JSON.stringify({
           record_id: selectedItem.id,
           table_name: 'persons',
           action: 'ACTUALIZADO',
-          details: `Nuevo Estado: ${formAportePersona.status.toUpperCase()}. Nueva Ubicación: ${formAportePersona.location_text}${formAportePersona.documento ? `. Cédula/Pasaporte: ${formAportePersona.documento}` : ''}`
+          details: `Nuevo Estado: ${formAportePersona.status.toUpperCase()}.${formAportePersona.documento ? ` Cédula asignada: ${formAportePersona.documento}.` : ''} Nueva Ubicación: ${formAportePersona.location_text}`
         })
       }).catch(console.error);
 
@@ -338,8 +351,7 @@ export default function App() {
       if (!res.ok) throw new Error();
       const updatedData = await res.json();
       const updatedRecord = updatedData[0];
-      
-      // NUEVO: Registrar actualización en el historial
+
       await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
         method: 'POST', headers: HEADERS, body: JSON.stringify({
           record_id: selectedItem.id,
@@ -357,82 +369,60 @@ export default function App() {
   };
 
   // ─────────────────────────────────────────────
-  // VISTAS
+  // RENDERS DE VISTA INTERNA
   // ─────────────────────────────────────────────
 
-  const HomeView = () => {
-    const countTotal = personas.length;
-    const countBuscados = personas.filter(p => p.status === 'buscado').length;
-    const countASalvo = personas.filter(p => p.status === 'a_salvo').length;
-
-    return (
-      <div className="flex flex-col h-full gap-4 animate-fade-in">
-        <div className="bg-black text-white p-6 pb-8">
-          <div className="flex justify-between items-start">
-            <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">Sistema de<br/>Respuesta</h2>
-            {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
-          </div>
-          <p className="text-gray-400 text-sm font-medium mt-1 mb-5">Conectado al incidente activo. Seleccione módulo de operaciones.</p>
-          
-          {/* BANNER DE ESTADÍSTICAS DE RESCATE */}
-          <div className="grid grid-cols-3 gap-2 border-t-2 border-gray-800 pt-4">
-            <div className="flex flex-col">
-              <span className="text-2xl font-black">{countTotal}</span>
-              <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Registros</span>
-            </div>
-            <div className="flex flex-col border-l-2 border-gray-800 pl-3">
-              <span className="text-2xl font-black text-red-500">{countBuscados}</span>
-              <span className="text-[9px] text-red-500/80 uppercase font-bold tracking-widest">Buscados</span>
-            </div>
-            <div className="flex flex-col border-l-2 border-gray-800 pl-3">
-              <span className="text-2xl font-black text-green-500">{countASalvo}</span>
-              <span className="text-[9px] text-green-500/80 uppercase font-bold tracking-widest">A Salvo ✓</span>
-            </div>
-          </div>
+  const HomeView = () => (
+    <div className="flex flex-col h-full gap-4 animate-fade-in">
+      <div className="bg-black text-white p-6 pb-8">
+        <div className="flex justify-between items-start">
+          <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">Sistema de<br/>Respuesta</h2>
+          {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
         </div>
-        <div className="px-4 flex flex-col gap-4 -mt-6">
-          <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
-            <User size={32} className="mb-2" />
-            <div className="flex justify-between w-full items-center">
-              <h3 className="text-2xl font-black uppercase">Personas</h3>
-              <span className="bg-black text-white text-xs px-2 py-1 font-bold">{countTotal} regs</span>
-            </div>
-            <p className="text-left text-sm text-gray-600 font-medium">Buscar familiares o reportar personas extraviadas / encontradas.</p>
-          </button>
-          <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
-            <Map size={32} className="mb-2" />
-            <div className="flex justify-between w-full items-center">
-              <h3 className="text-2xl font-black uppercase">Focos de Rescate</h3>
-              <span className="bg-white text-red-600 text-xs px-2 py-1 font-black">{zonas.length} regs</span>
-            </div>
-            <p className="text-left text-sm text-red-100 font-medium">Reportar derrumbes, colapsos, o solicitar rescate urgente.</p>
-          </button>
-        </div>
+        <p className="text-gray-400 text-sm font-medium mt-1">Conectado al incidente activo. Seleccione módulo de operaciones.</p>
       </div>
-    );
-  };
+      <div className="px-4 flex flex-col gap-4 -mt-6">
+        <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+          <User size={32} className="mb-2" />
+          <div className="flex justify-between w-full items-center">
+            <h3 className="text-2xl font-black uppercase">Personas</h3>
+            <span className="bg-black text-white text-xs px-2 py-1 font-bold">{personas.length} regs</span>
+          </div>
+          <p className="text-left text-sm text-gray-600 font-medium">Buscar familiares o reportar personas extraviadas / encontradas.</p>
+        </button>
+        <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+          <Map size={32} className="mb-2" />
+          <div className="flex justify-between w-full items-center">
+            <h3 className="text-2xl font-black uppercase">Focos de Rescate</h3>
+            <span className="bg-white text-red-600 text-xs px-2 py-1 font-black">{zonas.length} regs</span>
+          </div>
+          <p className="text-left text-sm text-red-100 font-medium">Reportar derrumbes, colapsos, o solicitar rescate urgente.</p>
+        </button>
+      </div>
+    </div>
+  );
 
   const DashboardView = ({ type }) => {
     const isPersonas = type === 'personas';
     const data = isPersonas ? personas : zonas;
     const filtered = data.filter(item => {
       if (!searchQuery) return true;
-      const str = isPersonas ? item.name_desc : item.name;
+      const str = isPersonas ? `${item.name_desc} ${item.document_id || ''}` : item.name;
       return str && str.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
     return (
       <div className="flex flex-col h-full animate-fade-in">
         <div className="bg-black p-4 sticky top-0 z-10 flex flex-col gap-3 shadow-lg">
-          <div className="flex items-center gap-3 text-white">
-            <button onClick={() => { setSearchQuery(''); setView('home'); }} className="p-1 -ml-2 hover:bg-gray-800 rounded-full transition-colors active:scale-90">
-              <ChevronLeft size={32} />
-            </button>
-            <h2 className="text-xl font-black uppercase flex items-center gap-2 flex-1 truncate">
+          <div className="flex justify-between items-center text-white">
+            <h2 className="text-xl font-black uppercase flex items-center gap-2">
               {isPersonas ? <User size={20}/> : <Map size={20}/>}
-              {isPersonas ? 'Búsqueda' : 'Focos'}
+              {isPersonas ? 'Búsqueda de Personas' : 'Focos de Rescate'}
             </h2>
-            {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500" />}
+            <div className="flex items-center gap-3">
+              {isSyncing && <RefreshCw size={14} className="animate-spin text-gray-500" />}
+              <button onClick={() => { setSearchQuery(''); setView('home'); }} className="text-sm font-bold bg-white text-black px-3 py-1 hover:bg-gray-200">Volver</button>
+            </div>
           </div>
           <input type="text" placeholder={isPersonas ? "Escribe nombre, apellido o cédula..." : "Buscar por sector o edificio..."} className="w-full p-3 text-black font-medium focus:outline-none rounded-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')} className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2">
@@ -445,13 +435,11 @@ export default function App() {
           ) : filtered.length === 0 ? (
             <div className="text-center py-10 px-4">
               <p className="font-bold text-gray-500 mb-2">
-                {searchQuery 
-                  ? `No encontramos coincidencias para "${searchQuery}".` 
-                  : "No hay registros aún."}
+                {searchQuery ? `No encontramos coincidencias para "${searchQuery}".` : "No hay registros aún."}
               </p>
               {searchQuery && (
                 <p className="text-sm text-gray-600 font-medium">
-                  Si tienes información, usa el botón azul de arriba para crear este reporte.
+                  Si sabes de esta persona, toca el botón azul de arriba para reportarla de una vez.
                 </p>
               )}
             </div>
@@ -473,68 +461,48 @@ export default function App() {
 
     return (
       <div className="bg-gray-100 min-h-screen animate-fade-in pb-20">
-        <div className="bg-black text-white p-4 sticky top-0 flex items-center gap-3 z-10 shadow-lg">
-          <button onClick={goBack} className="p-1 -ml-2 hover:bg-gray-800 rounded-full transition-colors active:scale-90">
-            <ChevronLeft size={32} />
-          </button>
-          <span className="font-black uppercase text-lg truncate flex-1">
-            Detalles del Reporte
-          </span>
+        <div className="bg-black text-white p-4 sticky top-0 flex justify-between items-center z-10 shadow-lg">
+          <button onClick={goBack} className="font-bold flex items-center gap-1 hover:text-gray-300">← Volver</button>
+          <span className="text-xs font-mono font-bold opacity-50 truncate w-32 text-right">{selectedItem.id?.split('-')[0]}</span>
         </div>
         <div className="p-4 space-y-4">
           <div className="bg-white border-4 border-black p-5">
             <div className="flex flex-col items-start gap-3 mb-4">
               <TrustBadge level={selectedItem.trust_level} />
-              {isPersona ? <StatusPill status={selectedItem.status} /> : <StatusPill status={`Urgencia ${selectedItem.urgency}`} />}
+              {isPersona ? <StatusPill status={selectedItem.status} /> : <span className={`text-xs px-2 py-1 font-bold uppercase text-white ${selectedItem.urgency === 'alta' ? 'bg-red-600' : 'bg-orange-500'}`}>{selectedItem.urgency === 'alta' ? 'Vidas en Peligro' : 'Aislados'}</span>}
             </div>
-            <h2 className="text-2xl font-black uppercase mb-4 leading-tight border-b-2 border-gray-100 pb-4">
+            
+            <h2 className="text-2xl font-black uppercase mb-1 leading-tight border-b-2 border-gray-100 pb-2">
               {isPersona ? selectedItem.name_desc : selectedItem.name}
             </h2>
             {isPersona && selectedItem.document_id && (
-              <p className="text-sm font-black uppercase tracking-wide text-blue-700 -mt-2 mb-3">C.I: {selectedItem.document_id}</p>
+              <p className="text-sm font-mono font-black text-gray-600 mb-4 bg-gray-50 p-2 border border-gray-200 w-max">C.I / Pasaporte: {selectedItem.document_id}</p>
             )}
+            
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{isPersona ? 'Ubicación' : 'Situación'}</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{isPersona ? 'Último Lugar Visto o Refugio/Hospital' : 'Situación'}</p>
                 <p className="font-medium text-lg leading-snug">{isPersona ? selectedItem.location_text : selectedItem.situation}</p>
               </div>
               <div className="bg-gray-50 p-3 border border-gray-200">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Contacto del reporte</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Contacto del reporte inicial</p>
                 <p className="font-bold">{selectedItem.reporter_contact}</p>
                 <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">Reg: {new Date(selectedItem.created_at).toLocaleString()}</p>
               </div>
             </div>
           </div>
 
-          {/* NUEVO: LÍNEA DE TIEMPO (TIMELINE) INTELIGENTE */}
-          <div className="bg-white border-4 border-black p-4 shadow-sm">
-            <h3 className="font-black uppercase mb-3 flex items-center gap-2 text-sm border-b-2 border-gray-100 pb-2">
-              <Clock size={16}/> Historial de Actividad
-            </h3>
-            {historyLogs.length === 0 ? (
-              <p className="text-xs text-gray-500 font-mono text-center py-2">Registrando actividad...</p>
-            ) : (
-              <div className="space-y-3">
-                {(showFullHistory ? historyLogs : historyLogs.slice(0, 3)).map(log => (
-                  <div key={log.id} className="border-l-4 border-black pl-3 ml-1 py-1">
-                    <p className="text-[10px] text-gray-500 font-mono uppercase">{new Date(log.created_at).toLocaleString()}</p>
-                    <p className={`text-xs font-bold uppercase ${log.action === 'CREADO' ? 'text-blue-600' : 'text-green-600'}`}>{log.action}</p>
-                    <p className="text-sm font-medium leading-snug">{log.details}</p>
-                  </div>
-                ))}
-                {historyLogs.length > 3 && (
-                  <button 
-                    onClick={() => setShowFullHistory(!showFullHistory)} 
-                    className="w-full bg-gray-100 hover:bg-gray-200 text-black font-bold uppercase text-xs p-3 mt-2 transition-colors border-2 border-transparent active:border-black"
-                  >
-                    {showFullHistory ? 'Ocultar historial' : `Ver ${historyLogs.length - 3} registros más`}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Enlace Inteligente a Telegram */}
+          <a 
+            href={`https://t.me/red_emergencia_bot?start=${isPersona ? 'person' : 'zone'}_${selectedItem.id}`}
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="w-full bg-blue-600 text-white font-black uppercase p-4 hover:bg-blue-700 flex items-center justify-center gap-2 border-2 border-black shadow-md transition-transform active:scale-[0.98]"
+          >
+            <Bell size={18}/> Recibir Alertas de este registro en mi Telegram
+          </a>
 
-          {/* FIX RESTAURADO: Botón con onClick */}
+          {/* Botón de Aportar Información */}
           <button 
             onClick={() => {
               if (isPersona) {
@@ -545,10 +513,35 @@ export default function App() {
                 setView('form_aporte_zona');
               }
             }}
-            className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 flex items-center justify-center gap-2 border-2 border-transparent shadow-md"
+            className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 flex items-center justify-center gap-2 border-2 border-transparent shadow-md transition-transform active:scale-[0.98]"
           >
-            <Edit3 size={18}/> Aportar Nueva Información
+            <Edit3 size={18}/> Aportar Nueva Información (Evolución)
           </button>
+
+          {/* Historial de Revisiones */}
+          <div className="bg-white border-4 border-black p-4 shadow-sm">
+            <h3 className="font-black uppercase mb-3 flex items-center gap-2 text-sm border-b-2 border-gray-100 pb-2">
+              <Clock size={16}/> Historial de Actividad
+            </h3>
+            {historyLogs.length === 0 ? (
+              <p className="text-xs text-gray-500 font-mono text-center py-2">Generando reporte inicial...</p>
+            ) : (
+              <div className="space-y-3">
+                {(showFullHistory ? historyLogs : historyLogs.slice(0, 3)).map(log => (
+                  <div key={log.id} className="border-l-4 border-black pl-3 ml-1 py-1">
+                    <p className="text-[10px] text-gray-500 font-mono uppercase">{new Date(log.created_at).toLocaleString()}</p>
+                    <p className={`text-xs font-bold uppercase ${log.action === 'CREADO' ? 'text-blue-600' : 'text-green-600'}`}>{log.action}</p>
+                    <p className="text-sm font-medium leading-snug">{log.details}</p>
+                  </div>
+                ))}
+                {historyLogs.length > 3 && (
+                  <button onClick={() => setShowFullHistory(!showFullHistory)} className="w-full bg-gray-100 hover:bg-gray-200 text-black font-bold uppercase text-xs p-3 mt-2 transition-colors border-2 border-transparent active:border-black">
+                    {showFullHistory ? 'Ocultar historial' : `Ver ${historyLogs.length - 3} registros más`}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -556,24 +549,34 @@ export default function App() {
 
   const FormPersonaView = () => (
     <div className="bg-white min-h-screen animate-fade-in">
-      <div className="bg-black text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
-        <button onClick={() => setView('personas')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
-          <ChevronLeft size={32} />
-        </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">Reportar Persona</h2>
+      <div className="bg-black text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
+        <h2 className="font-black uppercase">Reportar Persona</h2>
+        <button onClick={() => setView('personas')} className="text-sm font-bold text-gray-400 hover:text-white">Cancelar</button>
       </div>
       <form onSubmit={handleSubmitPersona} className="p-4 space-y-5">
-        <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">Solo llena lo que sepas. Puedes usar descripciones físicas.</div>
-        <div><label className="block text-sm font-black uppercase mb-2">1. Nombre o Descripción *</label><input required type="text" placeholder="Ej: Luis, o Niño de camisa roja" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.nombreDesc} onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} /></div>
-        <div><label className="block text-sm font-black uppercase mb-2">2. Cédula o Pasaporte (Opcional)</label><input type="text" placeholder="Ej: V-12345678 o P123456" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.documento} onChange={e => setFormPersona(f => ({...f, documento: e.target.value}))} /></div>
+        <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">Solo completa lo que sepas. No te detengas si te falta algún dato.</div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">Estado Actual *</label>
+          <label className="block text-sm font-black uppercase mb-2">1. Nombre o Descripción de la Persona *</label>
+          <input required type="text" placeholder="Ej: Juan Pérez o Abuela con camisa roja" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.nombreDesc} onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} />
+        </div>
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">2. Cédula o Pasaporte (Opcional)</label>
+          <input type="text" placeholder="Ej: V-12345678" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.documento} onChange={e => setFormPersona(f => ({...f, documento: e.target.value}))} />
+        </div>
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">3. Estado Actual *</label>
           <div className="grid grid-cols-2 gap-2">
             {['buscado', 'a_salvo', 'herido', 'fallecido'].map(s => (<button key={s} type="button" onClick={() => setFormPersona(f => ({...f, estado: s}))} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formPersona.estado === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{s.replace('_', ' ')}</button>))}
           </div>
         </div>
-        <div><label className="block text-sm font-black uppercase mb-2">3. Último Lugar Visto o Refugio/Hospital Actual *</label><input required type="text" placeholder="Sector, calle, refugio u hospital..." className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.ubicacion} onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} /></div>
-        <div><label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono *</label><input required type="tel" placeholder="0412-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.contacto} onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} /></div>
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">4. Último Lugar Visto o Refugio/Hospital Actual *</label>
+          <input required type="text" placeholder="Sector, calle, o nombre de hospital" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.ubicacion} onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} />
+        </div>
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">5. Tu Teléfono (Opcional - Para que te contacten rescatistas)</label>
+          <input type="tel" placeholder="Ej: 0412-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.contacto} onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} />
+        </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 transition-opacity">{isSubmitting ? 'Guardando...' : 'Publicar Reporte'}</button>
       </form>
     </div>
@@ -581,35 +584,41 @@ export default function App() {
 
   const FormZonaView = () => (
     <div className="bg-white min-h-screen animate-fade-in">
-      <div className="bg-red-600 text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
-        <button onClick={() => setView('zonas')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
-          <ChevronLeft size={32} />
-        </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">Reportar Zona Crítica</h2>
+      <div className="bg-red-600 text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
+        <h2 className="font-black uppercase">Reportar Foco</h2>
+        <button onClick={() => setView('zonas')} className="text-sm font-bold text-red-200 hover:text-white">Cancelar</button>
       </div>
       <form onSubmit={handleSubmitZona} className="p-4 space-y-5">
-        <div><label className="block text-sm font-black uppercase mb-2">1. Nombre del Sector / Zona *</label><input required type="text" placeholder="Ej: Sector El Limón" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500" value={formZona.nombre} onChange={e => setFormZona(f => ({...f, nombre: e.target.value}))} /></div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">2. Nivel de Urgencia *</label>
-          <div className="grid grid-cols-3 gap-2">
-            {['alta', 'media', 'baja'].map(u => (<button key={u} type="button" onClick={() => setFormZona(f => ({...f, urgencia: u}))} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formZona.urgencia === u ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{u}</button>))}
+          <label className="block text-sm font-black uppercase mb-2">1. Nombre del Edificio / Sector de Emergencia *</label>
+          <input required type="text" placeholder="Ej: Residencias Sol de San Bernardino" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500" value={formZona.nombre} onChange={e => setFormZona(f => ({...f, nombre: e.target.value}))} />
+        </div>
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">2. Nivel de Peligro *</label>
+          <div className="flex flex-col gap-2">
+            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'alta'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'alta' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>Vidas en Peligro (Atrapados)</button>
+            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'media'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'media' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>Familias Aisladas / Sin Salida</button>
+            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'baja'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'baja' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>Zona Afectada (Sin heridos)</button>
           </div>
         </div>
-        <div><label className="block text-sm font-black uppercase mb-2">3. Situación (Describe la emergencia) *</label><textarea required rows="4" placeholder="Ej: Edificio colapsado, personas atrapadas..." className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none" value={formZona.situacion} onChange={e => setFormZona(f => ({...f, situacion: e.target.value}))} /></div>
-        <div><label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono *</label><input required type="tel" placeholder="0414-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 font-mono" value={formZona.contacto} onChange={e => setFormZona(f => ({...f, contacto: e.target.value}))} /></div>
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">3. Situación (Describa la emergencia) *</label>
+          <textarea required rows="4" placeholder="Ej: Edificio colapsado parcialmente, gritos en el sótano..." className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none" value={formZona.situacion} onChange={e => setFormZona(f => ({...f, situacion: e.target.value}))} />
+        </div>
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono (Opcional - Para rescatistas)</label>
+          <input type="tel" placeholder="Ej: 0414-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 font-mono" value={formZona.contacto} onChange={e => setFormZona(f => ({...f, contacto: e.target.value}))} />
+        </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-red-700 disabled:opacity-50 transition-opacity">{isSubmitting ? 'Enviando Alerta...' : 'Alertar a Rescatistas'}</button>
       </form>
     </div>
   );
 
-  // ─── FIX RESTAURADO: VISTAS DE APORTE ───
   const FormAportePersonaView = () => (
     <div className="bg-white min-h-screen animate-fade-in">
-      <div className="bg-black text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
-        <button onClick={() => setView('detail')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
-          <ChevronLeft size={32} />
-        </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">Actualizar Persona</h2>
+      <div className="bg-black text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
+        <h2 className="font-black uppercase">Actualizar Persona</h2>
+        <button onClick={() => setView('detail')} className="text-sm font-bold text-gray-400">Cancelar</button>
       </div>
       <form onSubmit={handleAportarPersona} className="p-4 space-y-5">
         <div>
@@ -623,11 +632,11 @@ export default function App() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">2. Cédula o Pasaporte (Opcional)</label>
-          <input type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formAportePersona.documento} onChange={e => setFormAportePersona({...formAportePersona, documento: e.target.value})} />
+          <label className="block text-sm font-black uppercase mb-2">Cédula o Pasaporte (Completar si no la tenía)</label>
+          <input type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formAportePersona.documento || ''} onChange={e => setFormAportePersona({...formAportePersona, documento: e.target.value})} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">3. Último Lugar Visto o Refugio/Hospital Actual *</label>
+          <label className="block text-sm font-black uppercase mb-2">Ubicación Actualizada (Refugio u Hospital)</label>
           <input required type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formAportePersona.location_text} onChange={e => setFormAportePersona({...formAportePersona, location_text: e.target.value})} />
         </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase">
@@ -639,11 +648,9 @@ export default function App() {
 
   const FormAporteZonaView = () => (
     <div className="bg-white min-h-screen animate-fade-in">
-      <div className="bg-red-600 text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
-        <button onClick={() => setView('detail')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
-          <ChevronLeft size={32} />
-        </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">Actualizar Foco</h2>
+      <div className="bg-red-600 text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
+        <h2 className="font-black uppercase">Actualizar Foco</h2>
+        <button onClick={() => setView('detail')} className="text-sm font-bold text-red-200">Cancelar</button>
       </div>
       <form onSubmit={handleAportarZona} className="p-4 space-y-5">
         <div>
@@ -670,7 +677,7 @@ export default function App() {
   // ─── RENDER PRINCIPAL ───
   return (
     <div
-      className="max-w-md mx-auto bg-gray-100 min-h-screen font-sans relative overflow-hidden"
+      className="max-w-md mx-auto bg-gray-100 min-h-screen font-sans relative overflow-hidden shadow-2xl border-x-4 border-black"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -729,10 +736,8 @@ export default function App() {
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-        @keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
+        .animate-fade-in { animation: fadeIn 0.15s ease-out forwards; }
         .animate-slide-down { animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-slide-up { animation: slideUp 0.25s ease-out forwards; }
       `}} />
     </div>
   );
