@@ -138,43 +138,49 @@ app.post('/api/webhooks/telegram', async (req, res) => {
   res.sendStatus(200);
 });
 
-// Webhook de Supabase
+// Webhook de Supabase (Procesamiento y despacho diferenciado: Global vs. Privado)
 app.post('/api/webhooks/db-change', async (req, res) => {
   const authHeader = req.headers['x-webhook-secret'];
   if (authHeader !== WEBHOOK_SECRET) {
-    return res.status(401).json({ error: 'No autorizado.' });
+    return res.status(401).json({ error: 'No autorizado. Token de webhook inválido.' });
   }
 
   const { type, table, record, old_record } = req.body;
 
+  // Soportamos INSERT para reportes nuevos y UPDATE para ediciones de información
   if (type !== 'INSERT' && type !== 'UPDATE') {
     return res.json({ status: 'ignored', reason: 'Evento no soportado' });
   }
 
-  let telegramText = '';
+  let globalText = '';
+  let privateText = '';
 
   if (table === 'persons') {
     const currentStatus = record.status;
     const previousStatus = old_record ? old_record.status : null;
-    
-    let shouldNotify = false;
-    let title = '';
+    const currentLocation = record.location_text;
+    const previousLocation = old_record ? old_record.location_text : null;
+    const currentDoc = record.document_id;
+    const previousDoc = old_record ? old_record.document_id : null;
 
-    // Solo notifica cambios reales de estado en UPDATE para evitar spam
-    if (currentStatus === 'herido' && previousStatus !== 'herido') {
-      shouldNotify = true;
-      title = '⚠️ *EMERGENCIA VITAL: SE REQUIERE MÉDICO*';
-    } else if (currentStatus === 'a_salvo' && previousStatus !== 'a_salvo') {
-      shouldNotify = true;
-      title = '🟢 *MILAGRO: PERSONA ENCONTRADA A SALVO*';
-    } else if (currentStatus === 'fallecido' && previousStatus !== 'fallecido') {
-      shouldNotify = true;
-      title = '💀 *CONFIRMACIÓN DE FALLECIMIENTO*';
+    // 1. EVALUACIÓN CANAL GLOBAL (Filtro estricto anti-spam)
+    let shouldNotifyGlobal = false;
+    let globalTitle = '';
+
+    if (currentStatus === 'herido' && (type === 'INSERT' || currentStatus !== previousStatus)) {
+      shouldNotifyGlobal = true;
+      globalTitle = '⚠️ *EMERGENCIA VITAL: SE REQUIERE MÉDICO*';
+    } else if (currentStatus === 'a_salvo' && previousStatus && currentStatus !== previousStatus) {
+      shouldNotifyGlobal = true;
+      globalTitle = '🟢 *MILAGRO: PERSONA ENCONTRADA A SALVO*';
+    } else if (currentStatus === 'fallecido' && previousStatus && currentStatus !== previousStatus) {
+      shouldNotifyGlobal = true;
+      globalTitle = '💀 *CONFIRMACIÓN DE FALLECIMIENTO*';
     }
 
-    if (shouldNotify) {
-      telegramText = `
-${title}
+    if (shouldNotifyGlobal) {
+      globalText = `
+${globalTitle}
 ----------------------------------------
 *Nombre/Desc:* ${record.name_desc}
 ${record.document_id ? `*Cédula/Doc:* ${record.document_id}\n` : ''}*Ubicación:* ${record.location_text || 'No especificada'}
@@ -183,42 +189,124 @@ ${record.document_id ? `*Cédula/Doc:* ${record.document_id}\n` : ''}*Ubicación
 _Sistema de Despacho de Emergencias_
 `;
     }
+
+    // 2. EVALUACIÓN CHAT PRIVADO (Notificación detallada de CUALQUIER cambio)
+    if (record.telegram_chat_id) {
+      if (type === 'INSERT') {
+        privateText = `
+📝 *NUEVO REPORTE REGISTRADO*
+----------------------------------------
+Te has suscrito correctamente a las alertas de:
+🪪 *${record.name_desc.toUpperCase()}*
+
+*Estado actual:* ${record.status.toUpperCase()}
+*Ubicación inicial:* ${record.location_text || 'No especificada'}
+${record.document_id ? `*Cédula/Doc:* ${record.document_id}\n` : ''}
+Te notificaré de inmediato por este chat si hay alguna novedad o actualización.
+----------------------------------------
+`;
+      } else if (type === 'UPDATE') {
+        const changes = [];
+        if (currentStatus !== previousStatus) {
+          changes.push(`• *Estado:* de _${previousStatus.toUpperCase()}_ ➡️ _${currentStatus.toUpperCase()}_`);
+        }
+        if (currentLocation !== previousLocation) {
+          changes.push(`• *Ubicación:* de _${previousLocation || 'No especificada'}_ ➡️ _${currentLocation || 'No especificada'}_`);
+        }
+        if (currentDoc !== previousDoc) {
+          changes.push(`• *Cédula/Doc:* asignado _${currentDoc || 'No especificada'}_`);
+        }
+
+        // Si realmente cambió algún campo de valor, enviamos la alerta detallada
+        if (changes.length > 0) {
+          privateText = `
+🔄 *ACTUALIZACIÓN EN TU ALERTA*
+----------------------------------------
+Se ha registrado nueva información sobre:
+🪪 *${record.name_desc.toUpperCase()}*
+
+*Cambios detectados:*
+${changes.join('\n')}
+----------------------------------------
+_Notificación en vivo de tu suscripción personal._
+`;
+        }
+      }
+    }
   } else if (table === 'zones') {
     const currentUrgency = record.urgency;
     const previousUrgency = old_record ? old_record.urgency : null;
+    const currentSituation = record.situation;
+    const previousSituation = old_record ? old_record.situation : null;
 
-    if (currentUrgency === 'alta' && previousUrgency !== 'alta') {
-      telegramText = `
+    // 1. EVALUACIÓN CANAL GLOBAL (Solo focos de urgencia máxima)
+    if (currentUrgency === 'alta' && (type === 'INSERT' || currentUrgency !== previousUrgency)) {
+      globalText = `
 🔥 *CÓDIGO ROJO: FOCO DE RESCATE CRÍTICO*
 ----------------------------------------
 *Sector:* ${record.name}
 *Situación:* ${record.situation}
 *Contacto:* ${record.reporter_contact}
 ----------------------------------------
-_Prioridad máxima. Envíen equipo pesado._
+_Prioridad máxima. Envíen equipo de rescate pesado._
 `;
     }
-  }
 
-  if (telegramText) {
-    const sentGlobal = await sendTelegramMessage(telegramText);
-
-    let sentPrivate = false;
+    // 2. EVALUACIÓN CHAT PRIVADO (Cualquier evolución de la zona de peligro)
     if (record.telegram_chat_id) {
-      const privateText = `🔔 *NOTIFICACIÓN DE TU ALERTA SUSCRITA:*\n${telegramText}`;
-      sentPrivate = await sendTelegramMessageDirect(record.telegram_chat_id, privateText);
-    }
+      if (type === 'INSERT') {
+        privateText = `
+📍 *NUEVO FOCO DE RESCATE REGISTRADO*
+----------------------------------------
+Suscripción activa para la zona de riesgo:
+🏡 *${record.name.toUpperCase()}*
 
-    // Compatibilidad hacia atrás: mantener telegram_notified
-    return res.json({
-      status: 'processed',
-      telegram_notified: sentGlobal,
-      telegram_global_notified: sentGlobal,
-      telegram_private_notified: sentPrivate
-    });
+*Urgencia inicial:* ${record.urgency.toUpperCase()}
+*Situación reportada:* ${record.situation}
+----------------------------------------
+`;
+      } else if (type === 'UPDATE') {
+        const changes = [];
+        if (currentUrgency !== previousUrgency) {
+          changes.push(`• *Urgencia:* de _${previousUrgency.toUpperCase()}_ ➡️ _${currentUrgency.toUpperCase()}_`);
+        }
+        if (currentSituation !== previousSituation) {
+          changes.push(`• *Situación:* de _${previousSituation}_ ➡️ _${currentSituation}_`);
+        }
+
+        if (changes.length > 0) {
+          privateText = `
+🔄 *ACTUALIZACIÓN EN FOCO DE RESCATE*
+----------------------------------------
+Nueva evolución en la zona que estás monitoreando:
+🏡 *${record.name.toUpperCase()}*
+
+*Cambios registrados:*
+${changes.join('\n')}
+----------------------------------------
+`;
+        }
+      }
+    }
   }
 
-  res.json({ status: 'ignored', reason: 'No cumple reglas de prioridad crítica' });
+  // Despacho asíncrono e independiente de mensajes
+  let sentGlobal = false;
+  let sentPrivate = false;
+
+  if (globalText) {
+    sentGlobal = await sendTelegramMessage(globalText);
+  }
+  if (privateText && record.telegram_chat_id) {
+    sentPrivate = await sendTelegramMessageDirect(record.telegram_chat_id, privateText);
+  }
+
+  res.json({ 
+    status: 'processed', 
+    telegram_global_notified: sentGlobal, 
+    telegram_private_notified: sentPrivate,
+    telegram_notified: sentGlobal || sentPrivate
+  });
 });
 
 app.listen(PORT, () => {
