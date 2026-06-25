@@ -91,6 +91,51 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Endpoint de diagnóstico: devuelve la respuesta cruda de Telegram para un chat concreto
+app.post('/api/debug/telegram-send', async (req, res) => {
+  const authHeader = req.headers['x-webhook-secret'];
+  if (authHeader !== WEBHOOK_SECRET) {
+    return res.status(401).json({ error: 'No autorizado. Token de webhook inválido.' });
+  }
+
+  if (!TELEGRAM_BOT_TOKEN) {
+    return res.status(400).json({ error: 'TELEGRAM_BOT_TOKEN no configurado en el runtime.' });
+  }
+
+  const { chatId, text, withMarkdown = true } = req.body || {};
+  if (!chatId || !text) {
+    return res.status(400).json({ error: 'Faltan chatId o text.' });
+  }
+
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  const payload = {
+    chat_id: String(chatId),
+    text: String(text)
+  };
+  if (withMarkdown) payload.parse_mode = 'Markdown';
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const body = await response.text();
+    return res.status(200).json({
+      ok: response.ok,
+      status: response.status,
+      payload,
+      telegram_body: body
+    });
+  } catch (err) {
+    return res.status(500).json({
+      ok: false,
+      error: err.message
+    });
+  }
+});
+
 // Setup de Webhook de Telegram (forzando https para cumplir requisitos estrictos de Telegram)
 app.get('/api/setup-telegram', async (req, res) => {
   const host = req.headers.host;
