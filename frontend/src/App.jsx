@@ -15,6 +15,7 @@ const HEADERS = {
 export default function App() {
   const [view, setView] = useState('home'); 
   const [activeTab, setActiveTab] = useState('personas');
+  const [touchStartX, setTouchStartX] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState(null);
   
@@ -89,6 +90,48 @@ export default function App() {
   const showNotification = (msg, isError = false) => {
     setNotification({ msg, isError });
     setTimeout(() => setNotification(null), 4000);
+  };
+
+  const handleBackNavigation = () => {
+    switch (view) {
+      case 'personas':
+      case 'zonas':
+        setView('home');
+        break;
+      case 'detail':
+        setView(activeTab);
+        break;
+      case 'form_persona':
+        setView('personas');
+        break;
+      case 'form_zona':
+        setView('zonas');
+        break;
+      case 'form_aporte_persona':
+      case 'form_aporte_zona':
+        setView('detail');
+        break;
+      case 'home':
+      default:
+        break;
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX === null) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const swipeDistance = touchEndX - touchStartX;
+
+    if (swipeDistance > 75) {
+      handleBackNavigation();
+    }
+
+    setTouchStartX(null);
   };
 
   // 4. Enviar Persona a Supabase
@@ -414,7 +457,11 @@ export default function App() {
   );
 
   return (
-    <div className="max-w-md mx-auto bg-gray-100 min-h-screen font-sans relative overflow-hidden">
+    <div
+      className="max-w-md mx-auto bg-gray-100 min-h-screen font-sans relative overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {notification && (
         <div className={`absolute top-0 left-0 right-0 z-50 p-4 animate-slide-down ${notification.isError ? 'bg-red-600 text-white' : 'bg-black text-white'}`}>
           <div className="flex items-center gap-3 font-bold text-sm uppercase tracking-wide">
