@@ -618,14 +618,14 @@ export default function App() {
         </div>
       )}
 
-      {view === 'home'         && <HomeView />}
-      {view === 'personas'     && <DashboardView type="personas" />}
-      {view === 'zonas'        && <DashboardView type="zonas" />}
-      {view === 'detail'       && <DetailView />}
-      {view === 'form_persona' && <FormPersonaView />}
-      {view === 'form_zona'    && <FormZonaView />}
-      {view === 'form_aporte_persona' && <FormAportePersonaView />}
-      {view === 'form_aporte_zona'    && <FormAporteZonaView />}
+      {view === 'home'         && HomeView()}
+      {view === 'personas'     && DashboardView({ type: 'personas' })}
+      {view === 'zonas'        && DashboardView({ type: 'zonas' })}
+      {view === 'detail'       && DetailView()}
+      {view === 'form_persona' && FormPersonaView()}
+      {view === 'form_zona'    && FormZonaView()}
+      {view === 'form_aporte_persona' && FormAportePersonaView()}
+      {view === 'form_aporte_zona'    && FormAporteZonaView()}
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
