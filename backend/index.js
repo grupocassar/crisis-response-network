@@ -27,6 +27,33 @@ const SUPABASE_HEADERS = {
 
 const SUBSCRIPTIONS_TABLE = 'telegram_subscriptions';
 
+function toHumanLabel(value, dictionary = {}) {
+  if (value === null || value === undefined) return 'No especificada';
+  const raw = String(value).trim();
+  if (!raw) return 'No especificada';
+
+  if (dictionary[raw]) return dictionary[raw];
+
+  return raw
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const PERSON_STATUS_LABELS = {
+  buscado: 'Buscado',
+  buscado_a: 'Buscado/a',
+  a_salvo: 'A salvo',
+  herido: 'Herido',
+  fallecido: 'Fallecido'
+};
+
+const ZONE_URGENCY_LABELS = {
+  alta: 'Alta',
+  media: 'Media',
+  baja: 'Baja'
+};
+
 async function upsertTelegramSubscription(tableName, recordId, chatId) {
   try {
     const res = await fetch(
@@ -322,22 +349,22 @@ _Sistema de Despacho de Emergencias_
 Te has suscrito correctamente a las alertas de:
 🪪 ${record.name_desc.toUpperCase()}
 
-Estado actual: ${record.status.toUpperCase()}
+Estado actual: ${toHumanLabel(record.status, PERSON_STATUS_LABELS)}
 Ubicación inicial: ${record.location_text || 'No especificada'}
-${record.document_id ? `Cédula/Doc: ${record.document_id}\n` : ''}
+${record.document_id ? `Cédula/Doc: ${toHumanLabel(record.document_id)}\n` : ''}
 Te notificaré de inmediato por este chat si hay alguna novedad o actualización.
 ----------------------------------------
 `;
       } else if (type === 'UPDATE') {
         const changes = [];
         if (currentStatus !== previousStatus) {
-          changes.push(`• Estado: de ${previousStatus.toUpperCase()} -> ${currentStatus.toUpperCase()}`);
+          changes.push(`• Estado: de ${toHumanLabel(previousStatus, PERSON_STATUS_LABELS)} -> ${toHumanLabel(currentStatus, PERSON_STATUS_LABELS)}`);
         }
         if (currentLocation !== previousLocation) {
-          changes.push(`• Ubicación: de ${previousLocation || 'No especificada'} -> ${currentLocation || 'No especificada'}`);
+          changes.push(`• Ubicación: de ${toHumanLabel(previousLocation)} -> ${toHumanLabel(currentLocation)}`);
         }
         if (currentDoc !== previousDoc) {
-          changes.push(`• Cédula/Doc: asignado ${currentDoc || 'No especificada'}`);
+          changes.push(`• Cédula/Doc: asignado ${toHumanLabel(currentDoc)}`);
         }
 
         // Si realmente cambió algún campo de valor, enviamos la alerta detallada
@@ -393,17 +420,17 @@ _Prioridad máxima. Envíen equipo de rescate pesado._
 Suscripción activa para la zona de riesgo:
 🏡 ${record.name.toUpperCase()}
 
-Urgencia inicial: ${record.urgency.toUpperCase()}
-Situación reportada: ${record.situation}
+Urgencia inicial: ${toHumanLabel(record.urgency, ZONE_URGENCY_LABELS)}
+Situación reportada: ${toHumanLabel(record.situation)}
 ----------------------------------------
 `;
       } else if (type === 'UPDATE') {
         const changes = [];
         if (currentUrgency !== previousUrgency) {
-          changes.push(`• Urgencia: de ${previousUrgency.toUpperCase()} -> ${currentUrgency.toUpperCase()}`);
+          changes.push(`• Urgencia: de ${toHumanLabel(previousUrgency, ZONE_URGENCY_LABELS)} -> ${toHumanLabel(currentUrgency, ZONE_URGENCY_LABELS)}`);
         }
         if (currentSituation !== previousSituation) {
-          changes.push(`• Situación: de ${previousSituation} -> ${currentSituation}`);
+          changes.push(`• Situación: de ${toHumanLabel(previousSituation)} -> ${toHumanLabel(currentSituation)}`);
         }
 
         if (changes.length > 0) {
