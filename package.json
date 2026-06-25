@@ -4,6 +4,7 @@
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
     "dev": "cd frontend && npm install && npm run dev",
-    "start:backend": "cd backend && npm install && node index.js"
+    "start:backend": "cd backend && npm install && node index.js",
+    "test:webhook": "node scripts/test-webhook-dispatch.js"
   }
 }
