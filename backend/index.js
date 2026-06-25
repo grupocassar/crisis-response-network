@@ -30,13 +30,11 @@ async function sendTelegramMessageDirect(chatId, text, retries = 3, delay = 1000
   if (!TELEGRAM_BOT_TOKEN || !chatId) return false;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-  const buildPayload = (withMarkdown = true) => {
-    const payload = {
-      chat_id: chatId,
-      text: text
-    };
-    if (withMarkdown) payload.parse_mode = 'Markdown';
-    return payload;
+  const isGlobalChannel = TELEGRAM_CHAT_ID && String(chatId) === String(TELEGRAM_CHAT_ID);
+  const payload = {
+    chat_id: chatId,
+    text: text,
+    ...(isGlobalChannel ? { parse_mode: 'Markdown' } : {})
   };
 
   for (let i = 0; i < retries; i++) {
@@ -44,30 +42,23 @@ async function sendTelegramMessageDirect(chatId, text, retries = 3, delay = 1000
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(buildPayload(true))
+        body: JSON.stringify(payload)
       });
       const body = await response.text();
+      let description = '';
+      try {
+        const parsed = JSON.parse(body);
+        description = parsed.description || '';
+      } catch {
+        description = '';
+      }
 
-      console.log('TELEGRAM STATUS:', response.status);
-      console.log('TELEGRAM BODY:', body);
+      console.log('TELEGRAM chat_id:', String(chatId), 'status:', response.status);
+      if (!response.ok && description) {
+        console.log('TELEGRAM description:', description);
+      }
 
       if (response.ok) return true;
-
-      // Fallback de robustez: si Markdown falla por parseo, reintentar en texto plano
-      const markdownRejected = response.status === 400 && /can't parse entities/i.test(body);
-      if (markdownRejected) {
-        const plainResponse = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(buildPayload(false))
-        });
-        const plainBody = await plainResponse.text();
-
-        console.log('TELEGRAM STATUS (PLAIN):', plainResponse.status);
-        console.log('TELEGRAM BODY (PLAIN):', plainBody);
-
-        if (plainResponse.ok) return true;
-      }
     } catch (err) {
       console.error(`Error enviando mensaje directo a ${chatId}:`, err.message);
     }
