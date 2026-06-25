@@ -94,6 +94,10 @@ export default function App() {
   const [formAportePersona, setFormAportePersona] = useState({ status: '', location_text: '' });
   const [formAporteZona, setFormAporteZona] = useState({ urgency: '', situation: '' });
 
+  // NUEVO: Estados para el Historial (Timeline)
+  const [historyLogs, setHistoryLogs] = useState([]);
+  const [showFullHistory, setShowFullHistory] = useState(false);
+
   const swipeStartX = useRef(null);
   const swipeStartY = useRef(null);
   const isScrolling = useRef(null);
@@ -138,6 +142,19 @@ export default function App() {
     const interval = setInterval(() => fetchData(true), 30000);
     return () => clearInterval(interval);
   }, [incidentId, fetchData]);
+
+  // NUEVO: Cargar historial al abrir los detalles de un perfil
+  useEffect(() => {
+    if (view === 'detail' && selectedItem) {
+      fetch(`${SUPABASE_URL}/rest/v1/history_logs?record_id=eq.${selectedItem.id}&order=created_at.desc`, { headers: HEADERS })
+        .then(res => res.json())
+        .then(data => {
+          setHistoryLogs(data || []);
+          setShowFullHistory(false); // Resetear el botón desplegable al cambiar de perfil
+        })
+        .catch(err => console.error("Error cargando historial:", err));
+    }
+  }, [view, selectedItem]);
 
   const showNotification = (msg, isError = false) => {
     setNotification({ msg, isError });
@@ -211,6 +228,17 @@ export default function App() {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/persons`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
+      
+      // NUEVO: Registrar creación en el historial
+      await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
+        method: 'POST', headers: HEADERS, body: JSON.stringify({
+          record_id: newData[0].id,
+          table_name: 'persons',
+          action: 'CREADO',
+          details: `Reporte inicial. Estado: ${formPersona.estado.toUpperCase()}. Ubicación: ${formPersona.ubicacion}`
+        })
+      }).catch(console.error);
+
       setPersonas(prev => [newData[0], ...prev]);
       setFormPersona({ nombreDesc: '', estado: 'buscado', ubicacion: '', contacto: '' });
       showNotification("Reporte publicado exitosamente");
@@ -227,6 +255,17 @@ export default function App() {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/zones`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
+      
+      // NUEVO: Registrar creación en el historial
+      await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
+        method: 'POST', headers: HEADERS, body: JSON.stringify({
+          record_id: newData[0].id,
+          table_name: 'zones',
+          action: 'CREADO',
+          details: `Foco reportado. Urgencia: ${formZona.urgencia.toUpperCase()}. Situación: ${formZona.situacion}`
+        })
+      }).catch(console.error);
+
       setZonas(prev => [newData[0], ...prev]);
       setFormZona({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
       showNotification("Zona de emergencia reportada");
@@ -247,6 +286,17 @@ export default function App() {
       if (!res.ok) throw new Error();
       const updatedData = await res.json();
       const updatedRecord = updatedData[0];
+      
+      // NUEVO: Registrar actualización en el historial
+      await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
+        method: 'POST', headers: HEADERS, body: JSON.stringify({
+          record_id: selectedItem.id,
+          table_name: 'persons',
+          action: 'ACTUALIZADO',
+          details: `Nuevo Estado: ${formAportePersona.status.toUpperCase()}. Nueva Ubicación: ${formAportePersona.location_text}`
+        })
+      }).catch(console.error);
+
       setPersonas(prev => prev.map(p => p.id === updatedRecord.id ? updatedRecord : p));
       setSelectedItem(updatedRecord);
       showNotification("Información actualizada correctamente");
@@ -266,6 +316,17 @@ export default function App() {
       if (!res.ok) throw new Error();
       const updatedData = await res.json();
       const updatedRecord = updatedData[0];
+      
+      // NUEVO: Registrar actualización en el historial
+      await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
+        method: 'POST', headers: HEADERS, body: JSON.stringify({
+          record_id: selectedItem.id,
+          table_name: 'zones',
+          action: 'ACTUALIZADO',
+          details: `Nueva Urgencia: ${formAporteZona.urgency.toUpperCase()}. Evolución: ${formAporteZona.situation}`
+        })
+      }).catch(console.error);
+
       setZonas(prev => prev.map(z => z.id === updatedRecord.id ? updatedRecord : z));
       setSelectedItem(updatedRecord);
       showNotification("Información actualizada correctamente");
@@ -389,6 +450,34 @@ export default function App() {
                 <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">Reg: {new Date(selectedItem.created_at).toLocaleString()}</p>
               </div>
             </div>
+          </div>
+
+          {/* NUEVO: LÍNEA DE TIEMPO (TIMELINE) INTELIGENTE */}
+          <div className="bg-white border-4 border-black p-4 shadow-sm">
+            <h3 className="font-black uppercase mb-3 flex items-center gap-2 text-sm border-b-2 border-gray-100 pb-2">
+              <Clock size={16}/> Historial de Actividad
+            </h3>
+            {historyLogs.length === 0 ? (
+              <p className="text-xs text-gray-500 font-mono text-center py-2">Registrando actividad...</p>
+            ) : (
+              <div className="space-y-3">
+                {(showFullHistory ? historyLogs : historyLogs.slice(0, 3)).map(log => (
+                  <div key={log.id} className="border-l-4 border-black pl-3 ml-1 py-1">
+                    <p className="text-[10px] text-gray-500 font-mono uppercase">{new Date(log.created_at).toLocaleString()}</p>
+                    <p className={`text-xs font-bold uppercase ${log.action === 'CREADO' ? 'text-blue-600' : 'text-green-600'}`}>{log.action}</p>
+                    <p className="text-sm font-medium leading-snug">{log.details}</p>
+                  </div>
+                ))}
+                {historyLogs.length > 3 && (
+                  <button 
+                    onClick={() => setShowFullHistory(!showFullHistory)} 
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-black font-bold uppercase text-xs p-3 mt-2 transition-colors border-2 border-transparent active:border-black"
+                  >
+                    {showFullHistory ? 'Ocultar historial' : `Ver ${historyLogs.length - 3} registros más`}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* FIX RESTAURADO: Botón con onClick */}
