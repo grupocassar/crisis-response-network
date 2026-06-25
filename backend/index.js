@@ -30,10 +30,13 @@ async function sendTelegramMessageDirect(chatId, text, retries = 3, delay = 1000
   if (!TELEGRAM_BOT_TOKEN || !chatId) return false;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-  const payload = {
-    chat_id: chatId,
-    text: text,
-    parse_mode: 'Markdown'
+  const buildPayload = (withMarkdown = true) => {
+    const payload = {
+      chat_id: chatId,
+      text: text
+    };
+    if (withMarkdown) payload.parse_mode = 'Markdown';
+    return payload;
   };
 
   for (let i = 0; i < retries; i++) {
@@ -41,9 +44,30 @@ async function sendTelegramMessageDirect(chatId, text, retries = 3, delay = 1000
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(buildPayload(true))
       });
+      const body = await response.text();
+
+      console.log('TELEGRAM STATUS:', response.status);
+      console.log('TELEGRAM BODY:', body);
+
       if (response.ok) return true;
+
+      // Fallback de robustez: si Markdown falla por parseo, reintentar en texto plano
+      const markdownRejected = response.status === 400 && /can't parse entities/i.test(body);
+      if (markdownRejected) {
+        const plainResponse = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(buildPayload(false))
+        });
+        const plainBody = await plainResponse.text();
+
+        console.log('TELEGRAM STATUS (PLAIN):', plainResponse.status);
+        console.log('TELEGRAM BODY (PLAIN):', plainBody);
+
+        if (plainResponse.ok) return true;
+      }
     } catch (err) {
       console.error(`Error enviando mensaje directo a ${chatId}:`, err.message);
     }
