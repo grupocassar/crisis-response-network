@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Home, Clock, ShieldCheck, Plus, MapPin, RefreshCw } from 'lucide-react';
+import { User, Map, AlertTriangle, CheckCircle, ShieldCheck, Plus, MapPin, RefreshCw } from 'lucide-react';
 
 // --- CREDENCIALES REALES ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10YnRna3p3YXVrcWtheXhmd3FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTMzMzUsImV4cCI6MjA5NzkyOTMzNX0.Hhm8kNtc5AU9mg37n8bAT2W7iA9HnaK4KD5F69vYkdI';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzYSIsInJlZiI6Im10YnRna3p3YXVrcWtheXhmd3FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTMzMzUsImV4cCI6MjA5NzkyOTMzNX0.Hhm8kNtc5AU9mg37n8bAT2W7iA9HnaK4KD5F69vYkdI';
 
 const HEADERS = {
   apikey: SUPABASE_ANON_KEY,
@@ -13,10 +13,10 @@ const HEADERS = {
 };
 
 const TrustBadge = ({ level }) => {
-  if (level >= 3) return <span className="bg-blue-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12}/> Oficial</span>;
-  if (level === 2) return <span className="bg-green-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12}/> Rescate</span>;
-  if (level === 1) return <span className="bg-yellow-500 text-black text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><User size={12}/> Familiar</span>;
-  return <span className="bg-gray-200 text-gray-600 text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><AlertTriangle size={12}/> Civil (Nivel 0)</span>;
+  if (level >= 3) return <span className="bg-blue-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12} /> Oficial</span>;
+  if (level === 2) return <span className="bg-green-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12} /> Rescate</span>;
+  if (level === 1) return <span className="bg-yellow-500 text-black text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><User size={12} /> Familiar</span>;
+  return <span className="bg-gray-200 text-gray-600 text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><AlertTriangle size={12} /> Civil (Nivel 0)</span>;
 };
 
 const StatusPill = ({ status }) => {
@@ -34,7 +34,7 @@ function HomeView({ isSyncing, setView, personas, zonas }) {
     <div className="flex flex-col h-full gap-4 animate-fade-in">
       <div className="bg-black text-white p-6 pb-8">
         <div className="flex justify-between items-start">
-          <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">Sistema de<br/>Respuesta</h2>
+          <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">Sistema de<br />Respuesta</h2>
           {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500" />}
         </div>
         <p className="text-gray-400 text-sm font-medium mt-1">Conectado al Incidente Activo. Seleccione módulo de operación.</p>
@@ -169,7 +169,7 @@ function DetailView({ selectedItem, activeTab, setView }) {
           </div>
         </div>
 
-        <button className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 active:bg-black border-2 border-transparent shadow-md">
+        <button onClick={() => setView(isPersona ? 'form_aporte_persona' : 'form_aporte_zona')} className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 active:bg-black border-2 border-transparent shadow-md">
           Aportar Nueva Información
         </button>
       </div>
@@ -276,6 +276,8 @@ export default function App() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [formPersona, setFormPersona] = useState({ nombreDesc: '', estado: 'buscado', ubicacion: '', contacto: '' });
   const [formZona, setFormZona] = useState({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
+  const [formAportePersona, setFormAportePersona] = useState({ status: 'buscado', location_text: '', reporter_contact: '' });
+  const [formAporteZona, setFormAporteZona] = useState({ urgency: 'alta', situation: '', reporter_contact: '' });
 
   useEffect(() => {
     const initApp = async () => {
@@ -326,6 +328,23 @@ export default function App() {
     }, 30000);
     return () => clearInterval(interval);
   }, [incidentId, fetchData]);
+
+  useEffect(() => {
+    if (view === 'form_aporte_persona' && selectedItem) {
+      setFormAportePersona({
+        status: selectedItem.status || 'buscado',
+        location_text: selectedItem.location_text || '',
+        reporter_contact: selectedItem.reporter_contact || ''
+      });
+    }
+    if (view === 'form_aporte_zona' && selectedItem) {
+      setFormAporteZona({
+        urgency: selectedItem.urgency || 'alta',
+        situation: selectedItem.situation || '',
+        reporter_contact: selectedItem.reporter_contact || ''
+      });
+    }
+  }, [view, selectedItem]);
 
   const showNotification = (msg, isError = false) => {
     setNotification({ msg, isError });
@@ -396,6 +415,150 @@ export default function App() {
     }
   };
 
+  const handleSubmitAportePersona = async (e) => {
+    e.preventDefault();
+    if (!selectedItem) return showNotification('Registro inválido', true);
+    if (!incidentId) return showNotification('Sistema no inicializado', true);
+
+    setIsLoading(true);
+    try {
+      const payload = {
+        status: formAportePersona.status,
+        location_text: formAportePersona.location_text,
+        reporter_contact: formAportePersona.reporter_contact
+      };
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/persons?id=eq.${selectedItem.id}`, {
+        method: 'PATCH',
+        headers: HEADERS,
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Error actualizando aporte');
+      const newData = await res.json();
+      if (!newData || !newData.length) throw new Error('No se recibió actualización');
+      const updatedItem = newData[0];
+      setPersonas(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
+      setSelectedItem(updatedItem);
+      showNotification('Información de persona actualizada');
+      setView('detail');
+    } catch (err) {
+      console.error('Error actualizando aporte persona:', err);
+      showNotification('Error al guardar la actualización', true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmitAporteZona = async (e) => {
+    e.preventDefault();
+    if (!selectedItem) return showNotification('Registro inválido', true);
+    if (!incidentId) return showNotification('Sistema no inicializado', true);
+
+    setIsLoading(true);
+    try {
+      const payload = {
+        urgency: formAporteZona.urgency,
+        situation: formAporteZona.situation,
+        reporter_contact: formAporteZona.reporter_contact
+      };
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/zones?id=eq.${selectedItem.id}`, {
+        method: 'PATCH',
+        headers: HEADERS,
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Error actualizando aporte');
+      const newData = await res.json();
+      if (!newData || !newData.length) throw new Error('No se recibió actualización');
+      const updatedItem = newData[0];
+      setZonas(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
+      setSelectedItem(updatedItem);
+      showNotification('Información de zona actualizada');
+      setView('detail');
+    } catch (err) {
+      console.error('Error actualizando aporte zona:', err);
+      showNotification('Error al guardar la actualización', true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderFormAportePersonaView = () => {
+    if (!selectedItem) return null;
+    return (
+      <div className="bg-white min-h-screen animate-fade-in">
+        <div className="bg-black text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
+          <h2 className="font-black uppercase">Aportar Info - Persona</h2>
+          <button onClick={() => setView('detail')} className="text-sm font-bold text-gray-400 hover:text-white">Cancelar</button>
+        </div>
+
+        <form onSubmit={handleSubmitAportePersona} className="p-4 space-y-5">
+          <div>
+            <label className="block text-sm font-black uppercase mb-2">1. Estado Actual *</label>
+            <div className="grid grid-cols-2 gap-2">
+              {['buscado', 'a_salvo', 'herido', 'fallecido'].map(s => (
+                <button key={s} type="button" onClick={() => setFormAportePersona({ ...formAportePersona, status: s })} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formAportePersona.status === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
+                  {s.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-black uppercase mb-2">2. Ubicación / Estado Actual *</label>
+            <input required type="text" placeholder="Sector, calle o refugio" className="w-full p-4 border-2 border-black font-medium focus:outline-none" value={formAportePersona.location_text} onChange={e => setFormAportePersona({ ...formAportePersona, location_text: e.target.value })} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-black uppercase mb-2">3. Teléfono de contacto *</label>
+            <input required type="text" placeholder="0412-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none font-mono" value={formAportePersona.reporter_contact} onChange={e => setFormAportePersona({ ...formAportePersona, reporter_contact: e.target.value })} />
+          </div>
+
+          <button disabled={isLoading} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50">
+            {isLoading ? 'Guardando aporte...' : 'Guardar Aporte'}
+          </button>
+        </form>
+      </div>
+    );
+  };
+
+  const renderFormAporteZonaView = () => {
+    if (!selectedItem) return null;
+    return (
+      <div className="bg-white min-h-screen animate-fade-in">
+        <div className="bg-red-600 text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
+          <h2 className="font-black uppercase">Aportar Info - Zona</h2>
+          <button onClick={() => setView('detail')} className="text-sm font-bold text-red-200 hover:text-white">Cancelar</button>
+        </div>
+
+        <form onSubmit={handleSubmitAporteZona} className="p-4 space-y-5">
+          <div>
+            <label className="block text-sm font-black uppercase mb-2">1. Urgencia *</label>
+            <div className="grid grid-cols-3 gap-2">
+              {['alta', 'media', 'baja'].map(u => (
+                <button key={u} type="button" onClick={() => setFormAporteZona({ ...formAporteZona, urgency: u })} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formAporteZona.urgency === u ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
+                  {u}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-black uppercase mb-2">2. Situación *</label>
+            <textarea required rows="4" placeholder="Ej: Sector con heridos atrapados" className="w-full p-4 border-2 border-black font-medium focus:outline-none resize-none" value={formAporteZona.situation} onChange={e => setFormAporteZona({ ...formAporteZona, situation: e.target.value })}></textarea>
+          </div>
+
+          <div>
+            <label className="block text-sm font-black uppercase mb-2">3. Teléfono de contacto *</label>
+            <input required type="text" placeholder="0414-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none font-mono" value={formAporteZona.reporter_contact} onChange={e => setFormAporteZona({ ...formAporteZona, reporter_contact: e.target.value })} />
+          </div>
+
+          <button disabled={isLoading} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-red-700 disabled:opacity-50">
+            {isLoading ? 'Guardando aporte...' : 'Guardar Aporte'}
+          </button>
+        </form>
+      </div>
+    );
+  };
+
   return (
     <div className="max-w-md mx-auto bg-gray-100 min-h-screen font-sans relative overflow-hidden">
       {notification && (
@@ -413,6 +576,8 @@ export default function App() {
       {view === 'detail' && <DetailView selectedItem={selectedItem} activeTab={activeTab} setView={setView} />}
       {view === 'form_persona' && <FormPersonaView formPersona={formPersona} setFormPersona={setFormPersona} handleSubmitPersona={handleSubmitPersona} isLoading={isLoading} setView={setView} />}
       {view === 'form_zona' && <FormZonaView formZona={formZona} setFormZona={setFormZona} handleSubmitZona={handleSubmitZona} isLoading={isLoading} setView={setView} />}
+      {view === 'form_aporte_persona' && renderFormAportePersonaView()}
+      {view === 'form_aporte_zona' && renderFormAporteZonaView()}
 
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
