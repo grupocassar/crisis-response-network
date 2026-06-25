@@ -390,10 +390,10 @@ export default function App() {
       <div className="flex flex-col h-full gap-4 animate-fade-in">
         <div className="bg-black text-white p-6 pb-8">
           <div className="flex justify-between items-start">
-            <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">Sistema de<br/>Respuesta</h2>
+            <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">ENCUENTRAME</h2>
             {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
           </div>
-          <p className="text-gray-400 text-sm font-medium mt-1 mb-5">Conectado al incidente activo. Seleccione módulo de operaciones.</p>
+          <p className="text-gray-400 text-sm font-medium mt-1 mb-5">Alertas en tiempo real: reporta a tu familiar y recibe notificaciones automáticas en tu Telegram al instante.</p>
 
           <div className="grid grid-cols-3 gap-2 border-t-2 border-gray-800 pt-4">
             <div className="flex flex-col">
