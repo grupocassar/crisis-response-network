@@ -360,43 +360,57 @@ export default function App() {
   // VISTAS
   // ─────────────────────────────────────────────
 
-  const HomeView = () => (
-    <div className="flex flex-col h-full gap-4 animate-fade-in">
-      <div className="bg-black text-white p-6 pb-8">
-        <div className="flex justify-between items-start">
-          <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">Sistema de<br/>Respuesta</h2>
-          {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
+  const HomeView = () => {
+    const countTotal = personas.length;
+    const countBuscados = personas.filter(p => p.status === 'buscado').length;
+    const countASalvo = personas.filter(p => p.status === 'a_salvo').length;
+
+    return (
+      <div className="flex flex-col h-full gap-4 animate-fade-in">
+        <div className="bg-black text-white p-6 pb-8">
+          <div className="flex justify-between items-start">
+            <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">Sistema de<br/>Respuesta</h2>
+            {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
+          </div>
+          <p className="text-gray-400 text-sm font-medium mt-1 mb-5">Conectado al incidente activo. Seleccione módulo de operaciones.</p>
+          
+          {/* BANNER DE ESTADÍSTICAS DE RESCATE */}
+          <div className="grid grid-cols-3 gap-2 border-t-2 border-gray-800 pt-4">
+            <div className="flex flex-col">
+              <span className="text-2xl font-black">{countTotal}</span>
+              <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Registros</span>
+            </div>
+            <div className="flex flex-col border-l-2 border-gray-800 pl-3">
+              <span className="text-2xl font-black text-red-500">{countBuscados}</span>
+              <span className="text-[9px] text-red-500/80 uppercase font-bold tracking-widest">Buscados</span>
+            </div>
+            <div className="flex flex-col border-l-2 border-gray-800 pl-3">
+              <span className="text-2xl font-black text-green-500">{countASalvo}</span>
+              <span className="text-[9px] text-green-500/80 uppercase font-bold tracking-widest">A Salvo ✓</span>
+            </div>
+          </div>
         </div>
-        <p className="text-gray-400 text-sm font-medium mt-1">Conectado al incidente activo. Seleccione módulo.</p>
+        <div className="px-4 flex flex-col gap-4 -mt-6">
+          <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+            <User size={32} className="mb-2" />
+            <div className="flex justify-between w-full items-center">
+              <h3 className="text-2xl font-black uppercase">Personas</h3>
+              <span className="bg-black text-white text-xs px-2 py-1 font-bold">{countTotal} regs</span>
+            </div>
+            <p className="text-left text-sm text-gray-600 font-medium">Buscar familiares o reportar personas extraviadas / encontradas.</p>
+          </button>
+          <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+            <Map size={32} className="mb-2" />
+            <div className="flex justify-between w-full items-center">
+              <h3 className="text-2xl font-black uppercase">Focos de Rescate</h3>
+              <span className="bg-white text-red-600 text-xs px-2 py-1 font-black">{zonas.length} regs</span>
+            </div>
+            <p className="text-left text-sm text-red-100 font-medium">Reportar derrumbes, colapsos, o solicitar rescate urgente.</p>
+          </button>
+        </div>
       </div>
-      <div className="px-4 flex flex-col gap-4 -mt-6">
-        <a href="https://t.me/red_emergencia_bot" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white p-6 border-4 border-black hover:bg-blue-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
-          <Bell size={32} className="mb-2" />
-          <div className="flex justify-between w-full items-center">
-            <h3 className="text-2xl font-black uppercase">Alertas en Vivo</h3>
-            <span className="bg-black text-white text-xs px-2 py-1 font-bold">TELEGRAM</span>
-          </div>
-          <p className="text-left text-sm text-blue-100 font-medium">Recibe notificaciones críticas de rescates en Telegram.</p>
-        </a>
-        <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
-          <User size={32} className="mb-2" />
-          <div className="flex justify-between w-full items-center">
-            <h3 className="text-2xl font-black uppercase">Personas</h3>
-            <span className="bg-black text-white text-xs px-2 py-1 font-bold">{personas.length} regs</span>
-          </div>
-          <p className="text-left text-sm text-gray-600 font-medium">Buscar familiares o reportar personas extraviadas / encontradas.</p>
-        </button>
-        <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
-          <Map size={32} className="mb-2" />
-          <div className="flex justify-between w-full items-center">
-            <h3 className="text-2xl font-black uppercase">Zonas Críticas</h3>
-            <span className="bg-white text-red-600 text-xs px-2 py-1 font-black">{zonas.length} regs</span>
-          </div>
-          <p className="text-left text-sm text-red-100 font-medium">Reportar derrumbes, vías bloqueadas o solicitud de rescate.</p>
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const DashboardView = ({ type }) => {
     const isPersonas = type === 'personas';
