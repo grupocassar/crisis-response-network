@@ -297,8 +297,16 @@ ${changes.join('\n')}
   if (globalText) {
     sentGlobal = await sendTelegramMessage(globalText);
   }
+
+  console.log('PRIVATE CHAT:', record.telegram_chat_id);
+  console.log('PRIVATE TEXT:', privateText);
+
   if (privateText && record.telegram_chat_id) {
-    sentPrivate = await sendTelegramMessageDirect(record.telegram_chat_id, privateText);
+    const ok = await sendTelegramMessageDirect(record.telegram_chat_id, privateText);
+
+    console.log('SEND RESULT:', ok);
+
+    sentPrivate = ok;
   }
 
   res.json({ 
