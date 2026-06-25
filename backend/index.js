@@ -241,7 +241,7 @@ app.post('/api/webhooks/telegram', async (req, res) => {
             }).catch(() => null);
 
             if (subscribed) {
-              await sendTelegramMessageDirect(chatId, `🔔 *¡ENLACE DE ALERTAS EXITOSO!*\n\nTe has suscrito a las actualizaciones de:\n🪪 *${name.toUpperCase()}*\n\nTe avisaré por este chat privado inmediatamente cuando un rescatista o familiar aporte nueva información sobre este registro.`);
+              await sendTelegramMessageDirect(chatId, `🔔 ENLACE DE ALERTAS EXITOSO\n\nTe has suscrito a las actualizaciones de:\n🪪 ${name.toUpperCase()}\n\nTe avisaré por este chat privado inmediatamente cuando un rescatista o familiar aporte nueva información sobre este registro.`);
             } else {
               await sendTelegramMessageDirect(chatId, '❌ Error en el servidor al asociar tu Telegram.');
             }
@@ -254,7 +254,7 @@ app.post('/api/webhooks/telegram', async (req, res) => {
         }
       }
     } else {
-      await sendTelegramMessageDirect(chatId, `👋 *Bienvenido al Bot de la Red de Emergencias.*\n\nPara suscribirte a alertas de un familiar o foco de rescate, abre la página web y toca el botón *"Recibir Alertas en Telegram"* de ese registro.`);
+      await sendTelegramMessageDirect(chatId, `👋 Bienvenido al Bot de la Red de Emergencias.\n\nPara suscribirte a alertas de un familiar o foco de rescate, abre la página web y toca el botón "Recibir Alertas en Telegram" de ese registro.`);
     }
   }
 
@@ -317,41 +317,50 @@ _Sistema de Despacho de Emergencias_
     if (record.telegram_chat_id) {
       if (type === 'INSERT') {
         privateText = `
-📝 *NUEVO REPORTE REGISTRADO*
+📝 NUEVO REPORTE REGISTRADO
 ----------------------------------------
 Te has suscrito correctamente a las alertas de:
-🪪 *${record.name_desc.toUpperCase()}*
+🪪 ${record.name_desc.toUpperCase()}
 
-*Estado actual:* ${record.status.toUpperCase()}
-*Ubicación inicial:* ${record.location_text || 'No especificada'}
-${record.document_id ? `*Cédula/Doc:* ${record.document_id}\n` : ''}
+Estado actual: ${record.status.toUpperCase()}
+Ubicación inicial: ${record.location_text || 'No especificada'}
+${record.document_id ? `Cédula/Doc: ${record.document_id}\n` : ''}
 Te notificaré de inmediato por este chat si hay alguna novedad o actualización.
 ----------------------------------------
 `;
       } else if (type === 'UPDATE') {
         const changes = [];
         if (currentStatus !== previousStatus) {
-          changes.push(`• *Estado:* de _${previousStatus.toUpperCase()}_ ➡️ _${currentStatus.toUpperCase()}_`);
+          changes.push(`• Estado: de ${previousStatus.toUpperCase()} -> ${currentStatus.toUpperCase()}`);
         }
         if (currentLocation !== previousLocation) {
-          changes.push(`• *Ubicación:* de _${previousLocation || 'No especificada'}_ ➡️ _${currentLocation || 'No especificada'}_`);
+          changes.push(`• Ubicación: de ${previousLocation || 'No especificada'} -> ${currentLocation || 'No especificada'}`);
         }
         if (currentDoc !== previousDoc) {
-          changes.push(`• *Cédula/Doc:* asignado _${currentDoc || 'No especificada'}_`);
+          changes.push(`• Cédula/Doc: asignado ${currentDoc || 'No especificada'}`);
         }
 
         // Si realmente cambió algún campo de valor, enviamos la alerta detallada
         if (changes.length > 0) {
+          let privateHeader = '🔄 ACTUALIZACIÓN EN TU ALERTA';
+          if (currentStatus === 'a_salvo' && previousStatus && currentStatus !== previousStatus) {
+            privateHeader = '🟢 MILAGRO: PERSONA ENCONTRADA A SALVO';
+          } else if (currentStatus === 'herido' && (type === 'INSERT' || currentStatus !== previousStatus)) {
+            privateHeader = '⚠️ EMERGENCIA VITAL: SE REQUIERE MÉDICO';
+          } else if (currentStatus === 'fallecido' && previousStatus && currentStatus !== previousStatus) {
+            privateHeader = '💀 CONFIRMACIÓN DE FALLECIMIENTO';
+          }
+
           privateText = `
-🔄 *ACTUALIZACIÓN EN TU ALERTA*
+${privateHeader}
 ----------------------------------------
 Se ha registrado nueva información sobre:
-🪪 *${record.name_desc.toUpperCase()}*
+🪪 ${record.name_desc.toUpperCase()}
 
-*Cambios detectados:*
+Cambios detectados:
 ${changes.join('\n')}
 ----------------------------------------
-_Notificación en vivo de tu suscripción personal._
+Notificación en vivo de tu suscripción personal.
 `;
         }
       }
@@ -379,32 +388,32 @@ _Prioridad máxima. Envíen equipo de rescate pesado._
     if (record.telegram_chat_id) {
       if (type === 'INSERT') {
         privateText = `
-📍 *NUEVO FOCO DE RESCATE REGISTRADO*
+📍 NUEVO FOCO DE RESCATE REGISTRADO
 ----------------------------------------
 Suscripción activa para la zona de riesgo:
-🏡 *${record.name.toUpperCase()}*
+🏡 ${record.name.toUpperCase()}
 
-*Urgencia inicial:* ${record.urgency.toUpperCase()}
-*Situación reportada:* ${record.situation}
+Urgencia inicial: ${record.urgency.toUpperCase()}
+Situación reportada: ${record.situation}
 ----------------------------------------
 `;
       } else if (type === 'UPDATE') {
         const changes = [];
         if (currentUrgency !== previousUrgency) {
-          changes.push(`• *Urgencia:* de _${previousUrgency.toUpperCase()}_ ➡️ _${currentUrgency.toUpperCase()}_`);
+          changes.push(`• Urgencia: de ${previousUrgency.toUpperCase()} -> ${currentUrgency.toUpperCase()}`);
         }
         if (currentSituation !== previousSituation) {
-          changes.push(`• *Situación:* de _${previousSituation}_ ➡️ _${currentSituation}_`);
+          changes.push(`• Situación: de ${previousSituation} -> ${currentSituation}`);
         }
 
         if (changes.length > 0) {
           privateText = `
-🔄 *ACTUALIZACIÓN EN FOCO DE RESCATE*
+🔄 ACTUALIZACIÓN EN FOCO DE RESCATE
 ----------------------------------------
 Nueva evolución en la zona que estás monitoreando:
-🏡 *${record.name.toUpperCase()}*
+🏡 ${record.name.toUpperCase()}
 
-*Cambios registrados:*
+Cambios registrados:
 ${changes.join('\n')}
 ----------------------------------------
 `;
