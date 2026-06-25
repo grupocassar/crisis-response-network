@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell } from 'lucide-react';
+import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3 } from 'lucide-react';
 
 // --- CREDENCIALES REALES SUPABASE ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
@@ -13,8 +13,7 @@ const HEADERS = {
 };
 
 // ─────────────────────────────────────────────
-// FIX: Componentes auxiliares FUERA de App
-// para evitar que React los destruya/recree en cada render
+// Componentes auxiliares FUERA de App
 // ─────────────────────────────────────────────
 
 const TrustBadge = memo(({ level }) => {
@@ -30,13 +29,9 @@ const StatusPill = memo(({ status }) => {
   if (s === 'buscado') bg = 'bg-red-600';
   if (s === 'a_salvo') bg = 'bg-green-600';
   if (s === 'herido') bg = 'bg-orange-500';
+  if (s === 'fallecido') bg = 'bg-black border border-gray-500';
   return <span className={`${bg} text-white text-xs px-2 py-1 font-bold uppercase tracking-wide`}>{status.replace('_', ' ')}</span>;
 });
-
-// ─────────────────────────────────────────────
-// FIX: PersonaCard y ZonaCard como componentes
-// estables con memo para evitar re-renders innecesarios
-// ─────────────────────────────────────────────
 
 const PersonaCard = memo(({ item, onClick }) => (
   <div onClick={onClick} className="bg-white border-2 border-black p-4 cursor-pointer active:scale-[0.98] transition-transform">
@@ -90,17 +85,19 @@ export default function App() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // FIX: separado del loading de datos
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formPersona, setFormPersona] = useState({ nombreDesc: '', estado: 'buscado', ubicacion: '', contacto: '' });
   const [formZona, setFormZona] = useState({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
+  
+  // FIX RESTAURADO: Estados para Aportar Información
+  const [formAportePersona, setFormAportePersona] = useState({ status: '', location_text: '' });
+  const [formAporteZona, setFormAporteZona] = useState({ urgency: '', situation: '' });
 
-  // ── FIX SWIPE: usamos ref para no necesitar re-renders ──
   const swipeStartX = useRef(null);
   const swipeStartY = useRef(null);
   const isScrolling = useRef(null);
 
-  // ─── INICIALIZACIÓN ───
   useEffect(() => {
     const initApp = async () => {
       try {
@@ -114,7 +111,6 @@ export default function App() {
     initApp();
   }, []);
 
-  // ─── FETCH DE DATOS ───
   const fetchData = useCallback(async (silent = false) => {
     if (!incidentId) return;
     if (!silent) setInitialLoading(true);
@@ -136,11 +132,7 @@ export default function App() {
     }
   }, [incidentId]);
 
-  useEffect(() => {
-    if (incidentId) fetchData();
-  }, [incidentId, fetchData]);
-
-  // ─── POLLING 30s ───
+  useEffect(() => { if (incidentId) fetchData(); }, [incidentId, fetchData]);
   useEffect(() => {
     if (!incidentId) return;
     const interval = setInterval(() => fetchData(true), 30000);
@@ -152,7 +144,6 @@ export default function App() {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  // ─── NAVEGACIÓN ATRÁS ───
   const goBack = useCallback(() => {
     setView(prev => {
       switch (prev) {
@@ -161,59 +152,44 @@ export default function App() {
         case 'detail': return activeTab;
         case 'form_persona': return 'personas';
         case 'form_zona': return 'zonas';
+        case 'form_aporte_persona': 
+        case 'form_aporte_zona': return 'detail'; // FIX RESTAURADO: Soporte para volver de aporte a detail
         default: return prev;
       }
     });
   }, [activeTab]);
 
-  // ─── FIX SWIPE: lógica mejorada con detección de scroll vertical ───
   const handleTouchStart = useCallback((e) => {
     const touch = e.targetTouches[0];
     if (!touch) return;
-
-    // No iniciar swipe si el toque viene de un control interactivo
     if (e.target.closest('button, a, input, textarea, select')) return;
-
-    // Guardar posición inicial
     swipeStartX.current = touch.clientX;
     swipeStartY.current = touch.clientY;
-    isScrolling.current = null; // todavía no sabemos si el usuario hace scroll o swipe
+    isScrolling.current = null;
   }, []);
 
   const handleTouchMove = useCallback((e) => {
     if (swipeStartX.current === null) return;
-
     const touch = e.targetTouches[0];
     const deltaX = touch.clientX - swipeStartX.current;
     const deltaY = touch.clientY - swipeStartY.current;
-
-    // Determinar intención solo la primera vez que se mueve
     if (isScrolling.current === null) {
-      // Si el movimiento vertical es mayor, es scroll. Lo ignoramos.
       isScrolling.current = Math.abs(deltaY) > Math.abs(deltaX);
     }
   }, []);
 
   const handleTouchEnd = useCallback((e) => {
     if (swipeStartX.current === null) return;
-
-    // Si el usuario estaba haciendo scroll, ignoramos
     if (isScrolling.current) {
       swipeStartX.current = null;
       swipeStartY.current = null;
       isScrolling.current = null;
       return;
     }
-
     const touch = e.changedTouches[0];
     const deltaX = touch.clientX - swipeStartX.current;
-    const startedFromLeft = swipeStartX.current < 60; // FIX: zona generosa desde el borde izquierdo
-
-    // Swipe hacia la derecha desde el borde izquierdo = navegar atrás
-    if (startedFromLeft && deltaX > 60 && view !== 'home') {
-      goBack();
-    }
-
+    const startedFromLeft = swipeStartX.current < 60; 
+    if (startedFromLeft && deltaX > 60 && view !== 'home') goBack();
     swipeStartX.current = null;
     swipeStartY.current = null;
     isScrolling.current = null;
@@ -225,72 +201,80 @@ export default function App() {
     isScrolling.current = null;
   }, []);
 
-  // ─── ENVIAR PERSONA ───
+  // ─── LÓGICA DE ENVÍO (CREAR) ───
   const handleSubmitPersona = async (e) => {
     e.preventDefault();
-    if (!incidentId) return showNotification("Sistema no inicializado", true);
-
+    if (!incidentId) return;
     setIsSubmitting(true);
     try {
-      const payload = {
-        incident_id: incidentId,
-        name_desc: formPersona.nombreDesc,
-        status: formPersona.estado,
-        location_text: formPersona.ubicacion,
-        reporter_contact: formPersona.contacto,
-        trust_level: 0
-      };
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/persons`, {
-        method: 'POST', headers: HEADERS, body: JSON.stringify(payload)
-      });
+      const payload = { incident_id: incidentId, name_desc: formPersona.nombreDesc, status: formPersona.estado, location_text: formPersona.ubicacion, reporter_contact: formPersona.contacto, trust_level: 0 };
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/persons`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
       setPersonas(prev => [newData[0], ...prev]);
       setFormPersona({ nombreDesc: '', estado: 'buscado', ubicacion: '', contacto: '' });
       showNotification("Reporte publicado exitosamente");
       setView('personas');
-    } catch {
-      showNotification("Error de red. Intente de nuevo.", true);
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch { showNotification("Error de red. Intente de nuevo.", true); } finally { setIsSubmitting(false); }
   };
 
-  // ─── ENVIAR ZONA ───
   const handleSubmitZona = async (e) => {
     e.preventDefault();
-    if (!incidentId) return showNotification("Sistema no inicializado", true);
-
+    if (!incidentId) return;
     setIsSubmitting(true);
     try {
-      const payload = {
-        incident_id: incidentId,
-        name: formZona.nombre,
-        urgency: formZona.urgencia,
-        situation: formZona.situacion,
-        reporter_contact: formZona.contacto,
-        trust_level: 0
-      };
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/zones`, {
-        method: 'POST', headers: HEADERS, body: JSON.stringify(payload)
-      });
+      const payload = { incident_id: incidentId, name: formZona.nombre, urgency: formZona.urgencia, situation: formZona.situacion, reporter_contact: formZona.contacto, trust_level: 0 };
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/zones`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
       setZonas(prev => [newData[0], ...prev]);
       setFormZona({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
       showNotification("Zona de emergencia reportada");
       setView('zonas');
-    } catch {
-      showNotification("Error de red. Intente de nuevo.", true);
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch { showNotification("Error de red. Intente de nuevo.", true); } finally { setIsSubmitting(false); }
+  };
+
+  // ─── FIX RESTAURADO: LÓGICA DE ACTUALIZACIÓN (PATCH) ───
+  const handleAportarPersona = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/persons?id=eq.${selectedItem.id}`, {
+        method: 'PATCH',
+        headers: HEADERS,
+        body: JSON.stringify(formAportePersona)
+      });
+      if (!res.ok) throw new Error();
+      const updatedData = await res.json();
+      const updatedRecord = updatedData[0];
+      setPersonas(prev => prev.map(p => p.id === updatedRecord.id ? updatedRecord : p));
+      setSelectedItem(updatedRecord);
+      showNotification("Información actualizada correctamente");
+      setView('detail');
+    } catch { showNotification("Error al actualizar.", true); } finally { setIsSubmitting(false); }
+  };
+
+  const handleAportarZona = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/zones?id=eq.${selectedItem.id}`, {
+        method: 'PATCH',
+        headers: HEADERS,
+        body: JSON.stringify(formAporteZona)
+      });
+      if (!res.ok) throw new Error();
+      const updatedData = await res.json();
+      const updatedRecord = updatedData[0];
+      setZonas(prev => prev.map(z => z.id === updatedRecord.id ? updatedRecord : z));
+      setSelectedItem(updatedRecord);
+      showNotification("Información actualizada correctamente");
+      setView('detail');
+    } catch { showNotification("Error al actualizar.", true); } finally { setIsSubmitting(false); }
   };
 
   // ─────────────────────────────────────────────
-  // VISTAS — definidas dentro de App para acceder
-  // al estado, pero los subcomponentes de lista
-  // están FUERA para evitar titilación
+  // VISTAS
   // ─────────────────────────────────────────────
 
   const HomeView = () => (
@@ -302,10 +286,8 @@ export default function App() {
         </div>
         <p className="text-gray-400 text-sm font-medium mt-1">Conectado al incidente activo. Seleccione módulo.</p>
       </div>
-
       <div className="px-4 flex flex-col gap-4 -mt-6">
-        <a href="https://t.me/red_emergencia_bot" target="_blank" rel="noopener noreferrer"
-          className="bg-blue-600 text-white p-6 border-4 border-black hover:bg-blue-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+        <a href="https://t.me/red_emergencia_bot" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white p-6 border-4 border-black hover:bg-blue-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
           <Bell size={32} className="mb-2" />
           <div className="flex justify-between w-full items-center">
             <h3 className="text-2xl font-black uppercase">Alertas en Vivo</h3>
@@ -313,9 +295,7 @@ export default function App() {
           </div>
           <p className="text-left text-sm text-blue-100 font-medium">Recibe notificaciones críticas de rescates en Telegram.</p>
         </a>
-
-        <button onClick={() => setView('personas')}
-          className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+        <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
           <User size={32} className="mb-2" />
           <div className="flex justify-between w-full items-center">
             <h3 className="text-2xl font-black uppercase">Personas</h3>
@@ -323,9 +303,7 @@ export default function App() {
           </div>
           <p className="text-left text-sm text-gray-600 font-medium">Buscar familiares o reportar personas extraviadas / encontradas.</p>
         </button>
-
-        <button onClick={() => setView('zonas')}
-          className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+        <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
           <Map size={32} className="mb-2" />
           <div className="flex justify-between w-full items-center">
             <h3 className="text-2xl font-black uppercase">Zonas Críticas</h3>
@@ -356,32 +334,20 @@ export default function App() {
             </h2>
             <div className="flex items-center gap-3">
               {isSyncing && <RefreshCw size={14} className="animate-spin text-gray-500" />}
-              <button onClick={() => { setSearchQuery(''); setView('home'); }}
-                className="text-sm font-bold bg-white text-black px-3 py-1 hover:bg-gray-200">
-                Volver
-              </button>
+              <button onClick={() => { setSearchQuery(''); setView('home'); }} className="text-sm font-bold bg-white text-black px-3 py-1 hover:bg-gray-200">Volver</button>
             </div>
           </div>
-          <input
-            type="text"
-            placeholder={isPersonas ? "Buscar nombre o descripción..." : "Buscar sector o calle..."}
-            className="w-full p-3 text-black font-medium focus:outline-none rounded-none"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-          <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')}
-            className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2">
+          <input type="text" placeholder={isPersonas ? "Buscar nombre o descripción..." : "Buscar sector o calle..."} className="w-full p-3 text-black font-medium focus:outline-none rounded-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')} className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2">
             <Plus size={18}/> {isPersonas ? 'Crear Reporte de Persona' : 'Reportar Nueva Zona'}
           </button>
         </div>
-
         <div className="p-4 space-y-4 bg-gray-100 min-h-screen">
           {initialLoading ? (
             <p className="text-center font-bold text-gray-500 py-10 animate-pulse">Cargando base de datos...</p>
           ) : filtered.length === 0 ? (
             <p className="text-center font-bold text-gray-500 py-10">No hay registros aún.</p>
           ) : (
-            // FIX: uso de PersonaCard / ZonaCard estables para evitar titilación
             filtered.map(item =>
               isPersonas
                 ? <PersonaCard key={item.id} item={item} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
@@ -403,14 +369,11 @@ export default function App() {
           <button onClick={goBack} className="font-bold flex items-center gap-1 hover:text-gray-300">← Volver</button>
           <span className="text-xs font-mono font-bold opacity-50 truncate w-32 text-right">{selectedItem.id?.split('-')[0]}</span>
         </div>
-
         <div className="p-4 space-y-4">
           <div className="bg-white border-4 border-black p-5">
             <div className="flex flex-col items-start gap-3 mb-4">
               <TrustBadge level={selectedItem.trust_level} />
-              {isPersona
-                ? <StatusPill status={selectedItem.status} />
-                : <StatusPill status={`Urgencia ${selectedItem.urgency}`} />}
+              {isPersona ? <StatusPill status={selectedItem.status} /> : <StatusPill status={`Urgencia ${selectedItem.urgency}`} />}
             </div>
             <h2 className="text-2xl font-black uppercase mb-4 leading-tight border-b-2 border-gray-100 pb-4">
               {isPersona ? selectedItem.name_desc : selectedItem.name}
@@ -423,15 +386,25 @@ export default function App() {
               <div className="bg-gray-50 p-3 border border-gray-200">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Contacto del reporte</p>
                 <p className="font-bold">{selectedItem.reporter_contact}</p>
-                <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">
-                  Reg: {new Date(selectedItem.created_at).toLocaleString()}
-                </p>
+                <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">Reg: {new Date(selectedItem.created_at).toLocaleString()}</p>
               </div>
             </div>
           </div>
 
-          <button className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 active:bg-black border-2 border-transparent shadow-md">
-            Aportar Nueva Información
+          {/* FIX RESTAURADO: Botón con onClick */}
+          <button 
+            onClick={() => {
+              if (isPersona) {
+                setFormAportePersona({ status: selectedItem.status, location_text: selectedItem.location_text });
+                setView('form_aporte_persona');
+              } else {
+                setFormAporteZona({ urgency: selectedItem.urgency, situation: selectedItem.situation });
+                setView('form_aporte_zona');
+              }
+            }}
+            className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 flex items-center justify-center gap-2 border-2 border-transparent shadow-md"
+          >
+            <Edit3 size={18}/> Aportar Nueva Información
           </button>
         </div>
       </div>
@@ -444,53 +417,18 @@ export default function App() {
         <h2 className="font-black uppercase">Reporte: Persona</h2>
         <button onClick={() => setView('personas')} className="text-sm font-bold text-gray-400 hover:text-white">Cancelar</button>
       </div>
-
       <form onSubmit={handleSubmitPersona} className="p-4 space-y-5">
-        <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">
-          Solo llena lo que sepas. Puedes usar descripciones físicas.
-        </div>
-
-        <div>
-          <label className="block text-sm font-black uppercase mb-2">1. Nombre o Descripción *</label>
-          <input required type="text" placeholder="Ej: Luis, o Niño de camisa roja"
-            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500"
-            value={formPersona.nombreDesc}
-            onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} />
-        </div>
-
+        <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">Solo llena lo que sepas. Puedes usar descripciones físicas.</div>
+        <div><label className="block text-sm font-black uppercase mb-2">1. Nombre o Descripción *</label><input required type="text" placeholder="Ej: Luis, o Niño de camisa roja" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.nombreDesc} onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} /></div>
         <div>
           <label className="block text-sm font-black uppercase mb-2">2. Estado Actual *</label>
           <div className="grid grid-cols-2 gap-2">
-            {['buscado', 'a_salvo', 'herido', 'fallecido'].map(s => (
-              <button key={s} type="button"
-                onClick={() => setFormPersona(f => ({...f, estado: s}))}
-                className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formPersona.estado === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
-                {s.replace('_', ' ')}
-              </button>
-            ))}
+            {['buscado', 'a_salvo', 'herido', 'fallecido'].map(s => (<button key={s} type="button" onClick={() => setFormPersona(f => ({...f, estado: s}))} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formPersona.estado === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{s.replace('_', ' ')}</button>))}
           </div>
         </div>
-
-        <div>
-          <label className="block text-sm font-black uppercase mb-2">3. Ubicación *</label>
-          <input required type="text" placeholder="Sector, calle, refugio..."
-            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500"
-            value={formPersona.ubicacion}
-            onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} />
-        </div>
-
-        <div>
-          <label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono *</label>
-          <input required type="tel" placeholder="0412-1234567"
-            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono"
-            value={formPersona.contacto}
-            onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} />
-        </div>
-
-        <button disabled={isSubmitting} type="submit"
-          className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 transition-opacity">
-          {isSubmitting ? 'Guardando...' : 'Publicar Reporte'}
-        </button>
+        <div><label className="block text-sm font-black uppercase mb-2">3. Ubicación *</label><input required type="text" placeholder="Sector, calle, refugio..." className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.ubicacion} onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} /></div>
+        <div><label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono *</label><input required type="tel" placeholder="0412-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.contacto} onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} /></div>
+        <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 transition-opacity">{isSubmitting ? 'Guardando...' : 'Publicar Reporte'}</button>
       </form>
     </div>
   );
@@ -501,48 +439,73 @@ export default function App() {
         <h2 className="font-black uppercase">Reportar Zona Crítica</h2>
         <button onClick={() => setView('zonas')} className="text-sm font-bold text-red-200 hover:text-white">Cancelar</button>
       </div>
-
       <form onSubmit={handleSubmitZona} className="p-4 space-y-5">
-        <div>
-          <label className="block text-sm font-black uppercase mb-2">1. Nombre del Sector / Zona *</label>
-          <input required type="text" placeholder="Ej: Sector El Limón"
-            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500"
-            value={formZona.nombre}
-            onChange={e => setFormZona(f => ({...f, nombre: e.target.value}))} />
-        </div>
-
+        <div><label className="block text-sm font-black uppercase mb-2">1. Nombre del Sector / Zona *</label><input required type="text" placeholder="Ej: Sector El Limón" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500" value={formZona.nombre} onChange={e => setFormZona(f => ({...f, nombre: e.target.value}))} /></div>
         <div>
           <label className="block text-sm font-black uppercase mb-2">2. Nivel de Urgencia *</label>
           <div className="grid grid-cols-3 gap-2">
+            {['alta', 'media', 'baja'].map(u => (<button key={u} type="button" onClick={() => setFormZona(f => ({...f, urgencia: u}))} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formZona.urgencia === u ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{u}</button>))}
+          </div>
+        </div>
+        <div><label className="block text-sm font-black uppercase mb-2">3. Situación (Describe la emergencia) *</label><textarea required rows="4" placeholder="Ej: Edificio colapsado, personas atrapadas..." className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none" value={formZona.situacion} onChange={e => setFormZona(f => ({...f, situacion: e.target.value}))} /></div>
+        <div><label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono *</label><input required type="tel" placeholder="0414-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 font-mono" value={formZona.contacto} onChange={e => setFormZona(f => ({...f, contacto: e.target.value}))} /></div>
+        <button disabled={isSubmitting} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-red-700 disabled:opacity-50 transition-opacity">{isSubmitting ? 'Enviando Alerta...' : 'Alertar a Rescatistas'}</button>
+      </form>
+    </div>
+  );
+
+  // ─── FIX RESTAURADO: VISTAS DE APORTE ───
+  const FormAportePersonaView = () => (
+    <div className="bg-white min-h-screen animate-fade-in">
+      <div className="bg-black text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
+        <h2 className="font-black uppercase">Actualizar Persona</h2>
+        <button onClick={() => setView('detail')} className="text-sm font-bold text-gray-400">Cancelar</button>
+      </div>
+      <form onSubmit={handleAportarPersona} className="p-4 space-y-5">
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">Nuevo Estado Vital</label>
+          <div className="grid grid-cols-2 gap-2">
+            {['buscado', 'a_salvo', 'herido', 'fallecido'].map(s => (
+              <button key={s} type="button" onClick={() => setFormAportePersona({...formAportePersona, status: s})} className={`p-3 font-bold uppercase text-xs border-2 ${formAportePersona.status === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
+                {s.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">Ubicación Actualizada</label>
+          <input required type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formAportePersona.location_text} onChange={e => setFormAportePersona({...formAportePersona, location_text: e.target.value})} />
+        </div>
+        <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase">
+          {isSubmitting ? 'Guardando...' : 'Actualizar Información'}
+        </button>
+      </form>
+    </div>
+  );
+
+  const FormAporteZonaView = () => (
+    <div className="bg-white min-h-screen animate-fade-in">
+      <div className="bg-red-600 text-white p-4 sticky top-0 flex justify-between items-center shadow-md">
+        <h2 className="font-black uppercase">Actualizar Foco</h2>
+        <button onClick={() => setView('detail')} className="text-sm font-bold text-red-200">Cancelar</button>
+      </div>
+      <form onSubmit={handleAportarZona} className="p-4 space-y-5">
+        <div>
+          <label className="block text-sm font-black uppercase mb-2">Nuevo Nivel de Urgencia</label>
+          <div className="grid grid-cols-3 gap-2">
             {['alta', 'media', 'baja'].map(u => (
-              <button key={u} type="button"
-                onClick={() => setFormZona(f => ({...f, urgencia: u}))}
-                className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formZona.urgencia === u ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
+              <button key={u} type="button" onClick={() => setFormAporteZona({...formAporteZona, urgency: u})} className={`p-3 font-bold uppercase text-xs border-2 ${formAporteZona.urgency === u ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
                 {u}
               </button>
             ))}
           </div>
         </div>
-
         <div>
-          <label className="block text-sm font-black uppercase mb-2">3. Situación (Describe la emergencia) *</label>
-          <textarea required rows="4" placeholder="Ej: Edificio colapsado, personas atrapadas..."
-            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none"
-            value={formZona.situacion}
-            onChange={e => setFormZona(f => ({...f, situacion: e.target.value}))} />
+          <label className="block text-sm font-black uppercase mb-2">Situación Actual (Evolución)</label>
+          <textarea required rows="4" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none" value={formAporteZona.situation} onChange={e => setFormAporteZona({...formAporteZona, situation: e.target.value})}></textarea>
         </div>
-
-        <div>
-          <label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono *</label>
-          <input required type="tel" placeholder="0414-1234567"
-            className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 font-mono"
-            value={formZona.contacto}
-            onChange={e => setFormZona(f => ({...f, contacto: e.target.value}))} />
-        </div>
-
-        <button disabled={isSubmitting} type="submit"
-          className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-red-700 disabled:opacity-50 transition-opacity">
-          {isSubmitting ? 'Enviando Alerta...' : 'Alertar a Rescatistas'}
+        <button disabled={isSubmitting} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase">
+          {isSubmitting ? 'Guardando...' : 'Actualizar Rescatistas'}
         </button>
       </form>
     </div>
@@ -572,6 +535,8 @@ export default function App() {
       {view === 'detail'       && <DetailView />}
       {view === 'form_persona' && <FormPersonaView />}
       {view === 'form_zona'    && <FormZonaView />}
+      {view === 'form_aporte_persona' && <FormAportePersonaView />}
+      {view === 'form_aporte_zona'    && <FormAporteZonaView />}
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
