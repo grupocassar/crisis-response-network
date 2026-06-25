@@ -12,6 +12,16 @@ const HEADERS = {
   'Prefer': 'return=representation'
 };
 
+const formatDateTime = (value) => new Date(value).toLocaleString('en-US', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: true
+});
+
 // ─────────────────────────────────────────────
 // Componentes auxiliares FUERA de App
 // para evitar que React los destruya/recree en cada render
@@ -47,7 +57,7 @@ const PersonaCard = memo(({ item, onClick }) => (
       {item.location_text}
     </p>
     <p className="text-[10px] text-gray-400 font-mono mt-3 uppercase text-right">
-      {new Date(item.created_at).toLocaleString()}
+      {formatDateTime(item.created_at)}
     </p>
   </div>
 ));
@@ -66,7 +76,7 @@ const ZonaCard = memo(({ item, onClick }) => (
       {item.situation}
     </p>
     <p className="text-[10px] text-gray-400 font-mono mt-3 uppercase text-right">
-      {new Date(item.created_at).toLocaleString()}
+      {formatDateTime(item.created_at)}
     </p>
   </div>
 ));
@@ -511,7 +521,7 @@ export default function App() {
               <div className="bg-gray-50 p-3 border border-gray-200">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Contacto del reporte inicial</p>
                 <p className="font-bold">{selectedItem.reporter_contact}</p>
-                <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">Reg: {new Date(selectedItem.created_at).toLocaleString()}</p>
+                <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">Reg: {formatDateTime(selectedItem.created_at)}</p>
               </div>
             </div>
           </div>
@@ -553,7 +563,7 @@ export default function App() {
               <div className="space-y-3">
                 {(showFullHistory ? historyLogs : historyLogs.slice(0, 3)).map(log => (
                   <div key={log.id} className="border-l-4 border-black pl-3 ml-1 py-1">
-                    <p className="text-[10px] text-gray-500 font-mono uppercase">{new Date(log.created_at).toLocaleString()}</p>
+                    <p className="text-[10px] text-gray-500 font-mono uppercase">{formatDateTime(log.created_at)}</p>
                     <p className={`text-xs font-bold uppercase ${log.action === 'CREADO' ? 'text-blue-600' : 'text-green-600'}`}>{log.action}</p>
                     <p className="text-sm font-medium leading-snug">{log.details}</p>
                   </div>
