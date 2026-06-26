@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft, Globe } from 'lucide-react';
+import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft, Globe, ChevronDown, Users } from 'lucide-react';
 
 // --- CREDENCIALES REALES SUPABASE ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
@@ -44,7 +44,7 @@ const T = {
     noResults: 'No encontramos coincidencias para',
     noRecords: 'No hay registros aún.',
     noResultsHint: 'Si sabes de esta persona, toca el botón azul de arriba para reportarla de una vez.',
-    loadMore: '⬇️ Cargar 25 reportes más',
+    loadMore: 'Cargar 25 reportes más',
     loadMoreHint: '¿No encuentras a quien buscas? Usa la barra de búsqueda arriba para ahorrar datos.',
     loading: 'Cargando base de datos...',
     urgencyAlta: 'Alta',
@@ -109,6 +109,12 @@ const T = {
     modalDesc: '¿Quieres recibir notificaciones automáticas en tu Telegram si hay cambios sobre',
     modalBtnTelegram: 'Sí, activar en Telegram',
     modalBtnSkip: 'No, ver en la web',
+    footerTitle: 'Hecho por venezolanos, para venezolanos 🇻🇪',
+    footerDesc: '"Encúentrame" es una plataforma ciudadana, gratuita y de código abierto. Optimizada para conexiones inestables y para no agotar la batería de tu celular en medio de la crisis.',
+    footerColabTitle: 'Esfuerzo Colaborativo',
+    footerColabDesc: 'Si buscas a alguien, repórtalo. Si tienes información, actualiza su estado. Entre todos nos encontramos.',
+    footerDataTitle: 'Privacidad Vital',
+    footerDataDesc: 'No comercializamos ni compartimos tu información. Este sistema existe con un único fin: salvar vidas.',
   },
   en: {
     homeTitle: 'FIND ME',
@@ -129,7 +135,7 @@ const T = {
     noResults: 'No matches found for',
     noRecords: 'No records yet.',
     noResultsHint: 'If you know this person, tap the blue button above to report them.',
-    loadMore: '⬇️ Load 25 more reports',
+    loadMore: 'Load 25 more reports',
     loadMoreHint: "Can't find who you're looking for? Use the search bar above to save data.",
     loading: 'Loading database...',
     urgencyAlta: 'High',
@@ -194,6 +200,12 @@ const T = {
     modalDesc: 'Do you want to receive automatic Telegram notifications if there are updates about',
     modalBtnTelegram: 'Yes, activate on Telegram',
     modalBtnSkip: 'No, view on web',
+    footerTitle: 'Made by Venezuelans, for Venezuelans 🇻🇪',
+    footerDesc: '"Find Me" is a free, open-source citizen platform. Optimized for unstable connections and to save your phone battery during the crisis.',
+    footerColabTitle: 'Collaborative Effort',
+    footerColabDesc: 'If you are looking for someone, report them. If you have info, update their status. We find each other together.',
+    footerDataTitle: 'Vital Privacy',
+    footerDataDesc: 'We do not sell or share your data. This entire system exists with a single purpose: to save lives.',
   }
 };
 
@@ -622,6 +634,32 @@ export default function App() {
             <p className="text-left text-sm text-red-100 font-medium">{T[lang].zonesDesc}</p>
           </button>
         </div>
+
+        {/* FOOTER INSTITUCIONAL / HUMANO */}
+        <div className="mx-4 mb-6 mt-4 bg-gray-200 border-4 border-gray-300 p-5 space-y-4">
+          <h4 className="font-black text-lg uppercase tracking-tight text-gray-900 leading-tight">
+            {T[lang].footerTitle}
+          </h4>
+          <p className="text-sm font-medium text-gray-700 leading-snug">
+            {T[lang].footerDesc}
+          </p>
+          <div className="space-y-3 pt-2">
+            <div className="flex gap-3 items-start">
+              <Users size={18} className="text-gray-900 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="block font-black text-sm uppercase text-gray-900">{T[lang].footerColabTitle}</span>
+                <span className="text-xs font-medium text-gray-700">{T[lang].footerColabDesc}</span>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <ShieldCheck size={18} className="text-gray-900 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="block font-black text-sm uppercase text-gray-900">{T[lang].footerDataTitle}</span>
+                <span className="text-xs font-medium text-gray-700">{T[lang].footerDataDesc}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
@@ -682,11 +720,11 @@ export default function App() {
               {filtered.length > visibleCount && (
                 <div className="pt-2 pb-6 px-1">
                   <p className="text-center text-xs font-bold text-gray-500 mb-3">{T[lang].loadMoreHint}</p>
-                  <button
-                    onClick={() => setVisibleCount(prev => prev + 25)}
-                    className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 active:translate-y-0.5 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black flex justify-center items-center gap-2"
+                  <button 
+                    onClick={() => setVisibleCount(prev => prev + 25)} 
+                    className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black flex justify-center items-center gap-2"
                   >
-                    {T[lang].loadMore}
+                    <ChevronDown size={20} /> {T[lang].loadMore}
                   </button>
                 </div>
               )}
