@@ -117,6 +117,10 @@ const T = {
     footerColabDesc: 'Si buscas a alguien, repórtalo. Si tienes información, actualiza su estado. Entre todos nos encontramos.',
     footerDataTitle: 'Privacidad Vital',
     footerDataDesc: 'No comercializamos ni compartimos información. Este sistema existe con un único fin operativo.',
+    legalCompany: 'IDIKI TECH SRL (120Beat)',
+    legalRNC: 'RNC: 133-57596-5',
+    legalHumanitarian: 'Plataforma de uso humanitario pro-bono.',
+    legalCopyright: '© 2026 Todos los derechos reservados.',
   },
   en: {
     homeTitle: 'FIND ME',
@@ -210,6 +214,10 @@ const T = {
     footerColabDesc: "If you're looking for someone, report them. If you have info, update their status. We find each other together.",
     footerDataTitle: 'Vital Privacy',
     footerDataDesc: 'We do not sell or share data. This system exists for a single operational purpose.',
+    legalCompany: 'IDIKI TECH SRL (120Beat)',
+    legalRNC: 'RNC: 133-57596-5',
+    legalHumanitarian: 'Pro-bono humanitarian use platform.',
+    legalCopyright: '© 2026 All rights reserved.',
   }
 };
 
@@ -670,6 +678,14 @@ export default function App() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* FOOTER LEGAL CORPORATIVO */}
+        <div className="mt-6 pt-6 pb-8 border-t-2 border-gray-300 text-center flex flex-col items-center justify-center opacity-70">
+          <span className="text-xs font-black text-gray-800 uppercase tracking-widest">{T[lang].legalCompany}</span>
+          <span className="text-[10px] font-bold text-gray-600 tracking-wider mt-0.5">{T[lang].legalRNC}</span>
+          <span className="text-[10px] font-medium text-gray-500 mt-2">{T[lang].legalHumanitarian}</span>
+          <span className="text-[10px] font-mono text-gray-400 mt-1">{T[lang].legalCopyright}</span>
         </div>
       </div>
     );
