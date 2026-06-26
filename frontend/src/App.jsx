@@ -54,6 +54,61 @@ const T = {
     statusASalvo: 'A Salvo',
     statusHerido: 'Herido',
     statusFallecido: 'Fallecido',
+    // Detail
+    detailTitle: 'Detalles del Reporte',
+    detailUrgencyHigh: 'Vidas en Peligro',
+    detailUrgencyMed: 'Aislados',
+    detailLocation: 'Último Lugar Visto o Refugio/Hospital',
+    detailSituation: 'Situación',
+    detailContact: 'Contacto del reporte inicial',
+    detailDoc: 'C.I / Pasaporte:',
+    btnTelegram: 'Recibir Alertas en mi Telegram',
+    btnContribute: 'Aportar Nueva Información (Evolución)',
+    historyTitle: 'Historial de Actividad',
+    historyEmpty: 'Generando reporte inicial...',
+    historyHide: 'Ocultar historial',
+    historyMore: 'Ver {n} registros más',
+    // Formularios
+    formPersonaTitle: 'Reportar Persona',
+    formPersonaWarning: 'Solo completa lo que sepas. No te detengas si te falta algún dato.',
+    formPersonaLabel1: '1. Nombre o Descripción de la Persona *',
+    formPersonaPlaceholder1: 'Ej: Juan Pérez o Abuela con camisa roja',
+    formPersonaLabel2: '2. Cédula o Pasaporte (Opcional)',
+    formPersonaPlaceholder2: 'Ej: V-12345678',
+    formPersonaLabel3: '3. Estado Actual *',
+    formPersonaLabel4: '4. Último Lugar Visto o Refugio/Hospital Actual *',
+    formPersonaPlaceholder4: 'Sector, calle, o nombre de hospital',
+    formPersonaLabel5: '5. Tu Teléfono (Opcional - Para que te contacten rescatistas)',
+    formPersonaPlaceholder5: 'Ej: 0412-1234567',
+    btnPublish: 'Publicar Reporte',
+    btnSaving: 'Guardando...',
+    formZonaTitle: 'Reportar Foco',
+    formZonaLabel1: '1. Nombre del Edificio / Sector de Emergencia *',
+    formZonaPlaceholder1: 'Ej: Residencias Sol de San Bernardino',
+    formZonaLabel2: '2. Nivel de Peligro *',
+    formZonaBtnAlta: 'Vidas en Peligro (Atrapados)',
+    formZonaBtnMedia: 'Familias Aisladas / Sin Salida',
+    formZonaBtnBaja: 'Zona Afectada (Sin heridos)',
+    formZonaLabel3: '3. Situación (Describa la emergencia) *',
+    formZonaPlaceholder3: 'Ej: Edificio colapsado parcialmente, gritos en el sótano...',
+    formZonaLabel4: '4. Tu Teléfono (Opcional - Para rescatistas)',
+    formZonaPlaceholder4: 'Ej: 0414-1234567',
+    btnAlert: 'Alertar a Rescatistas',
+    btnAlertSending: 'Enviando Alerta...',
+    formAportePersonaTitle: 'Actualizar Persona',
+    formAporteLabel1: 'Nuevo Estado Vital',
+    formAporteLabel2: 'Cédula o Pasaporte (Completar si no la tenía)',
+    formAporteLabel3: 'Ubicación Actualizada (Refugio u Hospital)',
+    btnUpdate: 'Actualizar Información',
+    formAporteZonaTitle: 'Actualizar Foco',
+    formAporteZonaLabel1: 'Nuevo Nivel de Urgencia',
+    formAporteZonaLabel2: 'Situación Actual (Evolución)',
+    btnUpdateZone: 'Actualizar Rescatistas',
+    // Modal
+    modalTitle: '¡Reporte Creado!',
+    modalDesc: '¿Quieres recibir notificaciones automáticas en tu Telegram si hay cambios sobre',
+    modalBtnTelegram: 'Sí, activar en Telegram',
+    modalBtnSkip: 'No, ver en la web',
   },
   en: {
     homeTitle: 'FIND ME',
@@ -84,6 +139,61 @@ const T = {
     statusASalvo: 'Safe',
     statusHerido: 'Injured',
     statusFallecido: 'Deceased',
+    // Detail
+    detailTitle: 'Report Details',
+    detailUrgencyHigh: 'Lives at Risk',
+    detailUrgencyMed: 'Isolated',
+    detailLocation: 'Last Known Location or Shelter/Hospital',
+    detailSituation: 'Situation',
+    detailContact: 'Initial Contact',
+    detailDoc: 'ID / Passport:',
+    btnTelegram: 'Receive Alerts on my Telegram',
+    btnContribute: 'Submit New Information (Update)',
+    historyTitle: 'Activity History',
+    historyEmpty: 'Generating initial report...',
+    historyHide: 'Hide history',
+    historyMore: 'View {n} more records',
+    // Forms
+    formPersonaTitle: 'Report Person',
+    formPersonaWarning: "Fill in what you know. Don't stop if you are missing some data.",
+    formPersonaLabel1: '1. Person Name or Description *',
+    formPersonaPlaceholder1: 'Ex: John Doe or Elderly woman in red shirt',
+    formPersonaLabel2: '2. ID or Passport (Optional)',
+    formPersonaPlaceholder2: 'Ex: V-12345678',
+    formPersonaLabel3: '3. Current Status *',
+    formPersonaLabel4: '4. Last Location Seen or Current Shelter/Hospital *',
+    formPersonaPlaceholder4: 'Sector, street, or hospital name',
+    formPersonaLabel5: '5. Your Phone (Optional - So rescuers can reach you)',
+    formPersonaPlaceholder5: 'Ex: 0412-1234567',
+    btnPublish: 'Publish Report',
+    btnSaving: 'Saving...',
+    formZonaTitle: 'Report Zone',
+    formZonaLabel1: '1. Building Name / Emergency Sector *',
+    formZonaPlaceholder1: 'Ex: Downtown Emergency Building',
+    formZonaLabel2: '2. Danger Level *',
+    formZonaBtnAlta: 'Lives at Risk (Trapped)',
+    formZonaBtnMedia: 'Isolated Families / No Exit',
+    formZonaBtnBaja: 'Affected Zone (No injuries)',
+    formZonaLabel3: '3. Situation (Describe the emergency) *',
+    formZonaPlaceholder3: 'Ex: Building partially collapsed, voices heard in basement...',
+    formZonaLabel4: '4. Your Phone (Optional - For rescuers)',
+    formZonaPlaceholder4: 'Ex: 0414-1234567',
+    btnAlert: 'Alert Rescuers',
+    btnAlertSending: 'Sending Alert...',
+    formAportePersonaTitle: 'Update Person',
+    formAporteLabel1: 'New Vital Status',
+    formAporteLabel2: 'ID or Passport (Fill if missing)',
+    formAporteLabel3: 'Updated Location (Shelter or Hospital)',
+    btnUpdate: 'Update Information',
+    formAporteZonaTitle: 'Update Zone',
+    formAporteZonaLabel1: 'New Urgency Level',
+    formAporteZonaLabel2: 'Current Situation (Update)',
+    btnUpdateZone: 'Update Rescuers',
+    // Modal
+    modalTitle: 'Report Created!',
+    modalDesc: 'Do you want to receive automatic Telegram notifications if there are updates about',
+    modalBtnTelegram: 'Yes, activate on Telegram',
+    modalBtnSkip: 'No, view on web',
   }
 };
 
@@ -597,30 +707,30 @@ export default function App() {
           <button onClick={goBack} className="p-1 -ml-2 hover:bg-gray-800 rounded-full transition-colors active:scale-90">
             <ChevronLeft size={32} />
           </button>
-          <span className="font-black uppercase text-lg truncate flex-1">Detalles del Reporte</span>
+          <span className="font-black uppercase text-lg truncate flex-1">{T[lang].detailTitle}</span>
           <span className="text-xs font-mono font-bold opacity-50 truncate w-20 text-right">{selectedItem.id?.split('-')[0]}</span>
         </div>
         <div className="p-4 space-y-4">
           <div className="bg-white border-4 border-black p-5">
             <div className="flex flex-col items-start gap-3 mb-4">
               <TrustBadge level={selectedItem.trust_level} />
-              {isPersona ? <StatusPill status={selectedItem.status} /> : <span className={`text-xs px-2 py-1 font-bold uppercase text-white ${selectedItem.urgency === 'alta' ? 'bg-red-600' : 'bg-orange-500'}`}>{selectedItem.urgency === 'alta' ? 'Vidas en Peligro' : 'Aislados'}</span>}
+              {isPersona ? <StatusPill status={selectedItem.status} lang={lang} /> : <span className={`text-xs px-2 py-1 font-bold uppercase text-white ${selectedItem.urgency === 'alta' ? 'bg-red-600' : 'bg-orange-500'}`}>{selectedItem.urgency === 'alta' ? T[lang].detailUrgencyHigh : T[lang].detailUrgencyMed}</span>}
             </div>
             
             <h2 className="text-2xl font-black uppercase mb-1 leading-tight border-b-2 border-gray-100 pb-2">
               {isPersona ? selectedItem.name_desc : selectedItem.name}
             </h2>
             {isPersona && selectedItem.document_id && (
-              <p className="text-sm font-mono font-black text-gray-600 mb-4 bg-gray-50 p-2 border border-gray-200 w-max">C.I / Pasaporte: {selectedItem.document_id}</p>
+              <p className="text-sm font-mono font-black text-gray-600 mb-4 bg-gray-50 p-2 border border-gray-200 w-max">{T[lang].detailDoc} {selectedItem.document_id}</p>
             )}
             
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{isPersona ? 'Último Lugar Visto o Refugio/Hospital' : 'Situación'}</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{isPersona ? T[lang].detailLocation : T[lang].detailSituation}</p>
                 <p className="font-medium text-lg leading-snug">{isPersona ? selectedItem.location_text : selectedItem.situation}</p>
               </div>
               <div className="bg-gray-50 p-3 border border-gray-200">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Contacto del reporte inicial</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{T[lang].detailContact}</p>
                 <p className="font-bold">{selectedItem.reporter_contact}</p>
                 <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">Reg: {formatDateTime(selectedItem.created_at)}</p>
               </div>
@@ -634,7 +744,7 @@ export default function App() {
             rel="noopener noreferrer" 
             className="w-full bg-blue-600 text-white font-black uppercase p-4 hover:bg-blue-700 flex items-center justify-center gap-2 border-2 border-black shadow-md transition-transform active:scale-[0.98]"
           >
-            <Bell size={18}/> Recibir Alertas de este registro en mi Telegram
+            <Bell size={18}/> {T[lang].btnTelegram}
           </a>
 
           {/* Botón de Aportar Información */}
@@ -650,16 +760,16 @@ export default function App() {
             }}
             className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 flex items-center justify-center gap-2 border-2 border-transparent shadow-md transition-transform active:scale-[0.98]"
           >
-            <Edit3 size={18}/> Aportar Nueva Información (Evolución)
+            <Edit3 size={18}/> {T[lang].btnContribute}
           </button>
 
           {/* Historial de Revisiones */}
           <div className="bg-white border-4 border-black p-4 shadow-sm">
             <h3 className="font-black uppercase mb-3 flex items-center gap-2 text-sm border-b-2 border-gray-100 pb-2">
-              <Clock size={16}/> Historial de Actividad
+              <Clock size={16}/> {T[lang].historyTitle}
             </h3>
             {historyLogs.length === 0 ? (
-              <p className="text-xs text-gray-500 font-mono text-center py-2">Generando reporte inicial...</p>
+              <p className="text-xs text-gray-500 font-mono text-center py-2">{T[lang].historyEmpty}</p>
             ) : (
               <div className="space-y-3">
                 {(showFullHistory ? historyLogs : historyLogs.slice(0, 3)).map(log => (
@@ -671,7 +781,7 @@ export default function App() {
                 ))}
                 {historyLogs.length > 3 && (
                   <button onClick={() => setShowFullHistory(!showFullHistory)} className="w-full bg-gray-100 hover:bg-gray-200 text-black font-bold uppercase text-xs p-3 mt-2 transition-colors border-2 border-transparent active:border-black">
-                    {showFullHistory ? 'Ocultar historial' : `Ver ${historyLogs.length - 3} registros más`}
+                    {showFullHistory ? T[lang].historyHide : T[lang].historyMore.replace('{n}', historyLogs.length - 3)}
                   </button>
                 )}
               </div>
@@ -688,33 +798,33 @@ export default function App() {
         <button onClick={() => setView('personas')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
           <ChevronLeft size={32} />
         </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">Reportar Persona</h2>
+        <h2 className="font-black uppercase text-lg flex-1 truncate">{T[lang].formPersonaTitle}</h2>
       </div>
       <form onSubmit={handleSubmitPersona} className="p-4 space-y-5">
-        <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">Solo completa lo que sepas. No te detengas si te falta algún dato.</div>
+        <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">{T[lang].formPersonaWarning}</div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">1. Nombre o Descripción de la Persona *</label>
-          <input required type="text" placeholder="Ej: Juan Pérez o Abuela con camisa roja" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.nombreDesc} onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} />
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel1}</label>
+          <input required type="text" placeholder={T[lang].formPersonaPlaceholder1} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.nombreDesc} onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">2. Cédula o Pasaporte (Opcional)</label>
-          <input type="text" placeholder="Ej: V-12345678" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.documento} onChange={e => setFormPersona(f => ({...f, documento: e.target.value}))} />
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel2}</label>
+          <input type="text" placeholder={T[lang].formPersonaPlaceholder2} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.documento} onChange={e => setFormPersona(f => ({...f, documento: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">3. Estado Actual *</label>
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel3}</label>
           <div className="grid grid-cols-2 gap-2">
-            {['buscado', 'a_salvo', 'herido', 'fallecido'].map(s => (<button key={s} type="button" onClick={() => setFormPersona(f => ({...f, estado: s}))} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formPersona.estado === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{s.replace('_', ' ')}</button>))}
+            {[['buscado', T[lang].statusBuscado], ['a_salvo', T[lang].statusASalvo], ['herido', T[lang].statusHerido], ['fallecido', T[lang].statusFallecido]].map(([s, label]) => (<button key={s} type="button" onClick={() => setFormPersona(f => ({...f, estado: s}))} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formPersona.estado === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{label}</button>))}
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">4. Último Lugar Visto o Refugio/Hospital Actual *</label>
-          <input required type="text" placeholder="Sector, calle, o nombre de hospital" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.ubicacion} onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} />
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel4}</label>
+          <input required type="text" placeholder={T[lang].formPersonaPlaceholder4} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.ubicacion} onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">5. Tu Teléfono (Opcional - Para que te contacten rescatistas)</label>
-          <input type="tel" placeholder="Ej: 0412-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.contacto} onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} />
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel5}</label>
+          <input type="tel" placeholder={T[lang].formPersonaPlaceholder5} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.contacto} onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} />
         </div>
-        <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 transition-opacity">{isSubmitting ? 'Guardando...' : 'Publicar Reporte'}</button>
+        <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 transition-opacity">{isSubmitting ? T[lang].btnSaving : T[lang].btnPublish}</button>
       </form>
     </div>
   );
@@ -725,30 +835,30 @@ export default function App() {
         <button onClick={() => setView('zonas')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
           <ChevronLeft size={32} />
         </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">Reportar Foco</h2>
+        <h2 className="font-black uppercase text-lg flex-1 truncate">{T[lang].formZonaTitle}</h2>
       </div>
       <form onSubmit={handleSubmitZona} className="p-4 space-y-5">
         <div>
-          <label className="block text-sm font-black uppercase mb-2">1. Nombre del Edificio / Sector de Emergencia *</label>
-          <input required type="text" placeholder="Ej: Residencias Sol de San Bernardino" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500" value={formZona.nombre} onChange={e => setFormZona(f => ({...f, nombre: e.target.value}))} />
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formZonaLabel1}</label>
+          <input required type="text" placeholder={T[lang].formZonaPlaceholder1} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500" value={formZona.nombre} onChange={e => setFormZona(f => ({...f, nombre: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">2. Nivel de Peligro *</label>
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formZonaLabel2}</label>
           <div className="flex flex-col gap-2">
-            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'alta'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'alta' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>Vidas en Peligro (Atrapados)</button>
-            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'media'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'media' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>Familias Aisladas / Sin Salida</button>
-            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'baja'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'baja' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>Zona Afectada (Sin heridos)</button>
+            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'alta'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'alta' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnAlta}</button>
+            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'media'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'media' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnMedia}</button>
+            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'baja'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'baja' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnBaja}</button>
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">3. Situación (Describa la emergencia) *</label>
-          <textarea required rows="4" placeholder="Ej: Edificio colapsado parcialmente, gritos en el sótano..." className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none" value={formZona.situacion} onChange={e => setFormZona(f => ({...f, situacion: e.target.value}))} />
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formZonaLabel3}</label>
+          <textarea required rows="4" placeholder={T[lang].formZonaPlaceholder3} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none" value={formZona.situacion} onChange={e => setFormZona(f => ({...f, situacion: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">4. Tu Teléfono (Opcional - Para rescatistas)</label>
-          <input type="tel" placeholder="Ej: 0414-1234567" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 font-mono" value={formZona.contacto} onChange={e => setFormZona(f => ({...f, contacto: e.target.value}))} />
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formZonaLabel4}</label>
+          <input type="tel" placeholder={T[lang].formZonaPlaceholder4} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 font-mono" value={formZona.contacto} onChange={e => setFormZona(f => ({...f, contacto: e.target.value}))} />
         </div>
-        <button disabled={isSubmitting} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-red-700 disabled:opacity-50 transition-opacity">{isSubmitting ? 'Enviando Alerta...' : 'Alertar a Rescatistas'}</button>
+        <button disabled={isSubmitting} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-red-700 disabled:opacity-50 transition-opacity">{isSubmitting ? T[lang].btnAlertSending : T[lang].btnAlert}</button>
       </form>
     </div>
   );
@@ -759,29 +869,29 @@ export default function App() {
         <button onClick={() => setView('detail')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
           <ChevronLeft size={32} />
         </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">Actualizar Persona</h2>
+        <h2 className="font-black uppercase text-lg flex-1 truncate">{T[lang].formAportePersonaTitle}</h2>
       </div>
       <form onSubmit={handleAportarPersona} className="p-4 space-y-5">
         <div>
-          <label className="block text-sm font-black uppercase mb-2">Nuevo Estado Vital</label>
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteLabel1}</label>
           <div className="grid grid-cols-2 gap-2">
-            {['buscado', 'a_salvo', 'herido', 'fallecido'].map(s => (
+            {[['buscado', T[lang].statusBuscado], ['a_salvo', T[lang].statusASalvo], ['herido', T[lang].statusHerido], ['fallecido', T[lang].statusFallecido]].map(([s, label]) => (
               <button key={s} type="button" onClick={() => setFormAportePersona({...formAportePersona, status: s})} className={`p-3 font-bold uppercase text-xs border-2 ${formAportePersona.status === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
-                {s.replace('_', ' ')}
+                {label}
               </button>
             ))}
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">Cédula o Pasaporte (Completar si no la tenía)</label>
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteLabel2}</label>
           <input type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formAportePersona.documento || ''} onChange={e => setFormAportePersona({...formAportePersona, documento: e.target.value})} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">Ubicación Actualizada (Refugio u Hospital)</label>
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteLabel3}</label>
           <input required type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formAportePersona.location_text} onChange={e => setFormAportePersona({...formAportePersona, location_text: e.target.value})} />
         </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase">
-          {isSubmitting ? 'Guardando...' : 'Actualizar Información'}
+          {isSubmitting ? T[lang].btnSaving : T[lang].btnUpdate}
         </button>
       </form>
     </div>
@@ -793,25 +903,25 @@ export default function App() {
         <button onClick={() => setView('detail')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
           <ChevronLeft size={32} />
         </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">Actualizar Foco</h2>
+        <h2 className="font-black uppercase text-lg flex-1 truncate">{T[lang].formAporteZonaTitle}</h2>
       </div>
       <form onSubmit={handleAportarZona} className="p-4 space-y-5">
         <div>
-          <label className="block text-sm font-black uppercase mb-2">Nuevo Nivel de Urgencia</label>
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteZonaLabel1}</label>
           <div className="grid grid-cols-3 gap-2">
-            {['alta', 'media', 'baja'].map(u => (
+            {[['alta', T[lang].urgencyAlta], ['media', T[lang].urgencyMedia], ['baja', T[lang].urgencyBaja]].map(([u, label]) => (
               <button key={u} type="button" onClick={() => setFormAporteZona({...formAporteZona, urgency: u})} className={`p-3 font-bold uppercase text-xs border-2 ${formAporteZona.urgency === u ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
-                {u}
+                {label}
               </button>
             ))}
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">Situación Actual (Evolución)</label>
+          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteZonaLabel2}</label>
           <textarea required rows="4" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none" value={formAporteZona.situation} onChange={e => setFormAporteZona({...formAporteZona, situation: e.target.value})}></textarea>
         </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase">
-          {isSubmitting ? 'Guardando...' : 'Actualizar Rescatistas'}
+          {isSubmitting ? T[lang].btnSaving : T[lang].btnUpdateZone}
         </button>
       </form>
     </div>
@@ -850,10 +960,10 @@ export default function App() {
           <div className="bg-white border-4 border-black p-6 w-full max-w-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] space-y-4 animate-slide-up">
             <div className="flex items-center gap-2 text-blue-600 font-black uppercase text-lg border-b-4 border-black pb-2">
               <Bell size={24} className="animate-bounce" />
-              <span>¡Reporte Creado!</span>
+              <span>{T[lang].modalTitle}</span>
             </div>
             <p className="text-sm font-bold text-gray-800 leading-snug">
-              ¿Quieres recibir notificaciones automáticas en tu Telegram si un rescatista o familiar cambia el estado o ubicación de <span className="underline font-black">{selectedItem.name_desc || selectedItem.name}</span>?
+              {T[lang].modalDesc} <span className="underline font-black">{selectedItem.name_desc || selectedItem.name}</span>?
             </p>
             <div className="flex flex-col gap-2 pt-2">
               <a 
@@ -863,13 +973,13 @@ export default function App() {
                 onClick={() => setShowSuccessModal(false)}
                 className="w-full bg-blue-600 text-white font-black uppercase p-4 hover:bg-blue-700 text-center border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 text-sm"
               >
-                <Bell size={16}/> Sí, activar en Telegram
+                <Bell size={16}/> {T[lang].modalBtnTelegram}
               </a>
               <button 
                 onClick={() => setShowSuccessModal(false)}
                 className="w-full bg-white text-black font-black uppercase p-3 hover:bg-gray-100 text-center border-2 border-black text-xs"
               >
-                No, ver en la web
+                {T[lang].modalBtnSkip}
               </button>
             </div>
           </div>
