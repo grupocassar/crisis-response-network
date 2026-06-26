@@ -254,7 +254,7 @@ const PersonaCard = memo(({ item, onClick, lang = 'es' }) => (
       <TrustBadge level={item.trust_level} />
       <StatusPill status={item.status} lang={lang} />
     </div>
-    <h3 className="text-lg font-black leading-tight mb-1 uppercase">{item.name_desc}</h3>
+    <h3 className="text-lg font-black leading-tight mb-1">{item.name_desc}</h3>
     {item.document_id && <p className="text-xs font-mono font-bold text-gray-600 mb-2">C.I / Pasaporte: {item.document_id}</p>}
     <p className="text-sm text-gray-700 font-medium line-clamp-2">
       <MapPin size={14} className="inline mr-1 -mt-1"/>
@@ -274,7 +274,7 @@ const ZonaCard = memo(({ item, onClick, lang = 'es' }) => (
         {lang === 'en' ? 'Urgency' : 'Urgencia'}: {{ alta: T[lang].urgencyAlta, media: T[lang].urgencyMedia, baja: T[lang].urgencyBaja }[item.urgency] || item.urgency}
       </span>
     </div>
-    <h3 className="text-lg font-black leading-tight mb-2 uppercase">{item.name}</h3>
+    <h3 className="text-lg font-black leading-tight mb-2">{item.name}</h3>
     <p className="text-sm text-gray-700 font-medium line-clamp-2">
       <MapPin size={14} className="inline mr-1 -mt-1"/>
       {item.situation}
@@ -603,7 +603,7 @@ export default function App() {
       <div className="flex flex-col h-full gap-4 animate-fade-in">
         <div className="bg-black text-white p-6 pb-8">
           <div className="flex justify-between items-start">
-            <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">{T[lang].homeTitle}</h2>
+            <h2 className="text-3xl font-black tracking-tight mb-2 leading-none">{T[lang].homeTitle}</h2>
             <div className="flex items-center gap-2">
               {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
               <button onClick={toggleLang} className="flex items-center gap-1 bg-gray-800 px-2 py-1 text-xs font-bold uppercase rounded active:scale-95 transition-transform">
@@ -632,7 +632,7 @@ export default function App() {
           <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
             <User size={32} className="mb-2" />
             <div className="flex justify-between w-full items-center">
-              <h3 className="text-2xl font-black uppercase">{T[lang].persons}</h3>
+              <h3 className="text-2xl font-black tracking-tight">{T[lang].persons}</h3>
               <span className="bg-black text-white text-xs px-2 py-1 font-bold">{countTotal} regs</span>
             </div>
             <p className="text-left text-sm text-gray-600 font-medium">{T[lang].personsDesc}</p>
@@ -640,7 +640,7 @@ export default function App() {
           <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
             <Map size={32} className="mb-2" />
             <div className="flex justify-between w-full items-center">
-              <h3 className="text-2xl font-black uppercase">{T[lang].zones}</h3>
+              <h3 className="text-2xl font-black tracking-tight">{T[lang].zones}</h3>
               <span className="bg-white text-red-600 text-xs px-2 py-1 font-black">{zonas.length} regs</span>
             </div>
             <p className="text-left text-sm text-red-100 font-medium">{T[lang].zonesDesc}</p>
@@ -649,7 +649,7 @@ export default function App() {
 
         {/* FOOTER INSTITUCIONAL / HUMANO (Ingeniería de Supervivencia) */}
         <div className="mx-4 mb-6 mt-4 bg-gray-200 border-4 border-gray-300 p-5 space-y-4">
-          <h4 className="font-black text-lg uppercase tracking-tight text-gray-900 leading-tight">
+          <h4 className="font-black text-lg tracking-tight text-gray-900 leading-tight">
             {T[lang].footerTitle}
           </h4>
           <p className="text-sm font-medium text-gray-700 leading-snug">
@@ -659,21 +659,21 @@ export default function App() {
             <div className="flex gap-3 items-start">
               <ImageOff size={18} className="text-gray-900 mt-0.5 flex-shrink-0" />
               <div>
-                <span className="block font-black text-sm uppercase text-gray-900">{T[lang].footerTechTitle}</span>
+                <span className="block font-black text-sm text-gray-900">{T[lang].footerTechTitle}</span>
                 <span className="text-xs font-medium text-gray-700">{T[lang].footerTechDesc}</span>
               </div>
             </div>
             <div className="flex gap-3 items-start">
               <Users size={18} className="text-gray-900 mt-0.5 flex-shrink-0" />
               <div>
-                <span className="block font-black text-sm uppercase text-gray-900">{T[lang].footerColabTitle}</span>
+                <span className="block font-black text-sm text-gray-900">{T[lang].footerColabTitle}</span>
                 <span className="text-xs font-medium text-gray-700">{T[lang].footerColabDesc}</span>
               </div>
             </div>
             <div className="flex gap-3 items-start">
               <ShieldCheck size={18} className="text-gray-900 mt-0.5 flex-shrink-0" />
               <div>
-                <span className="block font-black text-sm uppercase text-gray-900">{T[lang].footerDataTitle}</span>
+                <span className="block font-black text-sm text-gray-900">{T[lang].footerDataTitle}</span>
                 <span className="text-xs font-medium text-gray-700">{T[lang].footerDataDesc}</span>
               </div>
             </div>
@@ -709,7 +709,7 @@ export default function App() {
             <button onClick={() => { setSearchQuery(''); setView('home'); }} className="p-1 -ml-2 hover:bg-gray-800 rounded-full transition-colors active:scale-90">
               <ChevronLeft size={32} />
             </button>
-            <h2 className="text-xl font-black uppercase flex items-center gap-2 flex-1 truncate">
+            <h2 className="text-xl font-black flex items-center tracking-tight gap-2 flex-1 truncate">
               {isPersonas ? <User size={20}/> : <Map size={20}/>}
               {isPersonas ? T[lang].dashPersons : T[lang].dashZones}
             </h2>
@@ -772,7 +772,7 @@ export default function App() {
           <button onClick={goBack} className="p-1 -ml-2 hover:bg-gray-800 rounded-full transition-colors active:scale-90">
             <ChevronLeft size={32} />
           </button>
-          <span className="font-black uppercase text-lg truncate flex-1">{T[lang].detailTitle}</span>
+          <span className="font-black text-lg truncate tracking-tight flex-1">{T[lang].detailTitle}</span>
           <span className="text-xs font-mono font-bold opacity-50 truncate w-20 text-right">{selectedItem.id?.split('-')[0]}</span>
         </div>
         <div className="p-4 space-y-4">
@@ -782,7 +782,7 @@ export default function App() {
               {isPersona ? <StatusPill status={selectedItem.status} lang={lang} /> : <span className={`text-xs px-2 py-1 font-bold uppercase text-white ${selectedItem.urgency === 'alta' ? 'bg-red-600' : 'bg-orange-500'}`}>{selectedItem.urgency === 'alta' ? T[lang].detailUrgencyHigh : T[lang].detailUrgencyMed}</span>}
             </div>
             
-            <h2 className="text-2xl font-black uppercase mb-1 leading-tight border-b-2 border-gray-100 pb-2">
+            <h2 className="text-2xl font-black mb-2 leading-tight border-b-2 border-gray-100 pb-2">
               {isPersona ? selectedItem.name_desc : selectedItem.name}
             </h2>
             {isPersona && selectedItem.document_id && (
@@ -791,11 +791,11 @@ export default function App() {
             
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{isPersona ? T[lang].detailLocation : T[lang].detailSituation}</p>
+                <p className="text-xs font-bold text-gray-500 tracking-wider mb-1">{isPersona ? T[lang].detailLocation : T[lang].detailSituation}</p>
                 <p className="font-medium text-lg leading-snug">{isPersona ? selectedItem.location_text : selectedItem.situation}</p>
               </div>
               <div className="bg-gray-50 p-3 border border-gray-200">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{T[lang].detailContact}</p>
+                <p className="text-xs font-bold text-gray-500 tracking-wider mb-1">{T[lang].detailContact}</p>
                 <p className="font-bold">{selectedItem.reporter_contact}</p>
                 <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase">Reg: {formatDateTime(selectedItem.created_at)}</p>
               </div>
@@ -830,7 +830,7 @@ export default function App() {
 
           {/* Historial de Revisiones */}
           <div className="bg-white border-4 border-black p-4 shadow-sm">
-            <h3 className="font-black uppercase mb-3 flex items-center gap-2 text-sm border-b-2 border-gray-100 pb-2">
+            <h3 className="font-black text-gray-900 mb-3 flex items-center gap-2 text-sm border-b-2 border-gray-100 pb-2">
               <Clock size={16}/> {T[lang].historyTitle}
             </h3>
             {historyLogs.length === 0 ? (
@@ -863,30 +863,30 @@ export default function App() {
         <button onClick={() => setView('personas')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
           <ChevronLeft size={32} />
         </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">{T[lang].formPersonaTitle}</h2>
+        <h2 className="font-black text-lg flex-1 truncate tracking-tight">{T[lang].formPersonaTitle}</h2>
       </div>
       <form onSubmit={handleSubmitPersona} className="p-4 space-y-5">
         <div className="bg-yellow-400 text-black p-3 text-xs font-bold uppercase tracking-wide border-2 border-black">{T[lang].formPersonaWarning}</div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel1}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formPersonaLabel1}</label>
           <input required type="text" placeholder={T[lang].formPersonaPlaceholder1} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.nombreDesc} onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel2}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formPersonaLabel2}</label>
           <input type="text" placeholder={T[lang].formPersonaPlaceholder2} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.documento} onChange={e => setFormPersona(f => ({...f, documento: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel3}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formPersonaLabel3}</label>
           <div className="grid grid-cols-2 gap-2">
             {[['buscado', T[lang].statusBuscado], ['a_salvo', T[lang].statusASalvo], ['herido', T[lang].statusHerido], ['fallecido', T[lang].statusFallecido]].map(([s, label]) => (<button key={s} type="button" onClick={() => setFormPersona(f => ({...f, estado: s}))} className={`p-3 font-bold uppercase text-xs border-2 transition-colors ${formPersona.estado === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{label}</button>))}
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel4}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formPersonaLabel4}</label>
           <input required type="text" placeholder={T[lang].formPersonaPlaceholder4} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.ubicacion} onChange={e => setFormPersona(f => ({...f, ubicacion: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formPersonaLabel5}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formPersonaLabel5}</label>
           <input type="tel" placeholder={T[lang].formPersonaPlaceholder5} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.contacto} onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} />
         </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 transition-opacity">{isSubmitting ? T[lang].btnSaving : T[lang].btnPublish}</button>
@@ -900,15 +900,15 @@ export default function App() {
         <button onClick={() => setView('zonas')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
           <ChevronLeft size={32} />
         </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">{T[lang].formZonaTitle}</h2>
+        <h2 className="font-black text-lg flex-1 truncate tracking-tight">{T[lang].formZonaTitle}</h2>
       </div>
       <form onSubmit={handleSubmitZona} className="p-4 space-y-5">
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formZonaLabel1}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formZonaLabel1}</label>
           <input required type="text" placeholder={T[lang].formZonaPlaceholder1} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500" value={formZona.nombre} onChange={e => setFormZona(f => ({...f, nombre: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formZonaLabel2}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formZonaLabel2}</label>
           <div className="flex flex-col gap-2">
             <button type="button" onClick={() => setFormZona({...formZona, urgency: 'alta'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'alta' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnAlta}</button>
             <button type="button" onClick={() => setFormZona({...formZona, urgency: 'media'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'media' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnMedia}</button>
@@ -916,11 +916,11 @@ export default function App() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formZonaLabel3}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formZonaLabel3}</label>
           <textarea required rows="4" placeholder={T[lang].formZonaPlaceholder3} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none" value={formZona.situacion} onChange={e => setFormZona(f => ({...f, situacion: e.target.value}))} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formZonaLabel4}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formZonaLabel4}</label>
           <input type="tel" placeholder={T[lang].formZonaPlaceholder4} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 font-mono" value={formZona.contacto} onChange={e => setFormZona(f => ({...f, contacto: e.target.value}))} />
         </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-red-700 disabled:opacity-50 transition-opacity">{isSubmitting ? T[lang].btnAlertSending : T[lang].btnAlert}</button>
@@ -934,11 +934,11 @@ export default function App() {
         <button onClick={() => setView('detail')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
           <ChevronLeft size={32} />
         </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">{T[lang].formAportePersonaTitle}</h2>
+        <h2 className="font-black text-lg flex-1 truncate tracking-tight">{T[lang].formAportePersonaTitle}</h2>
       </div>
       <form onSubmit={handleAportarPersona} className="p-4 space-y-5">
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteLabel1}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formAporteLabel1}</label>
           <div className="grid grid-cols-2 gap-2">
             {[['buscado', T[lang].statusBuscado], ['a_salvo', T[lang].statusASalvo], ['herido', T[lang].statusHerido], ['fallecido', T[lang].statusFallecido]].map(([s, label]) => (
               <button key={s} type="button" onClick={() => setFormAportePersona({...formAportePersona, status: s})} className={`p-3 font-bold uppercase text-xs border-2 ${formAportePersona.status === s ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
@@ -948,11 +948,11 @@ export default function App() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteLabel2}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formAporteLabel2}</label>
           <input type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formAportePersona.documento || ''} onChange={e => setFormAportePersona({...formAportePersona, documento: e.target.value})} />
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteLabel3}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formAporteLabel3}</label>
           <input required type="text" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formAportePersona.location_text} onChange={e => setFormAportePersona({...formAportePersona, location_text: e.target.value})} />
         </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase">
@@ -968,11 +968,11 @@ export default function App() {
         <button onClick={() => setView('detail')} className="p-1 -ml-2 hover:bg-white/20 rounded-full transition-colors active:scale-90">
           <ChevronLeft size={32} />
         </button>
-        <h2 className="font-black uppercase text-lg flex-1 truncate">{T[lang].formAporteZonaTitle}</h2>
+        <h2 className="font-black text-lg flex-1 truncate tracking-tight">{T[lang].formAporteZonaTitle}</h2>
       </div>
       <form onSubmit={handleAportarZona} className="p-4 space-y-5">
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteZonaLabel1}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formAporteZonaLabel1}</label>
           <div className="grid grid-cols-3 gap-2">
             {[['alta', T[lang].urgencyAlta], ['media', T[lang].urgencyMedia], ['baja', T[lang].urgencyBaja]].map(([u, label]) => (
               <button key={u} type="button" onClick={() => setFormAporteZona({...formAporteZona, urgency: u})} className={`p-3 font-bold uppercase text-xs border-2 ${formAporteZona.urgency === u ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>
@@ -982,7 +982,7 @@ export default function App() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-black uppercase mb-2">{T[lang].formAporteZonaLabel2}</label>
+          <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formAporteZonaLabel2}</label>
           <textarea required rows="4" className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-red-500 resize-none" value={formAporteZona.situation} onChange={e => setFormAporteZona({...formAporteZona, situation: e.target.value})}></textarea>
         </div>
         <button disabled={isSubmitting} type="submit" className="w-full bg-red-600 text-white font-black text-lg p-5 mt-4 uppercase">
@@ -1023,7 +1023,7 @@ export default function App() {
       {showSuccessModal && selectedItem && (
         <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
           <div className="bg-white border-4 border-black p-6 w-full max-w-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] space-y-4 animate-slide-up">
-            <div className="flex items-center gap-2 text-blue-600 font-black uppercase text-lg border-b-4 border-black pb-2">
+            <div className="flex items-center gap-2 text-blue-600 font-black text-lg border-b-4 border-black pb-2">
               <Bell size={24} className="animate-bounce" />
               <span>{T[lang].modalTitle}</span>
             </div>
