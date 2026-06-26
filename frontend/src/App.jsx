@@ -315,6 +315,23 @@ export default function App() {
   const [historyLogs, setHistoryLogs] = useState([]);
   const [showFullHistory, setShowFullHistory] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false); // RESTAURADO: Estado del modal
+  const [installPrompt, setInstallPrompt] = useState(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setInstallPrompt(null);
+  };
 
   const swipeStartX = useRef(null);
   const swipeStartY = useRef(null);
@@ -628,6 +645,17 @@ export default function App() {
             </div>
           </div>
         </div>
+        {/* BOTÓN DE INSTALACIÓN PWA (Solo visible si el navegador lo permite) */}
+        {installPrompt && (
+          <div className="mt-6 border-t-2 border-gray-800 pt-4 animate-fade-in bg-black px-6 pb-6">
+            <button
+              onClick={handleInstallApp}
+              className="w-full bg-blue-600 text-white font-black p-3 hover:bg-blue-700 flex justify-center items-center gap-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(255,255,255,1)] transition-all"
+            >
+              📲 INSTALAR APP EN EL TELÉFONO
+            </button>
+          </div>
+        )}
         <div className="px-4 flex flex-col gap-4 -mt-6">
           <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
             <User size={32} className="mb-2" />
