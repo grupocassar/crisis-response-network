@@ -89,6 +89,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('personas');
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(25);
 
   const [incidentId, setIncidentId] = useState(null);
   const [personas, setPersonas] = useState([]);
@@ -165,6 +166,11 @@ export default function App() {
         .catch(err => console.error("Error cargando historial:", err));
     }
   }, [view, selectedItem]);
+
+  // Resetear el límite de 25 cada vez que el usuario busca o cambia de vista
+  useEffect(() => {
+    setVisibleCount(25);
+  }, [view, searchQuery]);
 
   const showNotification = (msg, isError = false) => {
     setNotification({ msg, isError });
@@ -441,6 +447,8 @@ export default function App() {
       return str && str.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
+    const displayed = filtered.slice(0, visibleCount);
+
     return (
       <div className="flex flex-col h-full animate-fade-in">
         <div className="bg-black p-4 sticky top-0 z-10 flex flex-col gap-3 shadow-lg">
@@ -474,11 +482,24 @@ export default function App() {
               )}
             </div>
           ) : (
-            filtered.map(item =>
-              isPersonas
-                ? <PersonaCard key={item.id} item={item} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
-                : <ZonaCard key={item.id} item={item} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
-            )
+            <>
+              {displayed.map(item =>
+                isPersonas
+                  ? <PersonaCard key={item.id} item={item} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
+                  : <ZonaCard key={item.id} item={item} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
+              )}
+              {filtered.length > visibleCount && (
+                <div className="pt-2 pb-6 px-1">
+                  <p className="text-center text-xs font-bold text-gray-500 mb-3">¿No encuentras a quien buscas? Usa la barra de búsqueda arriba para ahorrar datos.</p>
+                  <button
+                    onClick={() => setVisibleCount(prev => prev + 25)}
+                    className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 active:translate-y-0.5 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black flex justify-center items-center gap-2"
+                  >
+                    ⬇️ Cargar 25 reportes más
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
