@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft, Globe, ChevronDown, Users } from 'lucide-react';
+import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft, Globe, ChevronDown, Users, ImageOff } from 'lucide-react';
 
 // --- CREDENCIALES REALES SUPABASE ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
@@ -109,12 +109,14 @@ const T = {
     modalDesc: '¿Quieres recibir notificaciones automáticas en tu Telegram si hay cambios sobre',
     modalBtnTelegram: 'Sí, activar en Telegram',
     modalBtnSkip: 'No, ver en la web',
-    footerTitle: 'Hecho por venezolanos, para venezolanos 🇻🇪',
-    footerDesc: '"Encúentrame" es una plataforma ciudadana, gratuita y de código abierto. Optimizada para conexiones inestables y para no agotar la batería de tu celular en medio de la crisis.',
+    footerTitle: 'Unidos para salvar vidas 🌍',
+    footerDesc: 'Plataforma ciudadana de código abierto. Ingeniería de supervivencia diseñada para operar en redes colapsadas.',
+    footerTechTitle: 'Cero Imágenes (Carga Inmediata)',
+    footerTechDesc: 'Decisión estratégica. Eliminamos las fotos para garantizar que abra en milisegundos en redes 2G y ahorre batería. Los datos rápidos salvan vidas.',
     footerColabTitle: 'Esfuerzo Colaborativo',
     footerColabDesc: 'Si buscas a alguien, repórtalo. Si tienes información, actualiza su estado. Entre todos nos encontramos.',
     footerDataTitle: 'Privacidad Vital',
-    footerDataDesc: 'No comercializamos ni compartimos tu información. Este sistema existe con un único fin: salvar vidas.',
+    footerDataDesc: 'No comercializamos ni compartimos información. Este sistema existe con un único fin operativo.',
   },
   en: {
     homeTitle: 'FIND ME',
@@ -200,12 +202,14 @@ const T = {
     modalDesc: 'Do you want to receive automatic Telegram notifications if there are updates about',
     modalBtnTelegram: 'Yes, activate on Telegram',
     modalBtnSkip: 'No, view on web',
-    footerTitle: 'Made by Venezuelans, for Venezuelans 🇻🇪',
-    footerDesc: '"Find Me" is a free, open-source citizen platform. Optimized for unstable connections and to save your phone battery during the crisis.',
+    footerTitle: 'United to save lives 🌍',
+    footerDesc: 'Open-source citizen platform. Survival engineering designed to operate on collapsed networks.',
+    footerTechTitle: 'Zero Images (Instant Load)',
+    footerTechDesc: 'Strategic decision. We removed photos to ensure it opens in milliseconds on 2G networks and saves battery. Fast data saves lives.',
     footerColabTitle: 'Collaborative Effort',
-    footerColabDesc: 'If you are looking for someone, report them. If you have info, update their status. We find each other together.',
+    footerColabDesc: "If you're looking for someone, report them. If you have info, update their status. We find each other together.",
     footerDataTitle: 'Vital Privacy',
-    footerDataDesc: 'We do not sell or share your data. This entire system exists with a single purpose: to save lives.',
+    footerDataDesc: 'We do not sell or share data. This system exists for a single operational purpose.',
   }
 };
 
@@ -635,7 +639,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* FOOTER INSTITUCIONAL / HUMANO */}
+        {/* FOOTER INSTITUCIONAL / HUMANO (Ingeniería de Supervivencia) */}
         <div className="mx-4 mb-6 mt-4 bg-gray-200 border-4 border-gray-300 p-5 space-y-4">
           <h4 className="font-black text-lg uppercase tracking-tight text-gray-900 leading-tight">
             {T[lang].footerTitle}
@@ -643,7 +647,14 @@ export default function App() {
           <p className="text-sm font-medium text-gray-700 leading-snug">
             {T[lang].footerDesc}
           </p>
-          <div className="space-y-3 pt-2">
+          <div className="space-y-4 pt-2">
+            <div className="flex gap-3 items-start">
+              <ImageOff size={18} className="text-gray-900 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="block font-black text-sm uppercase text-gray-900">{T[lang].footerTechTitle}</span>
+                <span className="text-xs font-medium text-gray-700">{T[lang].footerTechDesc}</span>
+              </div>
+            </div>
             <div className="flex gap-3 items-start">
               <Users size={18} className="text-gray-900 mt-0.5 flex-shrink-0" />
               <div>
