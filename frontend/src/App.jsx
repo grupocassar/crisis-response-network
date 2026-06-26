@@ -316,6 +316,16 @@ export default function App() {
   const [showFullHistory, setShowFullHistory] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false); // RESTAURADO: Estado del modal
   const [installPrompt, setInstallPrompt] = useState(null);
+  const [showIosBanner, setShowIosBanner] = useState(() => {
+    return localStorage.getItem('iosBannerDismissed') !== '1';
+  });
+
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && window.navigator.standalone !== true;
+
+  const dismissIosBanner = () => {
+    localStorage.setItem('iosBannerDismissed', '1');
+    setShowIosBanner(false);
+  };
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -645,15 +655,32 @@ export default function App() {
             </div>
           </div>
         </div>
-        {/* BOTÓN DE INSTALACIÓN PWA (Solo visible si el navegador lo permite) */}
+        {/* INSTALAR — Android/Chrome: botón nativo */}
         {installPrompt && (
-          <div className="mt-6 border-t-2 border-gray-800 pt-4 animate-fade-in bg-black px-6 pb-6">
+          <div className="bg-black border-t-2 border-gray-800 px-6 pb-6 pt-4">
             <button
               onClick={handleInstallApp}
-              className="w-full bg-blue-600 text-white font-black p-3 hover:bg-blue-700 flex justify-center items-center gap-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(255,255,255,1)] transition-all"
+              className="w-full bg-white text-black font-black p-3 text-sm tracking-widest uppercase hover:bg-gray-100 border-2 border-white shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)] active:translate-y-0.5 active:shadow-none transition-all"
             >
-              📲 INSTALAR APP EN EL TELÉFONO
+              INSTALAR EN ESTE DISPOSITIVO
             </button>
+          </div>
+        )}
+        {/* INSTALAR — iOS/Safari: instrucción descartable */}
+        {isIos && showIosBanner && !installPrompt && (
+          <div className="bg-black border-t-2 border-gray-800 px-6 py-4">
+            <div className="flex items-start justify-between gap-4">
+              <p className="text-gray-400 text-[11px] leading-snug">
+                Para instalar abre en <span className="text-white font-bold">Safari</span>, toca Compartir y selecciona <span className="text-white font-bold">Añadir a pantalla de inicio</span>.
+              </p>
+              <button
+                onClick={dismissIosBanner}
+                className="text-gray-600 hover:text-white font-bold flex-shrink-0 leading-none text-base"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </div>
           </div>
         )}
         <div className="px-4 flex flex-col gap-4 -mt-6">
