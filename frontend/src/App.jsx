@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft } from 'lucide-react';
+import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft, Globe } from 'lucide-react';
 
 // --- CREDENCIALES REALES SUPABASE ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
@@ -22,6 +22,72 @@ const formatDateTime = (value) => new Date(value).toLocaleString('en-US', {
 });
 
 // ─────────────────────────────────────────────
+// DICCIONARIO i18n ULTRALIGERO
+// ─────────────────────────────────────────────
+const T = {
+  es: {
+    homeTitle: 'ENCUENTRAME',
+    homeSubtitle: 'Alertas en tiempo real: reporta a tu familiar y recibe notificaciones automáticas en tu Telegram al instante.',
+    statsReports: 'Registros',
+    statsMissing: 'Buscados',
+    statsSafe: 'A Salvo ✓',
+    persons: 'Personas',
+    personsDesc: 'Buscar familiares o reportar personas extraviadas / encontradas.',
+    zones: 'Focos de Rescate',
+    zonesDesc: 'Reportar derrumbes, colapsos, o solicitar rescate urgente.',
+    dashPersons: 'Búsqueda de Personas',
+    dashZones: 'Focos de Rescate',
+    searchPlaceholderP: 'Escribe nombre, apellido o cédula...',
+    searchPlaceholderZ: 'Buscar por sector o edificio...',
+    btnNewPerson: 'Crear Reporte de Persona',
+    btnNewZone: 'Reportar Foco de Rescate',
+    noResults: 'No encontramos coincidencias para',
+    noRecords: 'No hay registros aún.',
+    noResultsHint: 'Si sabes de esta persona, toca el botón azul de arriba para reportarla de una vez.',
+    loadMore: '⬇️ Cargar 25 reportes más',
+    loadMoreHint: '¿No encuentras a quien buscas? Usa la barra de búsqueda arriba para ahorrar datos.',
+    loading: 'Cargando base de datos...',
+    urgencyAlta: 'Alta',
+    urgencyMedia: 'Media',
+    urgencyBaja: 'Baja',
+    statusBuscado: 'Buscado',
+    statusASalvo: 'A Salvo',
+    statusHerido: 'Herido',
+    statusFallecido: 'Fallecido',
+  },
+  en: {
+    homeTitle: 'FIND ME',
+    homeSubtitle: 'Real-time alerts: report your relative and receive automatic Telegram notifications instantly.',
+    statsReports: 'Reports',
+    statsMissing: 'Missing',
+    statsSafe: 'Safe ✓',
+    persons: 'Persons',
+    personsDesc: 'Search for relatives or report missing / found people.',
+    zones: 'Rescue Zones',
+    zonesDesc: 'Report collapses, cave-ins, or request urgent rescue.',
+    dashPersons: 'Person Search',
+    dashZones: 'Rescue Zones',
+    searchPlaceholderP: 'Type name, ID or passport...',
+    searchPlaceholderZ: 'Search by sector or building...',
+    btnNewPerson: 'Create Person Report',
+    btnNewZone: 'Report Rescue Zone',
+    noResults: 'No matches found for',
+    noRecords: 'No records yet.',
+    noResultsHint: 'If you know this person, tap the blue button above to report them.',
+    loadMore: '⬇️ Load 25 more reports',
+    loadMoreHint: "Can't find who you're looking for? Use the search bar above to save data.",
+    loading: 'Loading database...',
+    urgencyAlta: 'High',
+    urgencyMedia: 'Medium',
+    urgencyBaja: 'Low',
+    statusBuscado: 'Missing',
+    statusASalvo: 'Safe',
+    statusHerido: 'Injured',
+    statusFallecido: 'Deceased',
+  }
+};
+
+// ─────────────────────────────────────────────
 // Componentes auxiliares FUERA de App
 // para evitar que React los destruya/recree en cada render
 // ─────────────────────────────────────────────
@@ -33,21 +99,26 @@ const TrustBadge = memo(({ level }) => {
   return <span className="bg-gray-200 text-gray-600 text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><AlertTriangle size={12}/> Civil (Nivel 0)</span>;
 });
 
-const StatusPill = memo(({ status }) => {
+const StatusPill = memo(({ status, lang = 'es' }) => {
   const s = status ? status.toLowerCase() : '';
   let bg = 'bg-gray-800';
   if (s === 'buscado') bg = 'bg-red-600';
   if (s === 'a_salvo') bg = 'bg-green-600';
   if (s === 'herido') bg = 'bg-orange-500';
   if (s === 'fallecido') bg = 'bg-black border border-gray-500';
-  return <span className={`${bg} text-white text-xs px-2 py-1 font-bold uppercase tracking-wide`}>{status.replace('_', ' ')}</span>;
+  let label = status.replace('_', ' ');
+  if (s === 'buscado') label = T[lang].statusBuscado;
+  if (s === 'a_salvo') label = T[lang].statusASalvo;
+  if (s === 'herido') label = T[lang].statusHerido;
+  if (s === 'fallecido') label = T[lang].statusFallecido;
+  return <span className={`${bg} text-white text-xs px-2 py-1 font-bold uppercase tracking-wide`}>{label}</span>;
 });
 
-const PersonaCard = memo(({ item, onClick }) => (
+const PersonaCard = memo(({ item, onClick, lang = 'es' }) => (
   <div onClick={onClick} className="bg-white border-2 border-black p-4 cursor-pointer active:scale-[0.98] transition-transform">
     <div className="flex justify-between items-start mb-3">
       <TrustBadge level={item.trust_level} />
-      <StatusPill status={item.status} />
+      <StatusPill status={item.status} lang={lang} />
     </div>
     <h3 className="text-lg font-black leading-tight mb-1 uppercase">{item.name_desc}</h3>
     {item.document_id && <p className="text-xs font-mono font-bold text-gray-600 mb-2">C.I / Pasaporte: {item.document_id}</p>}
@@ -61,12 +132,12 @@ const PersonaCard = memo(({ item, onClick }) => (
   </div>
 ));
 
-const ZonaCard = memo(({ item, onClick }) => (
+const ZonaCard = memo(({ item, onClick, lang = 'es' }) => (
   <div onClick={onClick} className="bg-white border-2 border-black p-4 cursor-pointer active:scale-[0.98] transition-transform">
     <div className="flex justify-between items-start mb-3">
       <TrustBadge level={item.trust_level} />
       <span className={`text-xs px-2 py-1 font-bold uppercase text-white ${item.urgency === 'alta' ? 'bg-red-600' : 'bg-orange-500'}`}>
-        Urgencia: {item.urgency}
+        {lang === 'en' ? 'Urgency' : 'Urgencia'}: {{ alta: T[lang].urgencyAlta, media: T[lang].urgencyMedia, baja: T[lang].urgencyBaja }[item.urgency] || item.urgency}
       </span>
     </div>
     <h3 className="text-lg font-black leading-tight mb-2 uppercase">{item.name}</h3>
@@ -90,6 +161,8 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState(null);
   const [visibleCount, setVisibleCount] = useState(25);
+  const [lang, setLang] = useState('es');
+  const toggleLang = () => setLang(l => l === 'es' ? 'en' : 'es');
 
   const [incidentId, setIncidentId] = useState(null);
   const [personas, setPersonas] = useState([]);
@@ -396,23 +469,28 @@ export default function App() {
       <div className="flex flex-col h-full gap-4 animate-fade-in">
         <div className="bg-black text-white p-6 pb-8">
           <div className="flex justify-between items-start">
-            <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">ENCUENTRAME</h2>
-            {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
+            <h2 className="text-3xl font-black uppercase tracking-tight mb-2 leading-none">{T[lang].homeTitle}</h2>
+            <div className="flex items-center gap-2">
+              {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
+              <button onClick={toggleLang} className="flex items-center gap-1 bg-gray-800 px-2 py-1 text-xs font-bold uppercase rounded active:scale-95 transition-transform">
+                <Globe size={14}/> {lang === 'es' ? 'EN' : 'ES'}
+              </button>
+            </div>
           </div>
-          <p className="text-gray-400 text-sm font-medium mt-1 mb-5">Alertas en tiempo real: reporta a tu familiar y recibe notificaciones automáticas en tu Telegram al instante.</p>
+          <p className="text-gray-400 text-sm font-medium mt-1 mb-5">{T[lang].homeSubtitle}</p>
 
           <div className="grid grid-cols-3 gap-2 border-t-2 border-gray-800 pt-4">
             <div className="flex flex-col">
               <span className="text-2xl font-black">{countTotal}</span>
-              <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Registros</span>
+              <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">{T[lang].statsReports}</span>
             </div>
             <div className="flex flex-col border-l-2 border-gray-800 pl-3">
               <span className="text-2xl font-black text-red-500">{countBuscados}</span>
-              <span className="text-[9px] text-red-500/80 uppercase font-bold tracking-widest">Buscados</span>
+              <span className="text-[9px] text-red-500/80 uppercase font-bold tracking-widest">{T[lang].statsMissing}</span>
             </div>
             <div className="flex flex-col border-l-2 border-gray-800 pl-3">
               <span className="text-2xl font-black text-green-500">{countASalvo}</span>
-              <span className="text-[9px] text-green-500/80 uppercase font-bold tracking-widest">A Salvo</span>
+              <span className="text-[9px] text-green-500/80 uppercase font-bold tracking-widest">{T[lang].statsSafe}</span>
             </div>
           </div>
         </div>
@@ -420,18 +498,18 @@ export default function App() {
           <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
             <User size={32} className="mb-2" />
             <div className="flex justify-between w-full items-center">
-              <h3 className="text-2xl font-black uppercase">Personas</h3>
+              <h3 className="text-2xl font-black uppercase">{T[lang].persons}</h3>
               <span className="bg-black text-white text-xs px-2 py-1 font-bold">{countTotal} regs</span>
             </div>
-            <p className="text-left text-sm text-gray-600 font-medium">Buscar familiares o reportar personas extraviadas / encontradas.</p>
+            <p className="text-left text-sm text-gray-600 font-medium">{T[lang].personsDesc}</p>
           </button>
           <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
             <Map size={32} className="mb-2" />
             <div className="flex justify-between w-full items-center">
-              <h3 className="text-2xl font-black uppercase">Focos de Rescate</h3>
+              <h3 className="text-2xl font-black uppercase">{T[lang].zones}</h3>
               <span className="bg-white text-red-600 text-xs px-2 py-1 font-black">{zonas.length} regs</span>
             </div>
-            <p className="text-left text-sm text-red-100 font-medium">Reportar derrumbes, colapsos, o solicitar rescate urgente.</p>
+            <p className="text-left text-sm text-red-100 font-medium">{T[lang].zonesDesc}</p>
           </button>
         </div>
       </div>
@@ -458,44 +536,47 @@ export default function App() {
             </button>
             <h2 className="text-xl font-black uppercase flex items-center gap-2 flex-1 truncate">
               {isPersonas ? <User size={20}/> : <Map size={20}/>}
-              {isPersonas ? 'Búsqueda de Personas' : 'Focos de Rescate'}
+              {isPersonas ? T[lang].dashPersons : T[lang].dashZones}
             </h2>
-            {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500" />}
+            <div className="flex items-center gap-2">
+              <button onClick={toggleLang} className="flex items-center gap-1 bg-gray-800 px-2 py-1 text-xs font-bold uppercase rounded active:scale-95 transition-transform">
+                <Globe size={12}/> {lang === 'es' ? 'EN' : 'ES'}
+              </button>
+              {isSyncing && <RefreshCw size={14} className="animate-spin text-gray-500" />}
+            </div>
           </div>
-          <input type="text" placeholder={isPersonas ? "Escribe nombre, apellido o cédula..." : "Buscar por sector o edificio..."} className="w-full p-3 text-black font-medium focus:outline-none rounded-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          <input type="text" placeholder={isPersonas ? T[lang].searchPlaceholderP : T[lang].searchPlaceholderZ} className="w-full p-3 text-black font-medium focus:outline-none rounded-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')} className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2">
-            <Plus size={18}/> {isPersonas ? 'Crear Reporte de Persona' : 'Reportar Foco de Rescate'}
+            <Plus size={18}/> {isPersonas ? T[lang].btnNewPerson : T[lang].btnNewZone}
           </button>
         </div>
         <div className="p-4 space-y-4 bg-gray-100 min-h-screen">
           {initialLoading ? (
-            <p className="text-center font-bold text-gray-500 py-10 animate-pulse">Cargando base de datos...</p>
+            <p className="text-center font-bold text-gray-500 py-10 animate-pulse">{T[lang].loading}</p>
           ) : filtered.length === 0 ? (
             <div className="text-center py-10 px-4">
               <p className="font-bold text-gray-500 mb-2">
-                {searchQuery ? `No encontramos coincidencias para "${searchQuery}".` : "No hay registros aún."}
+                {searchQuery ? `${T[lang].noResults} "${searchQuery}".` : T[lang].noRecords}
               </p>
               {searchQuery && (
-                <p className="text-sm text-gray-600 font-medium">
-                  Si sabes de esta persona, toca el botón azul de arriba para reportarla de una vez.
-                </p>
+                <p className="text-sm text-gray-600 font-medium">{T[lang].noResultsHint}</p>
               )}
             </div>
           ) : (
             <>
               {displayed.map(item =>
                 isPersonas
-                  ? <PersonaCard key={item.id} item={item} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
-                  : <ZonaCard key={item.id} item={item} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
+                  ? <PersonaCard key={item.id} item={item} lang={lang} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
+                  : <ZonaCard key={item.id} item={item} lang={lang} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
               )}
               {filtered.length > visibleCount && (
                 <div className="pt-2 pb-6 px-1">
-                  <p className="text-center text-xs font-bold text-gray-500 mb-3">¿No encuentras a quien buscas? Usa la barra de búsqueda arriba para ahorrar datos.</p>
+                  <p className="text-center text-xs font-bold text-gray-500 mb-3">{T[lang].loadMoreHint}</p>
                   <button
                     onClick={() => setVisibleCount(prev => prev + 25)}
                     className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 active:translate-y-0.5 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black flex justify-center items-center gap-2"
                   >
-                    ⬇️ Cargar 25 reportes más
+                    {T[lang].loadMore}
                   </button>
                 </div>
               )}
