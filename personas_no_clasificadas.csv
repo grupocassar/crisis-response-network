@@ -1,0 +1,2 @@
+id_diagnostico,estado_http,endpoint_probado,posible_causa,fecha_intento
+ERROR_API_OFICIAL,HTTP 403 - Forbidden,https://desaparecidos-terremoto-api.theempire.tech/api/personas?page=1&pageSize=100,"Token inválido, expirado, o permisos insuficientes en la API.",2026-06-26T16:50:04.493Z

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-06-26T17:13:27.700Z",
+  "total_registros": 1,
+  "desaparecidos": 0,
+  "no_desaparecidos": 0,
+  "no_clasificados": 1,
+  "archivos": {
+    "desaparecidos": "personas_desaparecidas.csv",
+    "no_desaparecidos": "personas_no_desaparecidas.csv",
+    "no_clasificados": "personas_no_clasificadas.csv"
+  }
+}

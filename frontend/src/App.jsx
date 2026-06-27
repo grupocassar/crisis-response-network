@@ -303,7 +303,7 @@ export default function App() {
   const [incidentId, setIncidentId] = useState(null);
   const [personas, setPersonas] = useState([]);
   const [zonas, setZonas] = useState([]);
-  const [heridosCount, setHeridosCount] = useState(0);
+  const [stats, setStats] = useState({ total: 69570, buscados: 60665, a_salvo: 5416, heridos: 3291 });
   const [selectedItem, setSelectedItem] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -368,17 +368,14 @@ export default function App() {
     if (!silent) setInitialLoading(true);
     setIsSyncing(true);
     try {
-      const [resP, resZ, resHeridos] = await Promise.all([
+      const [resP, resZ] = await Promise.all([
         fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&order=created_at.desc`, { headers: HEADERS }),
         fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}&order=created_at.desc`, { headers: HEADERS }),
-        fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&status=eq.herido&select=id`, { headers: HEADERS })
       ]);
       const dataP = await resP.json();
       const dataZ = await resZ.json();
-      const dataHeridos = await resHeridos.json();
       setPersonas(Array.isArray(dataP) ? dataP : []);
       setZonas(Array.isArray(dataZ) ? dataZ : []);
-      setHeridosCount(Array.isArray(dataHeridos) ? dataHeridos.length : 0);
     } catch (err) {
       console.error("Error obteniendo datos:", err);
     } finally {
@@ -387,12 +384,27 @@ export default function App() {
     }
   }, [incidentId]);
 
-  useEffect(() => { if (incidentId) fetchData(); }, [incidentId, fetchData]);
+  const fetchStats = useCallback(async () => {
+    if (!incidentId) return;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_incident_stats`, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify({ p_incident_id: incidentId })
+      });
+      const data = await res.json();
+      if (data && data.total !== undefined) setStats(data);
+    } catch (err) {
+      console.error('Error cargando estadísticas:', err);
+    }
+  }, [incidentId]);
+
+  useEffect(() => { if (incidentId) { fetchData(); fetchStats(); } }, [incidentId, fetchData, fetchStats]);
   useEffect(() => {
     if (!incidentId) return;
-    const interval = setInterval(() => fetchData(true), 30000);
+    const interval = setInterval(() => { fetchData(true); fetchStats(); }, 30000);
     return () => clearInterval(interval);
-  }, [incidentId, fetchData]);
+  }, [incidentId, fetchData, fetchStats]);
 
   // Cargar historial al abrir detalles de perfil
   useEffect(() => {
@@ -628,11 +640,6 @@ export default function App() {
   // ─────────────────────────────────────────────
 
   const HomeView = () => {
-    const countTotal = personas.length;
-    const countBuscados = personas.filter(p => p.status === 'buscado').length;
-    const countASalvo = personas.filter(p => p.status === 'a_salvo').length;
-    const countHeridos = heridosCount;
-
     return (
       <div className="flex flex-col h-full gap-4 animate-fade-in">
         <div className="bg-black text-white p-6 pb-8">
@@ -649,19 +656,19 @@ export default function App() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border-t-2 border-gray-800 pt-4">
             <div className="flex flex-col">
-              <span className="text-2xl font-black">{countTotal}</span>
+              <span className="text-2xl font-black">{stats.total.toLocaleString()}</span>
               <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">{T[lang].statsReports}</span>
             </div>
             <div className="flex flex-col border-l-2 border-gray-800 pl-3">
-              <span className="text-2xl font-black text-red-500">{countBuscados}</span>
+              <span className="text-2xl font-black text-red-500">{stats.buscados.toLocaleString()}</span>
               <span className="text-[9px] text-red-500/80 uppercase font-bold tracking-widest">{T[lang].statsMissing}</span>
             </div>
             <div className="flex flex-col border-t-2 border-gray-800 pt-3 sm:pt-0 sm:border-t-0 sm:border-l-2 sm:pl-3">
-              <span className="text-2xl font-black text-green-500">{countASalvo}</span>
+              <span className="text-2xl font-black text-green-500">{stats.a_salvo.toLocaleString()}</span>
               <span className="text-[9px] text-green-500/80 uppercase font-bold tracking-widest">{T[lang].statsSafe}</span>
             </div>
             <div className="flex flex-col border-l-2 border-t-2 border-gray-800 pl-3 pt-3 sm:pt-0 sm:border-t-0">
-              <span className="text-2xl font-black text-orange-500">{countHeridos}</span>
+              <span className="text-2xl font-black text-orange-500">{stats.heridos.toLocaleString()}</span>
               <span className="text-[9px] text-orange-500/80 uppercase font-bold tracking-widest">{T[lang].statsInjured}</span>
             </div>
           </div>
@@ -699,7 +706,7 @@ export default function App() {
             <User size={32} className="mb-2" />
             <div className="flex justify-between w-full items-center">
               <h3 className="text-2xl font-black tracking-tight">{T[lang].persons}</h3>
-              <span className="bg-black text-white text-xs px-2 py-1 font-bold">{countTotal} regs</span>
+              <span className="bg-black text-white text-xs px-2 py-1 font-bold">{stats.total.toLocaleString()} regs</span>
             </div>
             <p className="text-left text-sm text-gray-600 font-medium">{T[lang].personsDesc}</p>
           </button>
