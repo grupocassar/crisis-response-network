@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft, Globe, ChevronDown, Users, ImageOff } from 'lucide-react';
+import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft, ChevronRight, Globe, ChevronDown, Users, ImageOff } from 'lucide-react';
 
 // --- CREDENCIALES REALES SUPABASE ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
@@ -773,13 +773,17 @@ export default function App() {
           </div>
         )}
         <div className="px-4 flex flex-col gap-4 -mt-6">
-          <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
+          <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[3px] active:translate-y-[3px]">
             <User size={32} className="mb-2" />
             <div className="flex justify-between w-full items-center">
               <h3 className="text-2xl font-black tracking-tight">{T[lang].persons}</h3>
               <span className="bg-black text-white text-xs px-2 py-1 font-bold">{stats.total.toLocaleString()} regs</span>
             </div>
             <p className="text-left text-sm text-gray-600 font-medium">{T[lang].personsDesc}</p>
+            <div className="w-full mt-1 pt-3 border-t-2 border-black flex items-center justify-between">
+              <span className="font-black text-xs uppercase tracking-[0.15em]">{lang === 'es' ? 'BUSCAR AHORA' : 'SEARCH NOW'}</span>
+              <ChevronRight size={18} strokeWidth={3} />
+            </div>
           </button>
           {/* Focos de Rescate — oculto por decisión estratégica de UX (sin uso activo aún)
           <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
