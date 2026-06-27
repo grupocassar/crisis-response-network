@@ -350,6 +350,8 @@ export default function App() {
   const swipeStartX = useRef(null);
   const swipeStartY = useRef(null);
   const isScrolling = useRef(null);
+  const searchQueryRef = useRef(searchQuery);
+  useEffect(() => { searchQueryRef.current = searchQuery; }, [searchQuery]);
 
   useEffect(() => {
     const initApp = async () => {
@@ -407,7 +409,7 @@ export default function App() {
   useEffect(() => { if (incidentId) { fetchData(); fetchStats(); } }, [incidentId, fetchData, fetchStats]);
   useEffect(() => {
     if (!incidentId) return;
-    const interval = setInterval(() => { fetchData(true); fetchStats(); }, 30000);
+    const interval = setInterval(() => { if (!searchQueryRef.current.trim()) fetchData(true); fetchStats(); }, 30000);
     return () => clearInterval(interval);
   }, [incidentId, fetchData, fetchStats]);
 
