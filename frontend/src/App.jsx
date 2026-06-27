@@ -296,13 +296,14 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('personas');
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState(null);
-  const [visibleCount, setVisibleCount] = useState(25);
   const [lang, setLang] = useState('es');
   const toggleLang = () => setLang(l => l === 'es' ? 'en' : 'es');
 
   const [incidentId, setIncidentId] = useState(null);
   const [personas, setPersonas] = useState([]);
   const [zonas, setZonas] = useState([]);
+  const [hasMorePersonas, setHasMorePersonas] = useState(false);
+  const [hasMoreZonas, setHasMoreZonas] = useState(false);
   const [stats, setStats] = useState({ total: 69570, buscados: 60665, a_salvo: 5416, heridos: 3291 });
   const [selectedItem, setSelectedItem] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -369,13 +370,17 @@ export default function App() {
     setIsSyncing(true);
     try {
       const [resP, resZ] = await Promise.all([
-        fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&order=created_at.desc`, { headers: HEADERS }),
-        fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}&order=created_at.desc`, { headers: HEADERS }),
+        fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&order=created_at.desc&limit=50`, { headers: HEADERS }),
+        fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}&order=created_at.desc&limit=50`, { headers: HEADERS }),
       ]);
       const dataP = await resP.json();
       const dataZ = await resZ.json();
-      setPersonas(Array.isArray(dataP) ? dataP : []);
-      setZonas(Array.isArray(dataZ) ? dataZ : []);
+      const listP = Array.isArray(dataP) ? dataP : [];
+      const listZ = Array.isArray(dataZ) ? dataZ : [];
+      setPersonas(listP);
+      setZonas(listZ);
+      setHasMorePersonas(listP.length === 50);
+      setHasMoreZonas(listZ.length === 50);
     } catch (err) {
       console.error("Error obteniendo datos:", err);
     } finally {
@@ -419,10 +424,76 @@ export default function App() {
     }
   }, [view, selectedItem]);
 
-  // Resetear el límite de 25 cada vez que el usuario busca o cambia de vista
+  // Búsqueda server-side con debounce de 300 ms
   useEffect(() => {
-    setVisibleCount(25);
-  }, [view, searchQuery]);
+    if (!incidentId) return;
+    const term = searchQuery.trim();
+    const t = setTimeout(async () => {
+      const searchP = term
+        ? `&or=(name_desc.ilike.*${encodeURIComponent(term)}*,document_id.ilike.*${encodeURIComponent(term)}*)`
+        : '';
+      const searchZ = term ? `&name=ilike.*${encodeURIComponent(term)}*` : '';
+      if (term) setInitialLoading(true); else setIsSyncing(true);
+      try {
+        const [resP, resZ] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}${searchP}&order=created_at.desc&limit=50`, { headers: HEADERS }),
+          fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}${searchZ}&order=created_at.desc&limit=50`, { headers: HEADERS }),
+        ]);
+        const dataP = await resP.json();
+        const dataZ = await resZ.json();
+        const listP = Array.isArray(dataP) ? dataP : [];
+        const listZ = Array.isArray(dataZ) ? dataZ : [];
+        setPersonas(listP);
+        setZonas(listZ);
+        setHasMorePersonas(listP.length === 50);
+        setHasMoreZonas(listZ.length === 50);
+      } catch (err) {
+        console.error('Error en búsqueda:', err);
+      } finally {
+        setInitialLoading(false);
+        setIsSyncing(false);
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchQuery, incidentId]);
+
+  const loadMorePersonas = useCallback(async () => {
+    if (!incidentId) return;
+    const term = searchQuery.trim();
+    const searchP = term
+      ? `&or=(name_desc.ilike.*${encodeURIComponent(term)}*,document_id.ilike.*${encodeURIComponent(term)}*)`
+      : '';
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}${searchP}&order=created_at.desc&limit=50&offset=${personas.length}`,
+        { headers: HEADERS }
+      );
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      setPersonas(prev => [...prev, ...list]);
+      setHasMorePersonas(list.length === 50);
+    } catch (err) {
+      console.error('Error cargando más personas:', err);
+    }
+  }, [incidentId, personas.length, searchQuery]);
+
+  const loadMoreZonas = useCallback(async () => {
+    if (!incidentId) return;
+    const term = searchQuery.trim();
+    const searchZ = term ? `&name=ilike.*${encodeURIComponent(term)}*` : '';
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}${searchZ}&order=created_at.desc&limit=50&offset=${zonas.length}`,
+        { headers: HEADERS }
+      );
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      setZonas(prev => [...prev, ...list]);
+      setHasMoreZonas(list.length === 50);
+    } catch (err) {
+      console.error('Error cargando más zonas:', err);
+    }
+  }, [incidentId, zonas.length, searchQuery]);
 
   const showNotification = (msg, isError = false) => {
     setNotification({ msg, isError });
@@ -767,13 +838,8 @@ export default function App() {
   const DashboardView = ({ type }) => {
     const isPersonas = type === 'personas';
     const data = isPersonas ? personas : zonas;
-    const filtered = data.filter(item => {
-      if (!searchQuery) return true;
-      const str = isPersonas ? `${item.name_desc} ${item.document_id || ''}` : item.name;
-      return str && str.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-
-    const displayed = filtered.slice(0, visibleCount);
+    const hasMore = isPersonas ? hasMorePersonas : hasMoreZonas;
+    const loadMore = isPersonas ? loadMorePersonas : loadMoreZonas;
 
     return (
       <div className="flex flex-col h-full animate-fade-in">
@@ -801,7 +867,7 @@ export default function App() {
         <div className="p-4 space-y-4 bg-gray-100 min-h-screen">
           {initialLoading ? (
             <p className="text-center font-bold text-gray-500 py-10 animate-pulse">{T[lang].loading}</p>
-          ) : filtered.length === 0 ? (
+          ) : data.length === 0 ? (
             <div className="text-center py-10 px-4">
               <p className="font-bold text-gray-500 mb-2">
                 {searchQuery ? `${T[lang].noResults} "${searchQuery}".` : T[lang].noRecords}
@@ -812,16 +878,16 @@ export default function App() {
             </div>
           ) : (
             <>
-              {displayed.map(item =>
+              {data.map(item =>
                 isPersonas
                   ? <PersonaCard key={item.id} item={item} lang={lang} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
                   : <ZonaCard key={item.id} item={item} lang={lang} onClick={() => { setSelectedItem(item); setActiveTab(type); setView('detail'); }} />
               )}
-              {filtered.length > visibleCount && (
+              {hasMore && (
                 <div className="pt-2 pb-6 px-1">
                   <p className="text-center text-xs font-bold text-gray-500 mb-3">{T[lang].loadMoreHint}</p>
                   <button 
-                    onClick={() => setVisibleCount(prev => prev + 25)} 
+                    onClick={loadMore}
                     className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black flex justify-center items-center gap-2"
                   >
                     <ChevronDown size={20} /> {T[lang].loadMore}
