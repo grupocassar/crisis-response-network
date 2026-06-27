@@ -424,10 +424,11 @@ export default function App() {
     }
   }, [view, selectedItem]);
 
-  // Búsqueda server-side con debounce de 300 ms
+  // Búsqueda server-side con debounce de 800 ms
   useEffect(() => {
     if (!incidentId) return;
     const term = searchQuery.trim();
+    const controller = new AbortController();
     const t = setTimeout(async () => {
       const searchP = term
         ? `&or=(name_desc.ilike.*${encodeURIComponent(term)}*,document_id.ilike.*${encodeURIComponent(term)}*)`
@@ -436,8 +437,8 @@ export default function App() {
       if (term) setInitialLoading(true); else setIsSyncing(true);
       try {
         const [resP, resZ] = await Promise.all([
-          fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}${searchP}&order=created_at.desc&limit=50`, { headers: HEADERS }),
-          fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}${searchZ}&order=created_at.desc&limit=50`, { headers: HEADERS }),
+          fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}${searchP}&order=created_at.desc&limit=50`, { headers: HEADERS, signal: controller.signal }),
+          fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}${searchZ}&order=created_at.desc&limit=50`, { headers: HEADERS, signal: controller.signal }),
         ]);
         const dataP = await resP.json();
         const dataZ = await resZ.json();
@@ -448,13 +449,15 @@ export default function App() {
         setHasMorePersonas(listP.length === 50);
         setHasMoreZonas(listZ.length === 50);
       } catch (err) {
-        console.error('Error en búsqueda:', err);
+        if (err.name !== 'AbortError') console.error('Error en búsqueda:', err);
       } finally {
-        setInitialLoading(false);
-        setIsSyncing(false);
+        if (!controller.signal.aborted) {
+          setInitialLoading(false);
+          setIsSyncing(false);
+        }
       }
-    }, 300);
-    return () => clearTimeout(t);
+    }, 800);
+    return () => { clearTimeout(t); controller.abort(); };
   }, [searchQuery, incidentId]);
 
   const loadMorePersonas = useCallback(async () => {
