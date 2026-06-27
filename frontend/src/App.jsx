@@ -781,6 +781,7 @@ export default function App() {
             </div>
             <p className="text-left text-sm text-gray-600 font-medium">{T[lang].personsDesc}</p>
           </button>
+          {/* Focos de Rescate — oculto por decisión estratégica de UX (sin uso activo aún)
           <button onClick={() => setView('zonas')} className="bg-red-600 text-white p-6 border-4 border-black hover:bg-red-700 flex flex-col items-start gap-2 transition-transform active:scale-[0.98]">
             <Map size={32} className="mb-2" />
             <div className="flex justify-between w-full items-center">
@@ -789,6 +790,7 @@ export default function App() {
             </div>
             <p className="text-left text-sm text-red-100 font-medium">{T[lang].zonesDesc}</p>
           </button>
+          */}
         </div>
 
         {/* FOOTER INSTITUCIONAL / HUMANO (Ingeniería de Supervivencia) */}
