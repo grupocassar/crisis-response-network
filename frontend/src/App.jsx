@@ -309,6 +309,8 @@ export default function App() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
 
   const [formPersona, setFormPersona] = useState({ nombreDesc: '', documento: '', estado: 'buscado', ubicacion: '', contacto: '' });
   const [formZona, setFormZona] = useState({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
@@ -465,6 +467,43 @@ export default function App() {
     }, 800);
     return () => { clearTimeout(t); controller.abort(); };
   }, [searchQuery, incidentId]);
+
+  // Soft suggestion: detectar posibles duplicados al crear nueva persona
+  useEffect(() => {
+    if (view !== 'form_persona') {
+      setSuggestions([]);
+      setIsSuggestionsLoading(false);
+      return;
+    }
+    const name = formPersona.nombreDesc.trim();
+    if (name.length < 4) {
+      setSuggestions([]);
+      setIsSuggestionsLoading(false);
+      return;
+    }
+    if (!incidentId) return;
+    const controller = new AbortController();
+    setIsSuggestionsLoading(true);
+    const t = setTimeout(async () => {
+      try {
+        const normalized = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const words = normalized.split(/\s+/).filter(w => w.length > 0);
+        const conditions = words.map(w => `search_name.ilike.*${encodeURIComponent(w)}*`).join(',');
+        const nameQuery = words.length > 1 ? `and(${conditions})` : conditions;
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&or=(${nameQuery})&order=status_weight.asc,created_at.desc&limit=3`,
+          { headers: HEADERS, signal: controller.signal }
+        );
+        const data = await res.json();
+        setSuggestions(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (err.name !== 'AbortError') setSuggestions([]);
+      } finally {
+        if (!controller.signal.aborted) setIsSuggestionsLoading(false);
+      }
+    }, 1000);
+    return () => { clearTimeout(t); controller.abort(); };
+  }, [formPersona.nombreDesc, view, incidentId]);
 
   const loadMorePersonas = useCallback(async () => {
     if (!incidentId) return;
@@ -1029,6 +1068,35 @@ export default function App() {
           <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formPersonaLabel1}</label>
           <input required type="text" placeholder={T[lang].formPersonaPlaceholder1} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500" value={formPersona.nombreDesc} onChange={e => setFormPersona(f => ({...f, nombreDesc: e.target.value}))} />
         </div>
+        {(isSuggestionsLoading || suggestions.length > 0) && (
+          <div className="border-2 border-gray-300 bg-gray-50 p-3 -mt-3">
+            <p className="text-[10px] font-black text-gray-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+              <AlertTriangle size={11} className="text-yellow-600 flex-shrink-0" />
+              Posibles coincidencias — ¿Es alguna de estas personas?
+            </p>
+            {isSuggestionsLoading ? (
+              <p className="text-xs text-gray-400 font-mono py-1">Buscando...</p>
+            ) : (
+              <div className="space-y-1.5">
+                {suggestions.map(s => (
+                  <div key={s.id} className="flex items-center gap-2 bg-white border border-gray-200 px-2 py-2">
+                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-800 truncate flex-1">{s.name_desc}</span>
+                      <StatusPill status={s.status} lang={lang} />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setSuggestions([]); setSearchQuery(s.name_desc); setView('personas'); }}
+                      className="text-xs font-black text-blue-600 uppercase border-2 border-blue-600 px-2 py-1 flex-shrink-0 hover:bg-blue-600 hover:text-white transition-colors"
+                    >
+                      Ver
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <div>
           <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formPersonaLabel2}</label>
           <input type="text" placeholder={T[lang].formPersonaPlaceholder2} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.documento} onChange={e => setFormPersona(f => ({...f, documento: e.target.value}))} />
