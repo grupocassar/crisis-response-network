@@ -1070,9 +1070,8 @@ export default function App() {
         </div>
         {(isSuggestionsLoading || suggestions.length > 0) && (
           <div className="border-2 border-gray-300 bg-gray-50 p-3 -mt-3">
-            <p className="text-[10px] font-black text-gray-600 uppercase tracking-wide mb-2 flex items-center gap-1">
-              <AlertTriangle size={11} className="text-yellow-600 flex-shrink-0" />
-              Posibles coincidencias — ¿Es alguna de estas personas?
+            <p className="text-[10px] font-black text-gray-600 mb-2">
+              ¿Es a quien buscas? Toca 'Ver', o ignora y continúa.
             </p>
             {isSuggestionsLoading ? (
               <p className="text-xs text-gray-400 font-mono py-1">Buscando...</p>
