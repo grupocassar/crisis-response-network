@@ -781,8 +781,8 @@ export default function App() {
             </div>
             <p className="text-left text-sm text-gray-600 font-medium">{T[lang].personsDesc}</p>
             <div className="w-full mt-1 pt-3 border-t-2 border-black flex items-center justify-between">
-              <span className="font-black text-xs uppercase tracking-[0.15em]">{lang === 'es' ? 'BUSCAR AHORA' : 'SEARCH NOW'}</span>
-              <ChevronRight size={18} strokeWidth={3} />
+              <span className="font-black text-xs uppercase tracking-[0.15em] text-blue-600">{lang === 'es' ? 'BUSCAR AHORA' : 'SEARCH NOW'}</span>
+              <ChevronRight size={18} strokeWidth={3} className="text-blue-600" />
             </div>
           </button>
           {/* Focos de Rescate — oculto por decisión estratégica de UX (sin uso activo aún)
