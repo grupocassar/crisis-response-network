@@ -372,7 +372,7 @@ export default function App() {
     setIsSyncing(true);
     try {
       const [resP, resZ] = await Promise.all([
-        fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&order=created_at.desc&limit=50`, { headers: HEADERS }),
+        fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&order=status_weight.asc,created_at.desc&limit=50`, { headers: HEADERS }),
         fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}&order=created_at.desc&limit=50`, { headers: HEADERS }),
       ]);
       const dataP = await resP.json();
@@ -443,7 +443,7 @@ export default function App() {
       if (term) setInitialLoading(true); else setIsSyncing(true);
       try {
         const [resP, resZ] = await Promise.all([
-          fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}${searchP}&order=created_at.desc&limit=50`, { headers: HEADERS, signal: controller.signal }),
+          fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}${searchP}&order=status_weight.asc,created_at.desc&limit=50`, { headers: HEADERS, signal: controller.signal }),
           fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}${searchZ}&order=created_at.desc&limit=50`, { headers: HEADERS, signal: controller.signal }),
         ]);
         const dataP = await resP.json();
@@ -478,7 +478,7 @@ export default function App() {
       : '';
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}${searchP}&order=created_at.desc&limit=50&offset=${personas.length}`,
+        `${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}${searchP}&order=status_weight.asc,created_at.desc&limit=50&offset=${personas.length}`,
         { headers: HEADERS }
       );
       const data = await res.json();
