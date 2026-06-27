@@ -31,6 +31,7 @@ const T = {
     statsReports: 'Registros',
     statsMissing: 'Buscados',
     statsSafe: 'A Salvo ✓',
+    statsInjured: 'Heridos',
     persons: 'Personas',
     personsDesc: 'Buscar familiares o reportar personas extraviadas / encontradas.',
     zones: 'Focos de Rescate',
@@ -128,6 +129,7 @@ const T = {
     statsReports: 'Reports',
     statsMissing: 'Missing',
     statsSafe: 'Safe ✓',
+    statsInjured: 'Injured',
     persons: 'Persons',
     personsDesc: 'Search for relatives or report missing / found people.',
     zones: 'Rescue Zones',
@@ -301,6 +303,7 @@ export default function App() {
   const [incidentId, setIncidentId] = useState(null);
   const [personas, setPersonas] = useState([]);
   const [zonas, setZonas] = useState([]);
+  const [heridosCount, setHeridosCount] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -365,14 +368,17 @@ export default function App() {
     if (!silent) setInitialLoading(true);
     setIsSyncing(true);
     try {
-      const [resP, resZ] = await Promise.all([
+      const [resP, resZ, resHeridos] = await Promise.all([
         fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&order=created_at.desc`, { headers: HEADERS }),
-        fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}&order=created_at.desc`, { headers: HEADERS })
+        fetch(`${SUPABASE_URL}/rest/v1/zones?incident_id=eq.${incidentId}&order=created_at.desc`, { headers: HEADERS }),
+        fetch(`${SUPABASE_URL}/rest/v1/persons?incident_id=eq.${incidentId}&status=eq.herido&select=id`, { headers: HEADERS })
       ]);
       const dataP = await resP.json();
       const dataZ = await resZ.json();
+      const dataHeridos = await resHeridos.json();
       setPersonas(Array.isArray(dataP) ? dataP : []);
       setZonas(Array.isArray(dataZ) ? dataZ : []);
+      setHeridosCount(Array.isArray(dataHeridos) ? dataHeridos.length : 0);
     } catch (err) {
       console.error("Error obteniendo datos:", err);
     } finally {
@@ -625,6 +631,7 @@ export default function App() {
     const countTotal = personas.length;
     const countBuscados = personas.filter(p => p.status === 'buscado').length;
     const countASalvo = personas.filter(p => p.status === 'a_salvo').length;
+    const countHeridos = heridosCount;
 
     return (
       <div className="flex flex-col h-full gap-4 animate-fade-in">
@@ -640,7 +647,7 @@ export default function App() {
           </div>
           <p className="text-gray-400 text-sm font-medium mt-1 mb-5">{T[lang].homeSubtitle}</p>
 
-          <div className="grid grid-cols-3 gap-2 border-t-2 border-gray-800 pt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border-t-2 border-gray-800 pt-4">
             <div className="flex flex-col">
               <span className="text-2xl font-black">{countTotal}</span>
               <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">{T[lang].statsReports}</span>
@@ -649,9 +656,13 @@ export default function App() {
               <span className="text-2xl font-black text-red-500">{countBuscados}</span>
               <span className="text-[9px] text-red-500/80 uppercase font-bold tracking-widest">{T[lang].statsMissing}</span>
             </div>
-            <div className="flex flex-col border-l-2 border-gray-800 pl-3">
+            <div className="flex flex-col border-t-2 border-gray-800 pt-3 sm:pt-0 sm:border-t-0 sm:border-l-2 sm:pl-3">
               <span className="text-2xl font-black text-green-500">{countASalvo}</span>
               <span className="text-[9px] text-green-500/80 uppercase font-bold tracking-widest">{T[lang].statsSafe}</span>
+            </div>
+            <div className="flex flex-col border-l-2 border-t-2 border-gray-800 pl-3 pt-3 sm:pt-0 sm:border-t-0">
+              <span className="text-2xl font-black text-orange-500">{countHeridos}</span>
+              <span className="text-[9px] text-orange-500/80 uppercase font-bold tracking-widest">{T[lang].statsInjured}</span>
             </div>
           </div>
         </div>
