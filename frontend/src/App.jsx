@@ -431,8 +431,11 @@ export default function App() {
     const controller = new AbortController();
     const t = setTimeout(async () => {
       const normalizedTerm = term.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const words = normalizedTerm.split(/\s+/).filter(w => w.length > 0);
+      const nameConditions = words.map(w => `search_name.ilike.*${encodeURIComponent(w)}*`).join(',');
+      const nameQuery = words.length > 1 ? `and(${nameConditions})` : nameConditions;
       const searchP = term
-        ? `&or=(search_name.ilike.*${encodeURIComponent(normalizedTerm)}*,document_id.ilike.*${encodeURIComponent(term)}*)`
+        ? `&or=(${nameQuery},document_id.ilike.*${encodeURIComponent(term)}*)`
         : '';
       const searchZ = term ? `&name=ilike.*${encodeURIComponent(term)}*` : '';
       if (term) setInitialLoading(true); else setIsSyncing(true);
@@ -465,8 +468,11 @@ export default function App() {
     if (!incidentId) return;
     const term = searchQuery.trim();
     const normalizedTerm = term.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const words = normalizedTerm.split(/\s+/).filter(w => w.length > 0);
+    const nameConditions = words.map(w => `search_name.ilike.*${encodeURIComponent(w)}*`).join(',');
+    const nameQuery = words.length > 1 ? `and(${nameConditions})` : nameConditions;
     const searchP = term
-      ? `&or=(search_name.ilike.*${encodeURIComponent(normalizedTerm)}*,document_id.ilike.*${encodeURIComponent(term)}*)`
+      ? `&or=(${nameQuery},document_id.ilike.*${encodeURIComponent(term)}*)`
       : '';
     try {
       const res = await fetch(
