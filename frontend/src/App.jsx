@@ -430,8 +430,9 @@ export default function App() {
     const term = searchQuery.trim();
     const controller = new AbortController();
     const t = setTimeout(async () => {
+      const normalizedTerm = term.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const searchP = term
-        ? `&or=(name_desc.ilike.*${encodeURIComponent(term)}*,document_id.ilike.*${encodeURIComponent(term)}*)`
+        ? `&or=(search_name.ilike.*${encodeURIComponent(normalizedTerm)}*,document_id.ilike.*${encodeURIComponent(term)}*)`
         : '';
       const searchZ = term ? `&name=ilike.*${encodeURIComponent(term)}*` : '';
       if (term) setInitialLoading(true); else setIsSyncing(true);
@@ -463,8 +464,9 @@ export default function App() {
   const loadMorePersonas = useCallback(async () => {
     if (!incidentId) return;
     const term = searchQuery.trim();
+    const normalizedTerm = term.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const searchP = term
-      ? `&or=(name_desc.ilike.*${encodeURIComponent(term)}*,document_id.ilike.*${encodeURIComponent(term)}*)`
+      ? `&or=(search_name.ilike.*${encodeURIComponent(normalizedTerm)}*,document_id.ilike.*${encodeURIComponent(term)}*)`
       : '';
     try {
       const res = await fetch(
