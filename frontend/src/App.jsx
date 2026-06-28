@@ -240,7 +240,7 @@ const TrustBadge = memo(({ level }) => {
   if (level >= 3) return <span className="bg-blue-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12}/> Oficial</span>;
   if (level === 2) return <span className="bg-green-600 text-white text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><ShieldCheck size={12}/> Rescate</span>;
   if (level === 1) return <span className="bg-yellow-500 text-black text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><User size={12}/> Familiar</span>;
-  return <span className="bg-gray-200 text-gray-600 text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><AlertTriangle size={12}/> Civil (Nivel 0)</span>;
+  return <span className="bg-gray-100 border border-gray-400 text-gray-600 text-[10px] px-2 py-1 font-bold uppercase tracking-wider flex items-center gap-1 w-max"><AlertTriangle size={12}/> Civil (Nivel 0)</span>;
 });
 
 const StatusPill = memo(({ status, lang = 'es' }) => {
@@ -948,8 +948,8 @@ export default function App() {
               {isSyncing && <RefreshCw size={14} className="animate-spin text-gray-500" />}
             </div>
           </div>
-          <input type="text" placeholder={isPersonas ? T[lang].searchPlaceholderP : T[lang].searchPlaceholderZ} className="w-full p-3 text-black font-medium focus:outline-none rounded-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-          <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')} className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2">
+          <input type="text" placeholder={isPersonas ? T[lang].searchPlaceholderP : T[lang].searchPlaceholderZ} className="w-full p-3 text-black font-medium focus:outline-none border-b-2 border-gray-300 focus:border-blue-500 transition-colors" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          <button onClick={() => setView(isPersonas ? 'form_persona' : 'form_zona')} className="w-full bg-blue-600 text-white font-bold p-3 uppercase tracking-wide hover:bg-blue-700 flex justify-center items-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,100,0.5)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all">
             <Plus size={18}/> {isPersonas ? T[lang].btnNewPerson : T[lang].btnNewZone}
           </button>
         </div>
@@ -1041,7 +1041,7 @@ export default function App() {
                 <button
                   onClick={handleFalsoPositivo}
                   disabled={isFalsoPositivo}
-                  className="w-full border-2 border-orange-600 text-orange-700 bg-transparent font-bold text-sm p-3 uppercase tracking-wide hover:bg-orange-50 disabled:opacity-50 transition-colors"
+                  className="w-full border-2 border-orange-600 text-orange-700 bg-transparent font-bold text-sm p-3 uppercase tracking-wide hover:bg-orange-50 disabled:opacity-50 shadow-[4px_4px_0px_0px_rgba(180,60,0,0.3)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
                 >
                   {isFalsoPositivo ? T[lang].btnFalsoPositivoSending : T[lang].btnFalsoPositivo}
                 </button>
@@ -1060,7 +1060,7 @@ export default function App() {
             href={`https://t.me/red_emergencia_bot?start=${isPersona ? 'person' : 'zone'}_${selectedItem.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full bg-blue-600 text-white font-black uppercase p-4 hover:bg-blue-700 flex items-center justify-center gap-2 border-2 border-black shadow-md transition-transform active:scale-[0.98]"
+            className="w-full bg-blue-600 text-white font-black uppercase p-4 hover:bg-blue-700 flex items-center justify-center gap-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,100,0.5)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
           >
             <Bell size={18}/> {T[lang].btnTelegram}
           </a>
@@ -1076,7 +1076,7 @@ export default function App() {
                 setView('form_aporte_zona');
               }
             }}
-            className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 flex items-center justify-center gap-2 border-2 border-transparent shadow-md transition-transform active:scale-[0.98]"
+            className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 flex items-center justify-center gap-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
           >
             <Edit3 size={18}/> {T[lang].btnContribute}
           </button>
@@ -1170,7 +1170,7 @@ export default function App() {
           <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formPersonaLabel5}</label>
           <input type="tel" placeholder={T[lang].formPersonaPlaceholder5} className="w-full p-4 border-2 border-black font-medium focus:outline-none focus:border-blue-500 font-mono" value={formPersona.contacto} onChange={e => setFormPersona(f => ({...f, contacto: e.target.value}))} />
         </div>
-        <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 transition-opacity">{isSubmitting ? T[lang].btnSaving : T[lang].btnPublish}</button>
+        <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-black text-lg p-5 mt-4 uppercase hover:bg-blue-700 disabled:opacity-50 shadow-[4px_4px_0px_0px_rgba(0,0,100,0.5)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all">{isSubmitting ? T[lang].btnSaving : T[lang].btnPublish}</button>
       </form>
     </div>
   );
