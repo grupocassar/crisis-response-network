@@ -65,6 +65,10 @@ const T = {
     detailDoc: 'C.I / Pasaporte:',
     btnTelegram: 'Recibir Alertas en mi Telegram',
     btnContribute: 'Aportar Nueva Información (Evolución)',
+    // Crowd-Correction
+    btnFalsoPositivo: 'Fui a este lugar y la persona no estaba',
+    btnFalsoPositivoSending: 'Reportando...',
+    falsoPositivoError: 'No se pudo procesar. Intente de nuevo.',
     historyTitle: 'Historial de Actividad',
     historyEmpty: 'Generando reporte inicial...',
     historyHide: 'Ocultar historial',
@@ -110,7 +114,7 @@ const T = {
     modalDesc: '¿Quieres recibir notificaciones automáticas en tu Telegram si hay cambios sobre',
     modalBtnTelegram: 'Sí, activar en Telegram',
     modalBtnSkip: 'No, ver en la web',
-    footerTitle: 'Unidos para salvar vidas 🌍',
+    footerTitle: 'Unidos para salvar vidas',
     footerDesc: 'Plataforma ciudadana de código abierto. Ingeniería de supervivencia diseñada para operar en redes colapsadas.',
     footerTechTitle: 'Cero Imágenes (Carga Inmediata)',
     footerTechDesc: 'Decisión estratégica. Eliminamos las fotos para garantizar que abra en milisegundos en redes 2G y ahorre batería. Los datos rápidos salvan vidas.',
@@ -163,6 +167,10 @@ const T = {
     detailDoc: 'ID / Passport:',
     btnTelegram: 'Receive Alerts on my Telegram',
     btnContribute: 'Submit New Information (Update)',
+    // Crowd-Correction
+    btnFalsoPositivo: 'I went to this location and the person was not there',
+    btnFalsoPositivoSending: 'Reporting...',
+    falsoPositivoError: 'Could not process. Please try again.',
     historyTitle: 'Activity History',
     historyEmpty: 'Generating initial report...',
     historyHide: 'Hide history',
@@ -208,7 +216,7 @@ const T = {
     modalDesc: 'Do you want to receive automatic Telegram notifications if there are updates about',
     modalBtnTelegram: 'Yes, activate on Telegram',
     modalBtnSkip: 'No, view on web',
-    footerTitle: 'United to save lives 🌍',
+    footerTitle: 'United to save lives',
     footerDesc: 'Open-source citizen platform. Survival engineering designed to operate on collapsed networks.',
     footerTechTitle: 'Zero Images (Instant Load)',
     footerTechDesc: 'Strategic decision. We removed photos to ensure it opens in milliseconds on 2G networks and saves battery. Fast data saves lives.',
@@ -309,18 +317,19 @@ export default function App() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFalsoPositivo, setIsFalsoPositivo] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
 
   const [formPersona, setFormPersona] = useState({ nombreDesc: '', documento: '', estado: 'buscado', ubicacion: '', contacto: '' });
   const [formZona, setFormZona] = useState({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
-  
+
   const [formAportePersona, setFormAportePersona] = useState({ status: '', location_text: '', documento: '' });
   const [formAporteZona, setFormAporteZona] = useState({ urgency: '', situation: '' });
 
   const [historyLogs, setHistoryLogs] = useState([]);
   const [showFullHistory, setShowFullHistory] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false); // RESTAURADO: Estado del modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showIosBanner, setShowIosBanner] = useState(() => {
     return localStorage.getItem('iosBannerDismissed') !== '1';
@@ -409,6 +418,7 @@ export default function App() {
   }, [incidentId]);
 
   useEffect(() => { if (incidentId) { fetchData(); fetchStats(); } }, [incidentId, fetchData, fetchStats]);
+
   useEffect(() => {
     if (!incidentId) return;
     const interval = setInterval(() => { if (!searchQueryRef.current.trim()) fetchData(true); fetchStats(); }, 30000);
@@ -428,7 +438,7 @@ export default function App() {
     }
   }, [view, selectedItem]);
 
-  // Búsqueda server-side con debounce de 800 ms
+  // Búsqueda server-side con debounce de 800 ms + AbortController
   useEffect(() => {
     if (!incidentId) return;
     const term = searchQuery.trim();
@@ -552,6 +562,34 @@ export default function App() {
     setTimeout(() => setNotification(null), 4000);
   };
 
+  // ─── CROWD-CORRECTION: Falso Positivo ───
+  const handleFalsoPositivo = async () => {
+    if (!selectedItem) return;
+    setIsFalsoPositivo(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/reportar_falso_positivo`, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify({ p_person_id: selectedItem.id })
+      });
+      if (!res.ok) throw new Error();
+
+      // Optimistic UI: actualizar estado local inmediatamente
+      const updatedItem = {
+        ...selectedItem,
+        status: 'buscado',
+        location_text: 'Desconocida (Ubicación descartada por familiar en el sitio)'
+      };
+      setSelectedItem(updatedItem);
+      setPersonas(prev => prev.map(p => p.id === updatedItem.id ? updatedItem : p));
+      showNotification(lang === 'es' ? 'Ubicación reportada. Se notificó a los familiares suscritos.' : 'Location reported. Subscribed family members were notified.');
+    } catch {
+      showNotification(T[lang].falsoPositivoError, true);
+    } finally {
+      setIsFalsoPositivo(false);
+    }
+  };
+
   const goBack = useCallback(() => {
     setView(prev => {
       switch (prev) {
@@ -560,7 +598,7 @@ export default function App() {
         case 'detail': return activeTab;
         case 'form_persona': return 'personas';
         case 'form_zona': return 'zonas';
-        case 'form_aporte_persona': 
+        case 'form_aporte_persona':
         case 'form_aporte_zona': return 'detail';
         default: return prev;
       }
@@ -596,7 +634,7 @@ export default function App() {
     }
     const touch = e.changedTouches[0];
     const deltaX = touch.clientX - swipeStartX.current;
-    const startedFromLeft = swipeStartX.current < 60; 
+    const startedFromLeft = swipeStartX.current < 60;
     if (startedFromLeft && deltaX > 60 && view !== 'home') goBack();
     swipeStartX.current = null;
     swipeStartY.current = null;
@@ -615,21 +653,20 @@ export default function App() {
     if (!incidentId) return;
     setIsSubmitting(true);
     try {
-      const payload = { 
-        incident_id: incidentId, 
-        name_desc: formPersona.nombreDesc, 
+      const payload = {
+        incident_id: incidentId,
+        name_desc: formPersona.nombreDesc,
         document_id: formPersona.documento || null,
-        status: formPersona.estado, 
-        location_text: formPersona.ubicacion, 
-        reporter_contact: formPersona.contacto || "No especificado", 
-        trust_level: 0 
+        status: formPersona.estado,
+        location_text: formPersona.ubicacion,
+        reporter_contact: formPersona.contacto || "No especificado",
+        trust_level: 0
       };
       const res = await fetch(`${SUPABASE_URL}/rest/v1/persons`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       const newData = await res.json();
       const newRecord = newData[0];
 
-      // Registrar creación en el historial
       await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
         method: 'POST', headers: HEADERS, body: JSON.stringify({
           record_id: newRecord.id,
@@ -642,12 +679,10 @@ export default function App() {
       setPersonas(prev => [newRecord, ...prev]);
       setFormPersona({ nombreDesc: '', documento: '', estado: 'buscado', ubicacion: '', contacto: '' });
       showNotification("Reporte publicado exitosamente");
-      
-      // UX EXCELENTE: Redirige al detalle, guarda en selectedItem y ACTIVA el Modal de Telegram
       setSelectedItem(newRecord);
       setActiveTab('personas');
       setView('detail');
-      setShowSuccessModal(true); // <--- RESTAURADO
+      setShowSuccessModal(true);
     } catch { showNotification("Error de red. Intente de nuevo.", true); } finally { setIsSubmitting(false); }
   };
 
@@ -656,13 +691,13 @@ export default function App() {
     if (!incidentId) return;
     setIsSubmitting(true);
     try {
-      const payload = { 
-        incident_id: incidentId, 
-        name: formZona.nombre, 
-        urgency: formZona.urgencia, 
-        situation: formZona.situacion, 
-        reporter_contact: formZona.contacto || "No especificado", 
-        trust_level: 0 
+      const payload = {
+        incident_id: incidentId,
+        name: formZona.nombre,
+        urgency: formZona.urgencia,
+        situation: formZona.situacion,
+        reporter_contact: formZona.contacto || "No especificado",
+        trust_level: 0
       };
       const res = await fetch(`${SUPABASE_URL}/rest/v1/zones`, { method: 'POST', headers: HEADERS, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
@@ -674,19 +709,17 @@ export default function App() {
           record_id: newRecord.id,
           table_name: 'zones',
           action: 'CREADO',
-          details: `Foco reportado. Urgencia: ${formZona.urgency.toUpperCase()}. Situación: ${formZona.situacion}`
+          details: `Foco reportado. Urgencia: ${formZona.urgencia.toUpperCase()}. Situación: ${formZona.situacion}`
         })
       }).catch(console.error);
 
       setZonas(prev => [newRecord, ...prev]);
       setFormZona({ nombre: '', situacion: '', urgencia: 'alta', contacto: '' });
       showNotification("Zona de emergencia reportada");
-
-      // UX EXCELENTE: Redirige al detalle y ACTIVA el Modal de Telegram
       setSelectedItem(newRecord);
       setActiveTab('zonas');
       setView('detail');
-      setShowSuccessModal(true); // <--- RESTAURADO
+      setShowSuccessModal(true);
     } catch { showNotification("Error de red. Intente de nuevo.", true); } finally { setIsSubmitting(false); }
   };
 
@@ -712,7 +745,6 @@ export default function App() {
       const updatedData = await res.json();
       const updatedRecord = updatedData[0];
 
-      // Registrar en historial
       await fetch(`${SUPABASE_URL}/rest/v1/history_logs`, {
         method: 'POST', headers: HEADERS, body: JSON.stringify({
           record_id: selectedItem.id,
@@ -796,7 +828,7 @@ export default function App() {
             </div>
           </div>
         </div>
-        {/* INSTALAR — Android/Chrome: botón nativo */}
+
         {installPrompt && (
           <div className="bg-black border-t-2 border-gray-800 px-6 pb-6 pt-4">
             <button
@@ -807,7 +839,7 @@ export default function App() {
             </button>
           </div>
         )}
-        {/* INSTALAR — iOS/Safari: instrucción descartable */}
+
         {isIos && showIosBanner && !installPrompt && (
           <div className="bg-black border-t-2 border-gray-800 px-6 py-4">
             <div className="flex items-start justify-between gap-4">
@@ -824,6 +856,7 @@ export default function App() {
             </div>
           </div>
         )}
+
         <div className="px-4 flex flex-col gap-4 -mt-6">
           <button onClick={() => setView('personas')} className="bg-white p-6 border-4 border-black hover:bg-gray-50 flex flex-col items-start gap-2 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[3px] active:translate-y-[3px]">
             <User size={32} className="mb-2" />
@@ -849,7 +882,6 @@ export default function App() {
           */}
         </div>
 
-        {/* FOOTER INSTITUCIONAL / HUMANO (Ingeniería de Supervivencia) */}
         <div className="mx-4 mb-6 mt-4 bg-gray-200 border-4 border-gray-300 p-5 space-y-4">
           <h4 className="font-black text-lg tracking-tight text-gray-900 leading-tight">
             {T[lang].footerTitle}
@@ -882,7 +914,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* FOOTER LEGAL CORPORATIVO */}
         <div className="mt-6 pt-6 pb-8 border-t-2 border-gray-300 text-center flex flex-col items-center justify-center opacity-70">
           <span className="text-xs font-black text-gray-800 uppercase tracking-widest">{T[lang].legalCompany}</span>
           <span className="text-[10px] font-bold text-gray-600 tracking-wider mt-0.5">{T[lang].legalRNC}</span>
@@ -944,7 +975,7 @@ export default function App() {
               {hasMore && (
                 <div className="pt-2 pb-6 px-1">
                   <p className="text-center text-xs font-bold text-gray-500 mb-3">{T[lang].loadMoreHint}</p>
-                  <button 
+                  <button
                     onClick={loadMore}
                     className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black flex justify-center items-center gap-2"
                   >
@@ -963,6 +994,11 @@ export default function App() {
     if (!selectedItem) return null;
     const isPersona = activeTab === 'personas';
 
+    // Condición para mostrar el botón de Crowd-Correction
+    const mostrarFalsoPositivo = isPersona
+      && (selectedItem.status === 'herido' || selectedItem.status === 'a_salvo')
+      && selectedItem.trust_level === 0;
+
     return (
       <div className="bg-gray-100 min-h-screen animate-fade-in pb-20">
         <div className="bg-black text-white p-4 sticky top-0 flex items-center gap-3 z-10 shadow-lg">
@@ -976,21 +1012,41 @@ export default function App() {
           <div className="bg-white border-4 border-black p-5">
             <div className="flex flex-col items-start gap-3 mb-4">
               <TrustBadge level={selectedItem.trust_level} />
-              {isPersona ? <StatusPill status={selectedItem.status} lang={lang} /> : <span className={`text-xs px-2 py-1 font-bold uppercase text-white ${selectedItem.urgency === 'alta' ? 'bg-red-600' : 'bg-orange-500'}`}>{selectedItem.urgency === 'alta' ? T[lang].detailUrgencyHigh : T[lang].detailUrgencyMed}</span>}
+              {isPersona
+                ? <StatusPill status={selectedItem.status} lang={lang} />
+                : <span className={`text-xs px-2 py-1 font-bold uppercase text-white ${selectedItem.urgency === 'alta' ? 'bg-red-600' : 'bg-orange-500'}`}>
+                    {selectedItem.urgency === 'alta' ? T[lang].detailUrgencyHigh : T[lang].detailUrgencyMed}
+                  </span>
+              }
             </div>
-            
+
             <h2 className="text-2xl font-black mb-2 leading-tight border-b-2 border-gray-100 pb-2">
               {isPersona ? selectedItem.name_desc : selectedItem.name}
             </h2>
             {isPersona && selectedItem.document_id && (
               <p className="text-sm font-mono font-black text-gray-600 mb-4 bg-gray-50 p-2 border border-gray-200 w-max">{T[lang].detailDoc} {selectedItem.document_id}</p>
             )}
-            
+
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-bold text-gray-500 tracking-wider mb-1">{isPersona ? T[lang].detailLocation : T[lang].detailSituation}</p>
                 <p className="font-medium text-lg leading-snug">{isPersona ? selectedItem.location_text : selectedItem.situation}</p>
               </div>
+
+              {/* ─── CROWD-CORRECTION: Botón Falso Positivo ───
+                  Solo visible para personas heridas/a_salvo con trust_level 0 (datos de extracción masiva).
+                  Diseño secundario (outline) para no competir visualmente con las acciones principales.
+              */}
+              {mostrarFalsoPositivo && (
+                <button
+                  onClick={handleFalsoPositivo}
+                  disabled={isFalsoPositivo}
+                  className="w-full border-2 border-gray-400 text-gray-700 font-bold text-sm p-3 uppercase tracking-wide hover:border-gray-700 hover:text-gray-900 disabled:opacity-50 transition-colors bg-white"
+                >
+                  {isFalsoPositivo ? T[lang].btnFalsoPositivoSending : T[lang].btnFalsoPositivo}
+                </button>
+              )}
+
               <div className="bg-gray-50 p-3 border border-gray-200">
                 <p className="text-xs font-bold text-gray-500 tracking-wider mb-1">{T[lang].detailContact}</p>
                 <p className="font-bold">{selectedItem.reporter_contact}</p>
@@ -1000,17 +1056,17 @@ export default function App() {
           </div>
 
           {/* Enlace Inteligente a Telegram */}
-          <a 
+          <a
             href={`https://t.me/red_emergencia_bot?start=${isPersona ? 'person' : 'zone'}_${selectedItem.id}`}
-            target="_blank" 
-            rel="noopener noreferrer" 
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full bg-blue-600 text-white font-black uppercase p-4 hover:bg-blue-700 flex items-center justify-center gap-2 border-2 border-black shadow-md transition-transform active:scale-[0.98]"
           >
             <Bell size={18}/> {T[lang].btnTelegram}
           </a>
 
           {/* Botón de Aportar Información */}
-          <button 
+          <button
             onClick={() => {
               if (isPersona) {
                 setFormAportePersona({ status: selectedItem.status, location_text: selectedItem.location_text, documento: selectedItem.document_id || '' });
@@ -1135,9 +1191,9 @@ export default function App() {
         <div>
           <label className="block text-sm font-black mb-2 text-gray-800">{T[lang].formZonaLabel2}</label>
           <div className="flex flex-col gap-2">
-            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'alta'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'alta' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnAlta}</button>
-            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'media'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'media' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnMedia}</button>
-            <button type="button" onClick={() => setFormZona({...formZona, urgency: 'baja'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgency === 'baja' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnBaja}</button>
+            <button type="button" onClick={() => setFormZona({...formZona, urgencia: 'alta'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgencia === 'alta' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnAlta}</button>
+            <button type="button" onClick={() => setFormZona({...formZona, urgencia: 'media'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgencia === 'media' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnMedia}</button>
+            <button type="button" onClick={() => setFormZona({...formZona, urgencia: 'baja'})} className={`p-3 font-bold uppercase text-xs border-2 ${formZona.urgencia === 'baja' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-300'}`}>{T[lang].formZonaBtnBaja}</button>
           </div>
         </div>
         <div>
@@ -1235,16 +1291,16 @@ export default function App() {
         </div>
       )}
 
-      {view === 'home'         && HomeView()}
-      {view === 'personas'     && DashboardView({ type: 'personas' })}
-      {view === 'zonas'        && DashboardView({ type: 'zonas' })}
-      {view === 'detail'       && DetailView()}
-      {view === 'form_persona' && FormPersonaView()}
-      {view === 'form_zona'    && FormZonaView()}
-      {view === 'form_aporte_persona' && FormAportePersonaView()}
-      {view === 'form_aporte_zona'    && FormAporteZonaView()}
+      {view === 'home'                 && HomeView()}
+      {view === 'personas'             && DashboardView({ type: 'personas' })}
+      {view === 'zonas'                && DashboardView({ type: 'zonas' })}
+      {view === 'detail'               && DetailView()}
+      {view === 'form_persona'         && FormPersonaView()}
+      {view === 'form_zona'            && FormZonaView()}
+      {view === 'form_aporte_persona'  && FormAportePersonaView()}
+      {view === 'form_aporte_zona'     && FormAporteZonaView()}
 
-      {/* MODAL DE ÉXITO BRUTALISTA DE TELEGRAM */}
+      {/* MODAL DE ÉXITO — TELEGRAM */}
       {showSuccessModal && selectedItem && (
         <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
           <div className="bg-white border-4 border-black p-6 w-full max-w-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] space-y-4 animate-slide-up">
@@ -1256,16 +1312,16 @@ export default function App() {
               {T[lang].modalDesc} <span className="underline font-black">{selectedItem.name_desc || selectedItem.name}</span>?
             </p>
             <div className="flex flex-col gap-2 pt-2">
-              <a 
+              <a
                 href={`https://t.me/red_emergencia_bot?start=${activeTab === 'personas' ? 'person' : 'zone'}_${selectedItem.id}`}
-                target="_blank" 
+                target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setShowSuccessModal(false)}
                 className="w-full bg-blue-600 text-white font-black uppercase p-4 hover:bg-blue-700 text-center border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 text-sm"
               >
                 <Bell size={16}/> {T[lang].modalBtnTelegram}
               </a>
-              <button 
+              <button
                 onClick={() => setShowSuccessModal(false)}
                 className="w-full bg-white text-black font-black uppercase p-3 hover:bg-gray-100 text-center border-2 border-black text-xs"
               >
