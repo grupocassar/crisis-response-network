@@ -66,7 +66,7 @@ const T = {
     btnTelegram: 'Recibir Alertas en mi Telegram',
     btnContribute: 'Aportar Nueva Información (Evolución)',
     // Crowd-Correction
-    btnFalsoPositivo: 'Fui a este lugar y la persona no estaba',
+    btnFalsoPositivo: 'Confirmo: No está en este lugar',
     btnFalsoPositivoSending: 'Reportando...',
     falsoPositivoError: 'No se pudo procesar. Intente de nuevo.',
     historyTitle: 'Historial de Actividad',
@@ -168,7 +168,7 @@ const T = {
     btnTelegram: 'Receive Alerts on my Telegram',
     btnContribute: 'Submit New Information (Update)',
     // Crowd-Correction
-    btnFalsoPositivo: 'I went to this location and the person was not there',
+    btnFalsoPositivo: 'Confirm: Not at this location',
     btnFalsoPositivoSending: 'Reporting...',
     falsoPositivoError: 'Could not process. Please try again.',
     historyTitle: 'Activity History',
@@ -1041,7 +1041,7 @@ export default function App() {
                 <button
                   onClick={handleFalsoPositivo}
                   disabled={isFalsoPositivo}
-                  className="w-full border-2 border-gray-400 text-gray-700 font-bold text-sm p-3 uppercase tracking-wide hover:border-gray-700 hover:text-gray-900 disabled:opacity-50 transition-colors bg-white"
+                  className="w-full border-2 border-orange-600 text-orange-700 bg-transparent font-bold text-sm p-3 uppercase tracking-wide hover:bg-orange-50 disabled:opacity-50 transition-colors"
                 >
                   {isFalsoPositivo ? T[lang].btnFalsoPositivoSending : T[lang].btnFalsoPositivo}
                 </button>
