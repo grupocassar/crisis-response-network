@@ -141,3 +141,17 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Datos temporales e inyecciones masivas
+*.csv
+cruce_*.sql
+inyeccion_*.sql
+parte_*.sql
+francotirador_*.sql
+*.json
+!package.json
+!package-lock.json
+lote_*.sql
+importacion_*.sql
+data_interceptada_*.json
+base_maestra_*.json
