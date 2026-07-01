@@ -312,7 +312,13 @@ export default function App() {
   const [zonas, setZonas] = useState([]);
   const [hasMorePersonas, setHasMorePersonas] = useState(false);
   const [hasMoreZonas, setHasMoreZonas] = useState(false);
-  const [stats, setStats] = useState({ total: 69570, buscados: 60665, a_salvo: 5416, heridos: 3291 });
+  const [stats, setStats] = useState(() => {
+    try {
+      const cached = localStorage.getItem('enc_stats');
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return { total: 91574, buscados: 30897, a_salvo: 35191, heridos: 25342 };
+  });
   const [selectedItem, setSelectedItem] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -411,7 +417,10 @@ export default function App() {
         body: JSON.stringify({ p_incident_id: incidentId })
       });
       const data = await res.json();
-      if (data && data.total !== undefined) setStats(data);
+      if (data && data.total !== undefined) {
+        setStats(data);
+        try { localStorage.setItem('enc_stats', JSON.stringify(data)); } catch {}
+      }
     } catch (err) {
       console.error('Error cargando estadísticas:', err);
     }
