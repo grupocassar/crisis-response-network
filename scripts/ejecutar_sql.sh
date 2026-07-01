@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # =====================================================================
 # ejecutar_sql.sh — Ejecuta un archivo .sql contra Supabase
+# Usa la API de Management de Supabase (funciona desde Codespaces)
 # Uso: ./scripts/ejecutar_sql.sh ruta/al/archivo.sql
 # =====================================================================
 set -e
 
-# Cargar variables de entorno
-if [ -f "$(dirname "$0")/../.env" ]; then
-  export $(grep -v '^#' "$(dirname "$0")/../.env" | grep -v '^$' | xargs)
+ROOT="$(dirname "$0")/.."
+if [ -f "$ROOT/.env" ]; then
+  export $(grep -v '^#' "$ROOT/.env" | grep -v '^$' | xargs)
 fi
 
 if [ -z "$1" ]; then
@@ -20,22 +21,13 @@ if [ ! -f "$1" ]; then
   exit 1
 fi
 
-if [ -z "$DB_PASSWORD" ] || [ "$DB_PASSWORD" = "tu_db_password_aqui" ]; then
-  echo "❌ Falta DB_PASSWORD en .env"
-  echo "   Abre Supabase Dashboard > Project Settings > Database > Connection string"
+if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ "$SUPABASE_ACCESS_TOKEN" = "tu_access_token_aqui" ]; then
+  echo "❌ Falta SUPABASE_ACCESS_TOKEN en .env"
   exit 1
 fi
 
-echo "🔌 Conectando a $SUPABASE_URL..."
 echo "📄 Ejecutando: $1"
 echo "─────────────────────────────────────"
 
-PGPASSWORD="$DB_PASSWORD" psql \
-  -h "$DB_HOST" \
-  -p "$DB_PORT" \
-  -U "$DB_USER" \
-  -d "$DB_NAME" \
-  -f "$1"
+node "$ROOT/scripts/ejecutar_sql.js" "$1"
 
-echo "─────────────────────────────────────"
-echo "✅ SQL ejecutado correctamente."
