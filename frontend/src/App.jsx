@@ -141,7 +141,7 @@ const T = {
     pressBtnDlLoading: 'PROCESANDO DATASET...',
     pressCitation: 'Cita sugerida: "Censo Unificado de Emergencia, Encuéntrame VE, 2026"',
     pressLimitsTitle: 'Limitaciones del Dataset',
-    pressLimitsDesc: 'Este dataset no debe interpretarse como un censo oficial emitido por el Estado. Representa el mayor registro civil independiente consolidado durante la emergencia. Las limitaciones incluyen: sesgo de reporte voluntario, cobertura geográfica incompleta debido a vías colapsadas, telecomunicaciones intermitentes y reconciliación de identidades en curso. Por estas razones, los conteos agregados pueden evolucionar.',
+    pressLimitsDesc: 'Este dataset no debe interpretarse como un censo oficial emitido por el Estado. Representa un registro civil independiente consolidado durante la emergencia. Las limitaciones incluyen: sesgo de reporte voluntario, cobertura geográfica incompleta debido a vías colapsadas, telecomunicaciones intermitentes y reconciliación de identidades en curso. Por estas razones, los conteos agregados pueden evolucionar.',
     pressVersion: 'Versión del Dataset:',
     pressHash: 'Integridad (SHA-256):',
     pressMethTitle: 'Marco Metodológico',
@@ -270,7 +270,7 @@ const T = {
     pressBtnDlLoading: 'PROCESSING DATASET...',
     pressCitation: 'Suggested Citation: "Unified Emergency Census, Encuéntrame VE, 2026"',
     pressLimitsTitle: 'Dataset Limitations & Confidence',
-    pressLimitsDesc: 'This dataset should not be interpreted as an official census. Rather, it represents the largest known independent civilian registry compiled during the emergency. Limitations include: voluntary reporting bias, incomplete geographic coverage due to collapsed infrastructure, intermittent telecommunications, and ongoing identity reconciliation. For these reasons, aggregate counts may evolve.',
+    pressLimitsDesc: 'This dataset should not be interpreted as an official census. Rather, it represents an independent civilian registry compiled during the emergency. Limitations include: voluntary reporting bias, incomplete geographic coverage due to collapsed infrastructure, intermittent telecommunications, and ongoing identity reconciliation. For these reasons, aggregate counts may evolve.',
     pressVersion: 'Dataset Version:',
     pressHash: 'Integrity (SHA-256):',
     pressMethTitle: 'Methodological Framework',
@@ -395,7 +395,7 @@ const T = {
     pressBtnDlLoading: 'KASITELLAAN TIETOA...',
     pressCitation: 'Suositeltu viittaus: "Unified Emergency Census, Encuéntrame VE, 2026"',
     pressLimitsTitle: 'Tietojoukon Rajoitukset',
-    pressLimitsDesc: 'Tätä tietojoukkoa ei pidä tulkita viralliseksi väestönlaskennaksi. Se edustaa suurinta tunnettua itsenäistä siviilirekisteriä. Rajoituksiin kuuluvat: vapaaehtoisen raportoinnin harha, epätäydellinen maantieteellinen kattavuus, katkonaiset tietoliikenneyhteydet ja jatkuva identiteettien täsmäytys. Kokonaisluvut voivat muuttua.',
+    pressLimitsDesc: 'Tätä tietojoukkoa ei pidä tulkita viralliseksi väestönlaskennaksi. Se edustaa itsenäistä siviilirekisteriä, joka on koottu hätätilanteen aikana. Rajoituksiin kuuluvat: vapaaehtoisen raportoinnin harha, epätäydellinen maantieteellinen kattavuus, katkonaiset tietoliikenneyhteydet ja jatkuva identiteettien täsmäytys. Kokonaisluvut voivat muuttua.',
     pressVersion: 'Tietojoukon Versio:',
     pressHash: 'Eheys (SHA-256):',
     pressMethTitle: 'Metodologinen Viitekehys',
@@ -711,6 +711,30 @@ const PressView = ({ setView, incidentId, lang }) => {
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1 font-sans">Who can audit this dataset?</h4>
                     <p className="text-gray-700">Accredited journalists, humanitarian organizations, and academic researchers may request access to the underlying methodology and additional documentation. Access is provided individually to protect sensitive civilian information while allowing independent review.</p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Changelog */}
+              <section className="pt-6 border-t border-gray-200">
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-4 font-sans">5. Dataset Changelog</h3>
+                <div className="space-y-5 text-xs font-mono text-gray-700 bg-gray-50 p-4 border border-gray-200">
+                  <div>
+                    <strong className="text-gray-900 text-sm">2026.07.02</strong>
+                    <ul className="list-disc pl-5 mt-2 space-y-1">
+                      <li>Duplicate reconciliation improved (Fuzzy Logic & Trigram filtering).</li>
+                      <li>~8,000 duplicated and overlapping records merged safely.</li>
+                      <li>Hospital network synchronized (+261 new hospital admissions validated).</li>
+                      <li>Methodology, Codebook and FAQ updated for press access.</li>
+                    </ul>
+                  </div>
+                  <div className="pt-3 border-t border-gray-200 mt-3">
+                    <strong className="text-gray-900 text-sm">2026.07.01</strong>
+                    <ul className="list-disc pl-5 mt-2 space-y-1">
+                      <li>Initial data consolidation (OSINT & Crowdsourcing pipelines).</li>
+                      <li>Strict validation and ETL pipeline implemented.</li>
+                      <li>Mortality figures excluded from public CSV pending forensic validation.</li>
+                    </ul>
                   </div>
                 </div>
               </section>
