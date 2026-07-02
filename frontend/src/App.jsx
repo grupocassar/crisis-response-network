@@ -728,7 +728,7 @@ const PressView = ({ setView, incidentId, lang }) => {
                     <ul className="list-disc pl-5 mt-2 space-y-1">
                       <li>Duplicate reconciliation improved (Fuzzy Logic & Trigram filtering).</li>
                       <li>~8,000 duplicated and overlapping records merged safely.</li>
-                      <li>Hospital network synchronized (+261 new hospital admissions validated).</li>
+                      <li>Volunteer-transcribed hospital admission lists consolidated (+261 new records validated).</li>
                       <li>Methodology, Codebook and FAQ updated for press access.</li>
                     </ul>
                   </div>
