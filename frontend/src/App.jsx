@@ -122,6 +122,29 @@ const T = {
     footerColabDesc: 'Si buscas a alguien, repórtalo. Si tienes información, actualiza su estado. Entre todos nos encontramos.',
     footerDataTitle: 'Privacidad Vital',
     footerDataDesc: 'No comercializamos ni compartimos información. Este sistema existe con un único fin operativo.',
+    pressMenu: 'Prensa / Data Room',
+    pressTitle: 'Data Room de Prensa',
+    pressSubtitle: 'Encuéntrame VE — IDIKI TECH SRL',
+    pressTokenPh: 'Token de acceso (Ej: PVE-XXXX)',
+    pressBtnAccess: 'Acceder al Portal',
+    pressRestricted: 'Acceso restringido a periodistas y organizaciones verificadas.',
+    pressTokenErr: 'Token inválido. Contacta a IDIKI TECH SRL.',
+    pressMetricsTitle: 'Cifras del Censo',
+    pressTotal: 'Total en Censo',
+    pressMissing: 'Aún Desaparecidos',
+    pressHosp: 'Ingresados (Hospitales)',
+    pressSafe: 'Localizados (A Salvo)',
+    pressNote: 'Los decesos están excluidos — requieren verificación forense oficial.',
+    pressDataTitle: 'Dataset Oficial',
+    pressDataDesc: 'CSV Sanitizado. Fuentes anonimizadas y duplicados resueltos.',
+    pressBtnDl: 'DESCARGAR DATASET (CSV)',
+    pressBtnDlLoading: 'PROCESANDO DATASET...',
+    pressAttribution: 'Atribución requerida: "Fuente: Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressMethTitle: 'Marco Metodológico',
+    pressMethDesc: 'Data consolidada mediante crowdsourcing descentralizado, inteligencia de fuentes abiertas (OSINT) y digitalización de registros analógicos por la diáspora. Depurada con algoritmos de deduplicación fonética (Trigramas).',
+    pressBtnRead: 'Leer Metodología Completa',
+    pressModalTitle: 'Marco Metodológico y Codebook',
+    pressModalFooterLeft: 'Equipo de Integridad de Datos — Encuéntrame VE',
     legalCompany: 'IDIKI TECH SRL',
     legalRNC: 'RNC: 133-57596-5',
     legalHumanitarian: 'Plataforma de uso humanitario pro-bono.',
@@ -224,6 +247,29 @@ const T = {
     footerColabDesc: "If you're looking for someone, report them. If you have info, update their status. We find each other together.",
     footerDataTitle: 'Vital Privacy',
     footerDataDesc: 'We do not sell or share data. This system exists for a single operational purpose.',
+    pressMenu: 'Press Data Room',
+    pressTitle: 'Press Data Room',
+    pressSubtitle: 'Encuéntrame VE — IDIKI TECH SRL',
+    pressTokenPh: 'Access token (e.g. PVE-XXXX)',
+    pressBtnAccess: 'Access Portal',
+    pressRestricted: 'Restricted to verified journalists and organizations.',
+    pressTokenErr: 'Invalid token. Contact IDIKI TECH SRL.',
+    pressMetricsTitle: 'Census Figures',
+    pressTotal: 'Total in Census',
+    pressMissing: 'Still Missing',
+    pressHosp: 'Hospitalized',
+    pressSafe: 'Located / Safe',
+    pressNote: 'Mortality figures excluded — require official forensic verification.',
+    pressDataTitle: 'Official Dataset',
+    pressDataDesc: 'Sanitized CSV. Anonymized sources and resolved duplicates.',
+    pressBtnDl: 'DOWNLOAD DATASET (CSV)',
+    pressBtnDlLoading: 'PROCESSING DATASET...',
+    pressAttribution: 'Attribution required: "Source: Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressMethTitle: 'Methodological Framework',
+    pressMethDesc: 'Data consolidated via decentralized crowdsourcing, Open Source Intelligence (OSINT), and digitization of analog records by the diaspora. Cleansed using phonetic deduplication algorithms.',
+    pressBtnRead: 'Read Full Methodology',
+    pressModalTitle: 'Methodological Framework & Codebook',
+    pressModalFooterLeft: 'Encuéntrame VE Data Integrity Team',
     legalCompany: 'IDIKI TECH SRL',
     legalRNC: 'RNC: 133-57596-5',
     legalHumanitarian: 'Pro-bono humanitarian use platform.',
@@ -322,6 +368,29 @@ const T = {
     footerColabDesc: 'Jos etsit jotakuta, ilmoita heistä. Jos sinulla on tietoa, päivitä tila.',
     footerDataTitle: 'Tärkeä yksityisyys',
     footerDataDesc: 'Emme myy tai jaa tietoja. Tämä järjestelmä on olemassa yhtä ainoaa tarkoitusta varten.',
+    pressMenu: 'Lehdistöhuone (Data)',
+    pressTitle: 'Lehdistöhuone',
+    pressSubtitle: 'Encuéntrame VE — IDIKI TECH SRL',
+    pressTokenPh: 'Pääsytunnus (esim. PVE-XXXX)',
+    pressBtnAccess: 'Kirjaudu Sisään',
+    pressRestricted: 'Pääsy sallittu vain vahvistetuille journalisteille ja järjestöille.',
+    pressTokenErr: 'Virheellinen tunnus. Ota yhteyttä IDIKI TECH SRL.',
+    pressMetricsTitle: 'Väestönlaskennan Luvut',
+    pressTotal: 'Yhteensä',
+    pressMissing: 'Kadonnut',
+    pressHosp: 'Sairaalassa',
+    pressSafe: 'Löydetty',
+    pressNote: 'Kuolleisuusluvut jätetty pois — vaativat virallisen oikeuslääketieteellisen vahvistuksen.',
+    pressDataTitle: 'Virallinen Tietojoukko',
+    pressDataDesc: 'Puhdistettu CSV. Lähteet anonymisoitu ja kaksoiskappaleet poistettu.',
+    pressBtnDl: 'LATAA TIETOJOUKKO (CSV)',
+    pressBtnDlLoading: 'KASITELLAAN TIETOA...',
+    pressAttribution: 'Lahdeviite vaaditaan: "Lahde: Encuentrame VE / IDIKI TECH SRL, 2026"',
+    pressMethTitle: 'Metodologinen Viitekehys',
+    pressMethDesc: 'Tiedot on koottu hajautetun joukkoistamisen, avoimien lähteiden tiedustelun (OSINT) ja analogisten asiakirjojen digitoinnin avulla. Puhdistettu foneettisilla algoritmeilla.',
+    pressBtnRead: 'Lue Koko Metodologia',
+    pressModalTitle: 'Metodologia ja Koodikirja',
+    pressModalFooterLeft: 'Encuentrame VE:n datan eheystiimi',
     legalCompany: 'IDIKI TECH SRL',
     legalRNC: 'RNC: 133-57596-5',
     legalHumanitarian: 'Pro-bono humanitaarinen alusta.',
@@ -395,8 +464,9 @@ const ZonaCard = memo(({ item, onClick, lang = 'es' }) => (
 
 // ─── DATA ROOM DE PRENSA ───
 // Componente standalone (fuera de App) para hooks estables y reset de estado al salir
-const PressView = ({ setView, incidentId }) => {
+const PressView = ({ setView, incidentId, lang }) => {
   const TOKENS_VALIDOS = ['PVE-2026-TOMMI', 'PVE-2026-B'];
+  const t = T[lang] || T.es;
   const [tokenInput, setTokenInput] = useState('');
   const [autenticado, setAutenticado] = useState(false);
   const [pressStats, setPressStats] = useState(null);
@@ -457,36 +527,33 @@ const PressView = ({ setView, incidentId }) => {
           <button onClick={() => setView('home')} className="p-1 -ml-2 hover:bg-gray-800 rounded-full active:scale-90">
             <ChevronLeft size={32} />
           </button>
-          <h2 className="font-black text-lg flex-1 truncate tracking-tight">Press / Prensa / Lehdistö</h2>
+          <h2 className="font-black text-lg flex-1 truncate tracking-tight">{t.pressMenu}</h2>
         </div>
         <div className="p-6 space-y-6">
           <div className="border-4 border-black p-5 space-y-2">
-            <h3 className="font-black text-xl uppercase tracking-tight">Data Room</h3>
-            <p className="text-sm text-gray-600 font-medium">Encuéntrame VE — IDIKI TECH SRL</p>
+            <h3 className="font-black text-xl uppercase tracking-tight">{t.pressTitle}</h3>
+            <p className="text-sm text-gray-600 font-medium">{t.pressSubtitle}</p>
           </div>
           <div className="space-y-3">
             <input
               type="text"
-              placeholder="Token de acceso (PVE-XXXX-XXXX)"
+              placeholder={t.pressTokenPh}
               className={`w-full p-4 border-2 font-mono text-sm focus:outline-none ${tokenError ? 'border-red-600 bg-red-50' : 'border-black'}`}
               value={tokenInput}
               onChange={e => { setTokenInput(e.target.value); setTokenError(false); }}
               onKeyDown={e => e.key === 'Enter' && verificarToken()}
             />
             {tokenError && (
-              <p className="text-red-600 font-bold text-xs uppercase tracking-wide">Token inválido. Contacta a IDIKI TECH SRL.</p>
+              <p className="text-red-600 font-bold text-xs uppercase tracking-wide">{t.pressTokenErr}</p>
             )}
             <button
               onClick={verificarToken}
               className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] active:translate-y-0.5 transition-all"
             >
-              Acceder / Access / Kirjaudu
+              {t.pressBtnAccess}
             </button>
           </div>
-          <p className="text-[10px] text-gray-400 text-center font-medium">
-            Acceso restringido a periodistas y organizaciones verificadas.<br />
-            Restricted to verified journalists and organizations.
-          </p>
+          <p className="text-[10px] text-gray-400 text-center font-medium">{t.pressRestricted}</p>
         </div>
       </div>
     );
@@ -498,71 +565,64 @@ const PressView = ({ setView, incidentId }) => {
         <button onClick={() => setView('home')} className="p-1 -ml-2 hover:bg-gray-800 rounded-full active:scale-90">
           <ChevronLeft size={32} />
         </button>
-        <h2 className="font-black text-lg flex-1 truncate tracking-tight">Data Room — Press</h2>
+        <h2 className="font-black text-lg flex-1 truncate tracking-tight">{t.pressTitle}</h2>
       </div>
       <div className="p-5 space-y-6">
         {/* Métricas */}
         <div className="border-4 border-black p-5">
           <h3 className="font-black text-xs uppercase tracking-widest mb-4 text-gray-500">
-            Census Figures — {new Date().toISOString().slice(0, 10)}
+            {t.pressMetricsTitle} — {new Date().toISOString().slice(0, 10)}
           </h3>
           {pressStats ? (
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-3xl font-black">{(pressStats.total - 144).toLocaleString()}</span>
-                <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Total in Census</span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">{t.pressTotal}</span>
               </div>
               <div>
                 <span className="text-3xl font-black text-red-600">{pressStats.buscados?.toLocaleString()}</span>
-                <span className="block text-[10px] font-bold uppercase tracking-widest text-red-500 mt-1">Missing</span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-red-500 mt-1">{t.pressMissing}</span>
               </div>
               <div>
                 <span className="text-3xl font-black text-orange-500">{pressStats.heridos?.toLocaleString()}</span>
-                <span className="block text-[10px] font-bold uppercase tracking-widest text-orange-400 mt-1">Hospitalized</span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-orange-400 mt-1">{t.pressHosp}</span>
               </div>
               <div>
                 <span className="text-3xl font-black text-green-600">{pressStats.a_salvo?.toLocaleString()}</span>
-                <span className="block text-[10px] font-bold uppercase tracking-widest text-green-500 mt-1">Located / Safe</span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-green-500 mt-1">{t.pressSafe}</span>
               </div>
             </div>
           ) : (
-            <p className="text-gray-400 font-mono text-sm animate-pulse">Loading...</p>
+            <p className="text-gray-400 font-mono text-sm animate-pulse">{t.loading}</p>
           )}
           <p className="text-[9px] text-gray-400 font-mono mt-4 border-t border-gray-100 pt-3">
-            Last updated: {new Date().toLocaleString('en-US')} UTC •{' '}
-            Status reflects last report received. Mortality figures excluded — require official forensic verification.
+            {new Date().toLocaleString('en-US')} UTC • {t.pressNote}
           </p>
         </div>
 
         {/* Descarga */}
         <div className="border-4 border-black p-5 space-y-3">
-          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">Dataset</h3>
-          <p className="text-sm text-gray-700 font-medium">
-            Sanitized CSV — one record per person, latest status only. Sources anonymized. Mortality excluded.
-          </p>
+          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">{t.pressDataTitle}</h3>
+          <p className="text-sm text-gray-700 font-medium">{t.pressDataDesc}</p>
           <button
             onClick={descargarCSV}
             disabled={descargando}
             className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 disabled:opacity-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
           >
-            {descargando ? 'PROCESSING DATASET...' : 'DOWNLOAD OFFICIAL DATASET (CSV)'}
+            {descargando ? t.pressBtnDlLoading : t.pressBtnDl}
           </button>
-          <p className="text-[10px] text-gray-400">
-            Attribution required: "Source: Encuéntrame VE / IDIKI TECH SRL, 2026"
-          </p>
+          <p className="text-[10px] text-gray-400">{t.pressAttribution}</p>
         </div>
 
         {/* Metodología */}
         <div className="border border-gray-300 p-5 space-y-4 bg-gray-50">
-          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">Methodological Framework</h3>
-          <p className="text-xs text-gray-700 leading-relaxed">
-            This dataset is the result of organic crowdsourcing, OSINT methodologies, and advanced phonetic deduplication algorithms. Aggregated by civil society and the Venezuelan diaspora globally.
-          </p>
+          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">{t.pressMethTitle}</h3>
+          <p className="text-xs text-gray-700 leading-relaxed">{t.pressMethDesc}</p>
           <button
             onClick={() => setShowMethodology(true)}
             className="w-full bg-white border-2 border-black text-black font-bold uppercase py-3 text-xs hover:bg-gray-100 transition-colors"
           >
-            Read Full Methodology & Codebook
+            {t.pressBtnRead}
           </button>
         </div>
       </div>
@@ -571,23 +631,23 @@ const PressView = ({ setView, incidentId }) => {
         <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm">
           <div className="bg-white max-w-2xl w-full my-auto shadow-2xl relative">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-              <h2 className="font-black text-lg uppercase tracking-tight">Methodological Framework & Codebook</h2>
+              <h2 className="font-black text-lg uppercase tracking-tight">{t.pressModalTitle}</h2>
               <button onClick={() => setShowMethodology(false)} className="text-gray-500 hover:text-black p-2">
                 <X size={24} />
               </button>
             </div>
             <div className="p-6 space-y-6 text-sm text-gray-800 font-serif leading-relaxed h-[70vh] overflow-y-auto">
               <section>
-                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">1. Data Provenance & Organic Crowdsourcing</h3>
-                <p>This dataset is the result of a massive, organic crowdsourcing effort initiated within the first 24 hours of the crisis. The initial data ingestion was driven by civil society, rescue volunteers on the ground, and the rapid dissemination of the platform by the Venezuelan diaspora globally (spanning from Latin America to hubs in Europe, such as Finland). This collaborative network enabled the real-time capture of critical survival data before traditional communication channels collapsed.</p>
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">1. Data Provenance & Decentralized Crowdsourcing</h3>
+                <p>In a collapsed-infrastructure environment, standard data collection is impossible. This dataset relies on asynchronous crowdsourcing. Volunteers on the ground captured photographic and video evidence of handwritten admission lists at medical outposts and shelters. Simultaneously, the Venezuelan diaspora globally operated as a decentralized data-entry network, applying OSINT (Open Source Intelligence) techniques to digitize these analog records and social media distress signals in real-time.</p>
               </section>
               <section>
-                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">2. Data Engineering & Sanitization</h3>
-                <p>To process the influx of decentralized reports, we implemented a strict ETL (Extract, Transform, Load) pipeline. The raw data contained thousands of panic-induced duplicates and typographical variations. We applied probabilistic record linkage and phonetic trigram deduplication algorithms (PostgreSQL GIN Trigram indexes) to normalize strings, remove phonetic duplicates, and consolidate identities safely without generating false positives.</p>
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">2. Data Engineering & Sanitization Pipeline</h3>
+                <p>This decentralized ingestion naturally produced high volumes of phonetic noise and panic-induced duplication. To resolve this, we implemented a strict ETL (Extract, Transform, Load) pipeline utilizing PostgreSQL GIN Trigram indexes for probabilistic record linkage. This algorithmic approach allowed us to normalize strings, identify fuzzy clones, and consolidate thousands of fragmented identities safely without generating false positives.</p>
               </section>
               <section>
-                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">3. Cross-Referencing & Data Masking</h3>
-                <p>Missing persons reports were cross-referenced with public and private hospital admission registries using OSINT (Open Source Intelligence) methodologies. Internal tracking metadata and exact extraction vectors have been masked in this public dataset to protect the integrity of the sources and the privacy of the victims.<br /><br /><em>* Note: Mortality figures (Deceased) have been strictly excluded from this public dataset, adhering to ICRC/OCHA standards requiring official forensic verification.</em></p>
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">3. Data Masking & Ethics</h3>
+                <p>Original reporter nodes (volunteer phone numbers) and exact multimedia source vectors have been masked in this public release to protect citizens on the ground. Furthermore, mortality figures (Deceased) have been strictly excluded from this dataset, adhering to ICRC/OCHA standards that require official forensic verification.</p>
               </section>
               <section>
                 <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">4. Data Dictionary (Codebook)</h3>
@@ -602,8 +662,8 @@ const PressView = ({ setView, incidentId }) => {
               </section>
             </div>
             <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-between items-center text-xs text-gray-500 font-mono">
-              <span>Encuéntrame VE Data Integrity Team</span>
-              <span>IDIKI TECH SRL</span>
+              <span>{t.pressModalFooterLeft}</span>
+              <span>{t.legalCompany}</span>
             </div>
           </div>
         </div>
@@ -1253,7 +1313,7 @@ export default function App() {
             onClick={() => setView('press')}
             className="mt-4 text-[10px] text-gray-400 hover:text-gray-600 font-mono underline underline-offset-2 transition-colors"
           >
-            Press / Prensa / Lehdistö
+            {T[lang].pressMenu}
           </button>
         </div>
       </div>
@@ -1635,7 +1695,7 @@ export default function App() {
       {view === 'form_zona'            && FormZonaView()}
       {view === 'form_aporte_persona'  && FormAportePersonaView()}
       {view === 'form_aporte_zona'     && FormAporteZonaView()}
-      {view === 'press'                && <PressView setView={setView} incidentId={incidentId} />}
+      {view === 'press'                && <PressView setView={setView} incidentId={incidentId} lang={lang} />}
 
       {/* MODAL DE ÉXITO — TELEGRAM */}
       {showSuccessModal && selectedItem && (
