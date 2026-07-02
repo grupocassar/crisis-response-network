@@ -127,7 +127,7 @@ const T = {
     pressSubtitle: 'Encuéntrame VE — IDIKI TECH SRL',
     pressTokenPh: 'Token de acceso (Ej: PVE-XXXX)',
     pressBtnAccess: 'Acceder al Portal',
-    pressRestricted: 'Acceso restringido a periodistas y organizaciones verificadas.',
+    pressRestricted: 'Acceso otorgado individualmente mediante token a periodistas acreditados, organizaciones humanitarias y usuarios institucionales.',
     pressTokenErr: 'Token inválido. Contacta a IDIKI TECH SRL.',
     pressMetricsTitle: 'Cifras del Censo',
     pressTotal: 'Total en Censo',
@@ -257,7 +257,7 @@ const T = {
     pressSubtitle: 'Encuéntrame VE — IDIKI TECH SRL',
     pressTokenPh: 'Access token (e.g. PVE-XXXX)',
     pressBtnAccess: 'Access Portal',
-    pressRestricted: 'Restricted to verified journalists and organizations.',
+    pressRestricted: 'Access is granted individually via token to accredited journalists, humanitarian organizations, and institutional users.',
     pressTokenErr: 'Invalid token. Contact IDIKI TECH SRL.',
     pressMetricsTitle: 'Census Figures',
     pressTotal: 'Total in Census',
@@ -383,7 +383,7 @@ const T = {
     pressSubtitle: 'Encuéntrame VE — IDIKI TECH SRL',
     pressTokenPh: 'Pääsytunnus (esim. PVE-XXXX)',
     pressBtnAccess: 'Kirjaudu Sisään',
-    pressRestricted: 'Pääsy sallittu vain vahvistetuille journalisteille ja järjestöille.',
+    pressRestricted: 'Pääsy myönnetään yksilöllisesti tunnuksella akkreditoiduille journalisteille, humanitaarisille järjestöille ja instituutioille.',
     pressTokenErr: 'Virheellinen tunnus. Ota yhteyttä IDIKI TECH SRL.',
     pressMetricsTitle: 'Väestönlaskennan Luvut',
     pressTotal: 'Yhteensä',
@@ -676,7 +676,7 @@ const PressView = ({ setView, incidentId, lang }) => {
 
               <section>
                 <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2 font-sans">2. Data Engineering & Sanitization Pipeline</h3>
-                <p>This decentralized ingestion naturally produced high volumes of phonetic noise and panic-induced duplication. To resolve this, we implemented a strict ETL (Extract, Transform, Load) pipeline utilizing PostgreSQL GIN Trigram indexes for probabilistic record linkage. This algorithmic approach allowed us to normalize strings, identify fuzzy clones, and consolidate thousands of fragmented identities safely.</p>
+                <p>This decentralized ingestion naturally produced high volumes of phonetic noise and panic-induced duplication. To resolve this, we implemented a strict ETL (Extract, Transform, Load) pipeline utilizing PostgreSQL GIN Trigram indexes for probabilistic record linkage. This algorithmic approach allowed us to normalize strings, identify fuzzy clones, and consolidate thousands of fragmented identities safely. Incoming reports are reviewed and consolidated into person-level records before being reflected in the public dataset.</p>
               </section>
 
               {/* Codebook */}
