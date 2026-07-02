@@ -137,11 +137,11 @@ const T = {
     pressNote: 'Los decesos están excluidos — requieren verificación forense oficial.',
     pressDataTitle: 'Dataset Oficial',
     pressDataDesc: 'CSV Sanitizado. Fuentes anonimizadas y duplicados resueltos.',
-    pressBtnDl: 'DESCARGAR DATASET OFICIAL (CSV)',
+    pressBtnDl: 'DESCARGAR DATASET (CSV)',
     pressBtnDlLoading: 'PROCESANDO DATASET...',
-    pressCitation: 'Cita sugerida: "Censo Unificado de Emergencia, Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressCitation: 'Cita sugerida: "Censo Unificado de Emergencia, Encuéntrame VE, 2026"',
     pressLimitsTitle: 'Limitaciones del Dataset',
-    pressLimitsDesc: 'Este dataset no debe interpretarse como un censo oficial emitido por el Estado. Representa el mayor registro civil independiente consolidado durante la emergencia. Las limitaciones inherentes incluyen: sesgo de reporte voluntario, cobertura geográfica incompleta debido a vías colapsadas, telecomunicaciones intermitentes, sincronización retrasada de nodos offline y reconciliación de identidades en curso. Por estas razones, los conteos agregados pueden evolucionar a medida que continúa la resolución de duplicados y la ingesta de reportes tardíos.',
+    pressLimitsDesc: 'Este dataset no debe interpretarse como un censo oficial emitido por el Estado. Representa el mayor registro civil independiente consolidado durante la emergencia. Las limitaciones incluyen: sesgo de reporte voluntario, cobertura geográfica incompleta debido a vías colapsadas, telecomunicaciones intermitentes y reconciliación de identidades en curso. Por estas razones, los conteos agregados pueden evolucionar.',
     pressVersion: 'Versión del Dataset:',
     pressHash: 'Integridad (SHA-256):',
     pressMethTitle: 'Marco Metodológico',
@@ -266,11 +266,11 @@ const T = {
     pressNote: 'Mortality figures excluded — require official forensic verification.',
     pressDataTitle: 'Official Dataset',
     pressDataDesc: 'Sanitized CSV. Anonymized sources and resolved duplicates.',
-    pressBtnDl: 'DOWNLOAD OFFICIAL DATASET (CSV)',
+    pressBtnDl: 'DOWNLOAD DATASET (CSV)',
     pressBtnDlLoading: 'PROCESSING DATASET...',
-    pressCitation: 'Suggested Citation: "Unified Emergency Census, Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressCitation: 'Suggested Citation: "Unified Emergency Census, Encuéntrame VE, 2026"',
     pressLimitsTitle: 'Dataset Limitations & Confidence',
-    pressLimitsDesc: 'This dataset should not be interpreted as an official census. Rather, it represents the largest known independent civilian registry compiled during the emergency. Limitations include: voluntary reporting bias, incomplete geographic coverage due to collapsed infrastructure, intermittent telecommunications, delayed synchronization from offline nodes, and ongoing identity reconciliation. For these reasons, aggregate counts may evolve as duplicate resolution and late reports continue.',
+    pressLimitsDesc: 'This dataset should not be interpreted as an official census. Rather, it represents the largest known independent civilian registry compiled during the emergency. Limitations include: voluntary reporting bias, incomplete geographic coverage due to collapsed infrastructure, intermittent telecommunications, and ongoing identity reconciliation. For these reasons, aggregate counts may evolve.',
     pressVersion: 'Dataset Version:',
     pressHash: 'Integrity (SHA-256):',
     pressMethTitle: 'Methodological Framework',
@@ -391,11 +391,11 @@ const T = {
     pressNote: 'Kuolleisuusluvut jätetty pois — vaativat virallisen oikeuslääketieteellisen vahvistuksen.',
     pressDataTitle: 'Virallinen Tietojoukko',
     pressDataDesc: 'Puhdistettu CSV. Lähteet anonymisoitu ja kaksoiskappaleet poistettu.',
-    pressBtnDl: 'LATAA VIRALLINEN TIETOJOUKKO (CSV)',
+    pressBtnDl: 'LATAA TIETOJOUKKO (CSV)',
     pressBtnDlLoading: 'KASITELLAAN TIETOA...',
-    pressCitation: 'Suositeltu viittaus: "Unified Emergency Census, Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressCitation: 'Suositeltu viittaus: "Unified Emergency Census, Encuéntrame VE, 2026"',
     pressLimitsTitle: 'Tietojoukon Rajoitukset',
-    pressLimitsDesc: 'Tätä tietojoukkoa ei pidä tulkita viralliseksi väestönlaskennaksi. Se edustaa suurinta tunnettua itsenäistä siviilirekisteriä, joka on koottu hätätilanteen aikana. Rajoituksiin kuuluvat: vapaaehtoisen raportoinnin harha, epätäydellinen maantieteellinen kattavuus, katkonaiset tietoliikenneyhteydet, viivästynyt synkronointi offline-solmuista ja jatkuva identiteettien täsmäytys. Näistä syistä kokonaisluvut voivat muuttua, kun kaksoiskappaleiden selvittäminen ja myöhästyneet raportit jatkuvat.',
+    pressLimitsDesc: 'Tätä tietojoukkoa ei pidä tulkita viralliseksi väestönlaskennaksi. Se edustaa suurinta tunnettua itsenäistä siviilirekisteriä. Rajoituksiin kuuluvat: vapaaehtoisen raportoinnin harha, epätäydellinen maantieteellinen kattavuus, katkonaiset tietoliikenneyhteydet ja jatkuva identiteettien täsmäytys. Kokonaisluvut voivat muuttua.',
     pressVersion: 'Tietojoukon Versio:',
     pressHash: 'Eheys (SHA-256):',
     pressMethTitle: 'Metodologinen Viitekehys',
@@ -640,16 +640,10 @@ const PressView = ({ setView, incidentId, lang }) => {
           </div>
         </div>
 
-        {/* Limitaciones */}
-        <div className="border border-gray-300 p-5 space-y-3 bg-white">
+        {/* Limitaciones Conocidas + Lanzador del Modal */}
+        <div className="border border-gray-300 p-5 space-y-4 bg-gray-50">
           <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">{t.pressLimitsTitle}</h3>
           <p className="text-xs text-gray-700 leading-relaxed">{t.pressLimitsDesc}</p>
-        </div>
-
-        {/* Metodología */}
-        <div className="border border-gray-300 p-5 space-y-4 bg-gray-50">
-          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">{t.pressMethTitle}</h3>
-          <p className="text-xs text-gray-700 leading-relaxed">{t.pressMethDesc}</p>
           <button
             onClick={() => setShowMethodology(true)}
             className="w-full bg-white border-2 border-black text-black font-bold uppercase py-3 text-xs hover:bg-gray-100 transition-colors"
@@ -668,34 +662,66 @@ const PressView = ({ setView, incidentId, lang }) => {
                 <X size={24} />
               </button>
             </div>
-            <div className="p-6 space-y-6 text-sm text-gray-800 font-serif leading-relaxed h-[70vh] overflow-y-auto">
+            <div className="p-6 space-y-8 text-sm text-gray-800 font-serif leading-relaxed h-[70vh] overflow-y-auto">
+
+              {/* Metodología */}
               <section>
-                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">1. Data Provenance & Decentralized Crowdsourcing</h3>
-                <p>In a collapsed-infrastructure environment, standard data collection is impossible. This dataset relies on asynchronous crowdsourcing. Volunteers on the ground captured photographic and video evidence of handwritten admission lists at medical outposts and shelters. Simultaneously, the Venezuelan diaspora globally operated as a decentralized data-entry network, applying OSINT (Open Source Intelligence) techniques to digitize these analog records and social media distress signals in real-time.</p>
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2 font-sans">1. Data Provenance & Decentralized Reporting</h3>
+                <p>In a collapsed-infrastructure environment, standard data collection is highly impaired. This dataset relies on asynchronous crowdsourcing. Volunteers on the ground captured photographic and video evidence of handwritten admission lists at medical outposts and shelters. Simultaneously, the Venezuelan diaspora globally operated as a decentralized data-entry network, applying OSINT techniques to digitize these records and social media distress signals in real-time.</p>
               </section>
+
               <section>
-                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">2. Data Engineering & Sanitization Pipeline</h3>
-                <p>This decentralized ingestion naturally produced high volumes of phonetic noise and panic-induced duplication. To resolve this, we implemented a strict ETL (Extract, Transform, Load) pipeline utilizing PostgreSQL GIN Trigram indexes for probabilistic record linkage. This algorithmic approach allowed us to normalize strings, identify fuzzy clones, and consolidate thousands of fragmented identities safely without generating false positives.</p>
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2 font-sans">2. Data Engineering & Sanitization Pipeline</h3>
+                <p>This decentralized ingestion naturally produced high volumes of phonetic noise and panic-induced duplication. To resolve this, we implemented a strict ETL (Extract, Transform, Load) pipeline utilizing PostgreSQL GIN Trigram indexes for probabilistic record linkage. This algorithmic approach allowed us to normalize strings, identify fuzzy clones, and consolidate thousands of fragmented identities safely.</p>
               </section>
+
+              {/* Codebook */}
               <section>
-                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">3. Data Masking & Ethics</h3>
-                <p>Original reporter nodes (volunteer phone numbers) and exact multimedia source vectors have been masked in this public release to protect citizens on the ground. Furthermore, mortality figures (Deceased) have been strictly excluded from this dataset, adhering to ICRC/OCHA standards that require official forensic verification.</p>
-              </section>
-              <section>
-                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">4. Data Dictionary (Codebook)</h3>
-                <ul className="list-disc pl-5 space-y-2 text-xs font-sans">
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2 font-sans">3. Data Dictionary (Codebook)</h3>
+                <ul className="list-disc pl-5 space-y-2 text-xs font-sans text-gray-700">
                   <li><strong>full_name:</strong> Sanitized and normalized identity string.</li>
                   <li><strong>identity_document:</strong> National ID (Nullified if the reported format was invalid to prevent identity clashes).</li>
                   <li><strong>last_reported_status:</strong> Categorical state (Missing, Located, Hospitalized).</li>
                   <li><strong>last_known_location:</strong> Last confirmed spatial data point or medical facility.</li>
                   <li><strong>data_source:</strong> Anonymized provenance (Verified Citizen Report, Public Health Network, OSINT).</li>
-                  <li><strong>first_reported_utc / last_updated_utc:</strong> ISO 8601 Timestamps of the record lifecycle.</li>
+                  <li><strong>last_updated_utc:</strong> ISO 8601 Timestamp of the record's last status change.</li>
                 </ul>
               </section>
+
+              {/* FAQ */}
+              <section className="pt-6 border-t border-gray-200">
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-4 font-sans">4. Frequently Asked Questions (For Journalists)</h3>
+
+                <div className="space-y-5 text-sm">
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-1 font-sans">Why do your figures differ from other publicly available figures?</h4>
+                    <p className="text-gray-700">This dataset is generated through decentralized civilian reporting rather than institutional reporting channels. It reflects records submitted by citizens, volunteers, hospitals, shelters, and open-source intelligence as they are received and reconciled. Different collection methodologies naturally produce different totals. Journalists are encouraged to compare methodologies rather than isolated headline numbers.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-1 font-sans">Why do the totals change over time?</h4>
+                    <p className="text-gray-700">Disaster datasets are inherently dynamic. New reports arrive continuously while duplicate identities are reconciled and previously missing individuals are later located. Dataset revisions therefore reflect improved data quality rather than instability.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-1 font-sans">Why are deceased figures excluded from the public dataset?</h4>
+                    <p className="text-gray-700">Adhering to ICRC and OCHA humanitarian standards, mortality figures require official forensic verification in the field. To prevent unnecessary distress and respect privacy, unverified reports of death are excluded from the public CSV.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-1 font-sans">Who can audit this dataset?</h4>
+                    <p className="text-gray-700">Accredited journalists, humanitarian organizations, and academic researchers may request access to the underlying methodology and additional documentation. Access is provided individually to protect sensitive civilian information while allowing independent review.</p>
+                  </div>
+                </div>
+              </section>
             </div>
-            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-between items-center text-xs text-gray-500 font-mono">
-              <span>{t.pressModalFooterLeft}</span>
-              <span>{t.legalCompany}</span>
+
+            {/* Firma Institucional Sobria */}
+            <div className="bg-gray-50 border-t border-gray-200 p-6 text-xs text-gray-600 font-mono space-y-2">
+              <p><strong className="text-gray-900">MAINTAINER:</strong> Nelson Torres</p>
+              <p><strong className="text-gray-900">PRESS CONTACT:</strong> administrador@grupo-cassar.com</p>
+              <p><strong className="text-gray-900">LOCATION:</strong> Lahti, Finland</p>
+              <p><strong className="text-gray-900">INFRASTRUCTURE:</strong> Cloudflare Edge Network / Supabase</p>
             </div>
           </div>
         </div>
