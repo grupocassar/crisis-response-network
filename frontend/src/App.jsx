@@ -131,8 +131,9 @@ const T = {
     pressTokenErr: 'Token inválido. Contacta a IDIKI TECH SRL.',
     pressMetricsTitle: 'Cifras del Censo',
     pressTotal: 'Total en Censo',
+    pressTotalNote: '(Desaparecidos + Hospitalizados + Localizados. Excluye decesos)',
     pressMissing: 'Aún Desaparecidos',
-    pressHosp: 'Ingresados (Hospitales)',
+    pressHosp: 'Hospitalizados',
     pressSafe: 'Localizados (A Salvo)',
     pressNote: 'Los decesos están excluidos — requieren verificación forense oficial.',
     pressDataTitle: 'Dataset Oficial',
@@ -260,6 +261,7 @@ const T = {
     pressTokenErr: 'Invalid token. Contact IDIKI TECH SRL.',
     pressMetricsTitle: 'Census Figures',
     pressTotal: 'Total in Census',
+    pressTotalNote: '(Missing + Hospitalized + Located. Excludes mortality figures)',
     pressMissing: 'Still Missing',
     pressHosp: 'Hospitalized',
     pressSafe: 'Located / Safe',
@@ -385,6 +387,7 @@ const T = {
     pressTokenErr: 'Virheellinen tunnus. Ota yhteyttä IDIKI TECH SRL.',
     pressMetricsTitle: 'Väestönlaskennan Luvut',
     pressTotal: 'Yhteensä',
+    pressTotalNote: '(Kadonnut + Sairaalassa + Löydetty. Ei sisällä kuolleita)',
     pressMissing: 'Kadonnut',
     pressHosp: 'Sairaalassa',
     pressSafe: 'Löydetty',
@@ -600,6 +603,7 @@ const PressView = ({ setView, incidentId, lang }) => {
               <div>
                 <span className="text-3xl font-black">{(pressStats.total - 144).toLocaleString()}</span>
                 <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">{t.pressTotal}</span>
+                <span className="block text-[8px] font-mono text-gray-400 mt-0.5">{T[lang].pressTotalNote}</span>
               </div>
               <div>
                 <span className="text-3xl font-black text-red-600">{pressStats.buscados?.toLocaleString()}</span>
@@ -636,7 +640,7 @@ const PressView = ({ setView, incidentId, lang }) => {
           <p className="text-[10px] text-gray-500 leading-relaxed">{t.pressCitation}</p>
           <div className="text-[10px] text-gray-500 font-mono border-t border-gray-200 pt-3 space-y-1">
             <p>{t.pressVersion} {DATASET_VERSION}</p>
-            <p className="break-all">{t.pressHash} {fileHash || '—'}</p>
+            <span><strong>{T[lang].pressHash}</strong> {fileHash ? fileHash : '[Dynamically generated upon download]'}</span>
           </div>
         </div>
 
@@ -710,7 +714,7 @@ const PressView = ({ setView, incidentId, lang }) => {
 
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1 font-sans">Who can audit this dataset?</h4>
-                    <p className="text-gray-700">Accredited journalists, humanitarian organizations, and academic researchers may request access to the underlying methodology and additional documentation. Access is provided individually to protect sensitive civilian information while allowing independent review.</p>
+                    <p className="text-gray-700">Accredited journalists, humanitarian organizations, and academic researchers may request access to anonymized data samples, our sanitization logic, and source documentation. Access is provided individually to protect sensitive civilian information while allowing independent review of the collection process.</p>
                   </div>
                 </div>
               </section>
