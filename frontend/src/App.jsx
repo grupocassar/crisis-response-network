@@ -137,9 +137,13 @@ const T = {
     pressNote: 'Los decesos están excluidos — requieren verificación forense oficial.',
     pressDataTitle: 'Dataset Oficial',
     pressDataDesc: 'CSV Sanitizado. Fuentes anonimizadas y duplicados resueltos.',
-    pressBtnDl: 'DESCARGAR DATASET (CSV)',
+    pressBtnDl: 'DESCARGAR DATASET OFICIAL (CSV)',
     pressBtnDlLoading: 'PROCESANDO DATASET...',
-    pressAttribution: 'Atribución requerida: "Fuente: Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressCitation: 'Cita sugerida: "Censo Unificado de Emergencia, Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressLimitsTitle: 'Limitaciones del Dataset',
+    pressLimitsDesc: 'Este dataset no debe interpretarse como un censo oficial emitido por el Estado. Representa el mayor registro civil independiente consolidado durante la emergencia. Las limitaciones inherentes incluyen: sesgo de reporte voluntario, cobertura geográfica incompleta debido a vías colapsadas, telecomunicaciones intermitentes, sincronización retrasada de nodos offline y reconciliación de identidades en curso. Por estas razones, los conteos agregados pueden evolucionar a medida que continúa la resolución de duplicados y la ingesta de reportes tardíos.',
+    pressVersion: 'Versión del Dataset:',
+    pressHash: 'Integridad (SHA-256):',
     pressMethTitle: 'Marco Metodológico',
     pressMethDesc: 'Data consolidada mediante crowdsourcing descentralizado, inteligencia de fuentes abiertas (OSINT) y digitalización de registros analógicos por la diáspora. Depurada con algoritmos de deduplicación fonética (Trigramas).',
     pressBtnRead: 'Leer Metodología Completa',
@@ -262,9 +266,13 @@ const T = {
     pressNote: 'Mortality figures excluded — require official forensic verification.',
     pressDataTitle: 'Official Dataset',
     pressDataDesc: 'Sanitized CSV. Anonymized sources and resolved duplicates.',
-    pressBtnDl: 'DOWNLOAD DATASET (CSV)',
+    pressBtnDl: 'DOWNLOAD OFFICIAL DATASET (CSV)',
     pressBtnDlLoading: 'PROCESSING DATASET...',
-    pressAttribution: 'Attribution required: "Source: Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressCitation: 'Suggested Citation: "Unified Emergency Census, Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressLimitsTitle: 'Dataset Limitations & Confidence',
+    pressLimitsDesc: 'This dataset should not be interpreted as an official census. Rather, it represents the largest known independent civilian registry compiled during the emergency. Limitations include: voluntary reporting bias, incomplete geographic coverage due to collapsed infrastructure, intermittent telecommunications, delayed synchronization from offline nodes, and ongoing identity reconciliation. For these reasons, aggregate counts may evolve as duplicate resolution and late reports continue.',
+    pressVersion: 'Dataset Version:',
+    pressHash: 'Integrity (SHA-256):',
     pressMethTitle: 'Methodological Framework',
     pressMethDesc: 'Data consolidated via decentralized crowdsourcing, Open Source Intelligence (OSINT), and digitization of analog records by the diaspora. Cleansed using phonetic deduplication algorithms.',
     pressBtnRead: 'Read Full Methodology',
@@ -383,9 +391,13 @@ const T = {
     pressNote: 'Kuolleisuusluvut jätetty pois — vaativat virallisen oikeuslääketieteellisen vahvistuksen.',
     pressDataTitle: 'Virallinen Tietojoukko',
     pressDataDesc: 'Puhdistettu CSV. Lähteet anonymisoitu ja kaksoiskappaleet poistettu.',
-    pressBtnDl: 'LATAA TIETOJOUKKO (CSV)',
+    pressBtnDl: 'LATAA VIRALLINEN TIETOJOUKKO (CSV)',
     pressBtnDlLoading: 'KASITELLAAN TIETOA...',
-    pressAttribution: 'Lahdeviite vaaditaan: "Lahde: Encuentrame VE / IDIKI TECH SRL, 2026"',
+    pressCitation: 'Suositeltu viittaus: "Unified Emergency Census, Encuéntrame VE / IDIKI TECH SRL, 2026"',
+    pressLimitsTitle: 'Tietojoukon Rajoitukset',
+    pressLimitsDesc: 'Tätä tietojoukkoa ei pidä tulkita viralliseksi väestönlaskennaksi. Se edustaa suurinta tunnettua itsenäistä siviilirekisteriä, joka on koottu hätätilanteen aikana. Rajoituksiin kuuluvat: vapaaehtoisen raportoinnin harha, epätäydellinen maantieteellinen kattavuus, katkonaiset tietoliikenneyhteydet, viivästynyt synkronointi offline-solmuista ja jatkuva identiteettien täsmäytys. Näistä syistä kokonaisluvut voivat muuttua, kun kaksoiskappaleiden selvittäminen ja myöhästyneet raportit jatkuvat.',
+    pressVersion: 'Tietojoukon Versio:',
+    pressHash: 'Eheys (SHA-256):',
     pressMethTitle: 'Metodologinen Viitekehys',
     pressMethDesc: 'Tiedot on koottu hajautetun joukkoistamisen, avoimien lähteiden tiedustelun (OSINT) ja analogisten asiakirjojen digitoinnin avulla. Puhdistettu foneettisilla algoritmeilla.',
     pressBtnRead: 'Lue Koko Metodologia',
@@ -466,11 +478,13 @@ const ZonaCard = memo(({ item, onClick, lang = 'es' }) => (
 // Componente standalone (fuera de App) para hooks estables y reset de estado al salir
 const PressView = ({ setView, incidentId, lang }) => {
   const TOKENS_VALIDOS = ['PVE-2026-TOMMI', 'PVE-2026-B'];
+  const DATASET_VERSION = '2026.07.02';
   const t = T[lang] || T.es;
   const [tokenInput, setTokenInput] = useState('');
   const [autenticado, setAutenticado] = useState(false);
   const [pressStats, setPressStats] = useState(null);
   const [descargando, setDescargando] = useState(false);
+  const [fileHash, setFileHash] = useState(null);
   const [tokenError, setTokenError] = useState(false);
   const [showMethodology, setShowMethodology] = useState(false);
 
@@ -509,6 +523,14 @@ const PressView = ({ setView, incidentId, lang }) => {
         }).join(',')
       );
       const csv = '\uFEFF' + [cols.join(','), ...rows].join('\n');
+
+      // Calcular SHA-256 del contenido
+      const msgBuffer = new TextEncoder().encode(csv);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      setFileHash(hashHex);
+
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       a.download = `encuentrame_ve_census_${new Date().toISOString().slice(0, 10)}.csv`;
@@ -611,7 +633,17 @@ const PressView = ({ setView, incidentId, lang }) => {
           >
             {descargando ? t.pressBtnDlLoading : t.pressBtnDl}
           </button>
-          <p className="text-[10px] text-gray-400">{t.pressAttribution}</p>
+          <p className="text-[10px] text-gray-500 leading-relaxed">{t.pressCitation}</p>
+          <div className="text-[10px] text-gray-500 font-mono border-t border-gray-200 pt-3 space-y-1">
+            <p>{t.pressVersion} {DATASET_VERSION}</p>
+            <p className="break-all">{t.pressHash} {fileHash || '—'}</p>
+          </div>
+        </div>
+
+        {/* Limitaciones */}
+        <div className="border border-gray-300 p-5 space-y-3 bg-white">
+          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">{t.pressLimitsTitle}</h3>
+          <p className="text-xs text-gray-700 leading-relaxed">{t.pressLimitsDesc}</p>
         </div>
 
         {/* Metodología */}
