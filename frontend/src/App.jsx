@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft, ChevronRight, Globe, ChevronDown, Users, ImageOff } from 'lucide-react';
+import { Search, User, Map, AlertTriangle, CheckCircle, Clock, ShieldCheck, Plus, MapPin, RefreshCw, Bell, Edit3, ChevronLeft, ChevronRight, Globe, ChevronDown, Users, ImageOff, X } from 'lucide-react';
 
 // --- CREDENCIALES REALES SUPABASE ---
 const SUPABASE_URL = 'https://mtbtgkzwaukqkayxfwqn.supabase.co';
@@ -402,6 +402,7 @@ const PressView = ({ setView, incidentId }) => {
   const [pressStats, setPressStats] = useState(null);
   const [descargando, setDescargando] = useState(false);
   const [tokenError, setTokenError] = useState(false);
+  const [showMethodology, setShowMethodology] = useState(false);
 
   useEffect(() => {
     if (!autenticado || !incidentId) return;
@@ -544,7 +545,7 @@ const PressView = ({ setView, incidentId }) => {
             disabled={descargando}
             className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 disabled:opacity-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
           >
-            {descargando ? 'Generating...' : '⬇ Download Official Dataset (CSV)'}
+            {descargando ? 'PROCESSING DATASET...' : 'DOWNLOAD OFFICIAL DATASET (CSV)'}
           </button>
           <p className="text-[10px] text-gray-400">
             Attribution required: "Source: Encuéntrame VE / IDIKI TECH SRL, 2026"
@@ -552,24 +553,61 @@ const PressView = ({ setView, incidentId }) => {
         </div>
 
         {/* Metodología */}
-        <div className="border-4 border-gray-300 p-5 space-y-3 bg-gray-50">
-          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">Methodology</h3>
+        <div className="border border-gray-300 p-5 space-y-4 bg-gray-50">
+          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">Methodological Framework</h3>
           <p className="text-xs text-gray-700 leading-relaxed">
-            This dataset results from OSINT methodologies and citizen validation (crowdsourcing).
-            Phonetic trigram deduplication algorithms were applied to eliminate noise.
-            Hospital admission records were unified into a single clean data infrastructure.
-            A full forensic audit was conducted on 2026-07-01 covering 91,574 records.
+            This dataset is the result of organic crowdsourcing, OSINT methodologies, and advanced phonetic deduplication algorithms. Aggregated by civil society and the Venezuelan diaspora globally.
           </p>
-          <p className="text-xs text-gray-700 leading-relaxed">
-            <strong>Column guide:</strong> full_name, identity_document, status_code
-            (MISSING / HOSPITALIZED / LOCATED), last_known_location, data_source,
-            first_reported_utc, last_updated_utc.
-          </p>
-          <p className="text-xs font-bold text-gray-800 mt-2">
-            Contact: IDIKI TECH SRL | RNC: 133-57596-5
-          </p>
+          <button
+            onClick={() => setShowMethodology(true)}
+            className="w-full bg-white border-2 border-black text-black font-bold uppercase py-3 text-xs hover:bg-gray-100 transition-colors"
+          >
+            Read Full Methodology & Codebook
+          </button>
         </div>
       </div>
+
+      {showMethodology && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm">
+          <div className="bg-white max-w-2xl w-full my-auto shadow-2xl relative">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+              <h2 className="font-black text-lg uppercase tracking-tight">Methodological Framework & Codebook</h2>
+              <button onClick={() => setShowMethodology(false)} className="text-gray-500 hover:text-black p-2">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-6 space-y-6 text-sm text-gray-800 font-serif leading-relaxed h-[70vh] overflow-y-auto">
+              <section>
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">1. Data Provenance & Organic Crowdsourcing</h3>
+                <p>This dataset is the result of a massive, organic crowdsourcing effort initiated within the first 24 hours of the crisis. The initial data ingestion was driven by civil society, rescue volunteers on the ground, and the rapid dissemination of the platform by the Venezuelan diaspora globally (spanning from Latin America to hubs in Europe, such as Finland). This collaborative network enabled the real-time capture of critical survival data before traditional communication channels collapsed.</p>
+              </section>
+              <section>
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">2. Data Engineering & Sanitization</h3>
+                <p>To process the influx of decentralized reports, we implemented a strict ETL (Extract, Transform, Load) pipeline. The raw data contained thousands of panic-induced duplicates and typographical variations. We applied probabilistic record linkage and phonetic trigram deduplication algorithms (PostgreSQL GIN Trigram indexes) to normalize strings, remove phonetic duplicates, and consolidate identities safely without generating false positives.</p>
+              </section>
+              <section>
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">3. Cross-Referencing & Data Masking</h3>
+                <p>Missing persons reports were cross-referenced with public and private hospital admission registries using OSINT (Open Source Intelligence) methodologies. Internal tracking metadata and exact extraction vectors have been masked in this public dataset to protect the integrity of the sources and the privacy of the victims.<br /><br /><em>* Note: Mortality figures (Deceased) have been strictly excluded from this public dataset, adhering to ICRC/OCHA standards requiring official forensic verification.</em></p>
+              </section>
+              <section>
+                <h3 className="font-bold text-black uppercase text-xs tracking-widest mb-2">4. Data Dictionary (Codebook)</h3>
+                <ul className="list-disc pl-5 space-y-2 text-xs font-sans">
+                  <li><strong>full_name:</strong> Sanitized and normalized identity string.</li>
+                  <li><strong>identity_document:</strong> National ID (Nullified if the reported format was invalid to prevent identity clashes).</li>
+                  <li><strong>last_reported_status:</strong> Categorical state (Missing, Located, Hospitalized).</li>
+                  <li><strong>last_known_location:</strong> Last confirmed spatial data point or medical facility.</li>
+                  <li><strong>data_source:</strong> Anonymized provenance (Verified Citizen Report, Public Health Network, OSINT).</li>
+                  <li><strong>first_reported_utc / last_updated_utc:</strong> ISO 8601 Timestamps of the record lifecycle.</li>
+                </ul>
+              </section>
+            </div>
+            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-between items-center text-xs text-gray-500 font-mono">
+              <span>Encuéntrame VE Data Integrity Team</span>
+              <span>IDIKI TECH SRL</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
