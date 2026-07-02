@@ -10,6 +10,7 @@
     "db:sql": "bash scripts/ejecutar_sql.sh"
   },
   "devDependencies": {
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "pg": "^8.22.0"
   }
 }

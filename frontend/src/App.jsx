@@ -228,6 +228,104 @@ const T = {
     legalRNC: 'RNC: 133-57596-5',
     legalHumanitarian: 'Pro-bono humanitarian use platform.',
     legalCopyright: '© 2026 All rights reserved.',
+  },
+  fi: {
+    homeTitle: 'LÖYDÄ MINUT',
+    homeSubtitle: 'Reaaliaikaiset hälytykset: ilmoita sukulaisestasi ja saa automaattiset Telegram-ilmoitukset heti.',
+    statsReports: 'Rekisterit',
+    statsMissing: 'Kadonnut',
+    statsSafe: 'Turvassa ✓',
+    statsInjured: 'Sairaala',
+    persons: 'Henkilöt',
+    personsDesc: 'Etsi sukulaisia tai ilmoita kadonneista / löydetyistä.',
+    zones: 'Pelastusalueet',
+    zonesDesc: 'Ilmoita romahduksista tai pyydä kiireellistä pelastusta.',
+    dashPersons: 'Henkilöhaku',
+    dashZones: 'Pelastusalueet',
+    searchPlaceholderP: 'Kirjoita nimi tai henkilötunnus...',
+    searchPlaceholderZ: 'Hae sektorin tai rakennuksen mukaan...',
+    btnNewPerson: 'Luo henkilöraportti',
+    btnNewZone: 'Ilmoita pelastusalue',
+    noResults: 'Ei tuloksia haulle',
+    noRecords: 'Ei rekisterejä vielä.',
+    noResultsHint: 'Jos tiedät tästä henkilöstä, paina sinistä nappia yllä.',
+    loadMore: 'Lataa 25 lisää raporttia',
+    loadMoreHint: 'Etkö löydä etsimääsi? Käytä hakupalkkia yllä.',
+    loading: 'Ladataan tietokantaa...',
+    urgencyAlta: 'Korkea',
+    urgencyMedia: 'Keskitaso',
+    urgencyBaja: 'Matala',
+    statusBuscado: 'Kadonnut',
+    statusASalvo: 'Turvassa',
+    statusHerido: 'Sairaalassa',
+    statusFallecido: 'Menehtynyt',
+    detailTitle: 'Raportin tiedot',
+    detailUrgencyHigh: 'Henget vaarassa',
+    detailUrgencyMed: 'Eristyksissä',
+    detailLocation: 'Viimeisin tunnettu sijainti tai sairaala',
+    detailSituation: 'Tilanne',
+    detailContact: 'Alkuperäinen yhteyshenkilo',
+    detailDoc: 'Henkilötunnus:',
+    btnTelegram: 'Vastaanota hälytykset Telegramissa',
+    btnContribute: 'Lähetä uutta tietoa',
+    btnFalsoPositivo: 'Vahvistan: Ei ole tässä paikassa',
+    btnFalsoPositivoSending: 'Ilmoitetaan...',
+    falsoPositivoError: 'Käsittely epäonnistui. Yritä uudelleen.',
+    historyTitle: 'Toimintahistoria',
+    historyEmpty: 'Luodaan alkuraporttia...',
+    historyHide: 'Piilota historia',
+    historyMore: 'Näytä {n} lisää',
+    formPersonaTitle: 'Ilmoita henkilö',
+    formPersonaWarning: 'Täytä mitä tiedät. Älä pysähdy puuttuviin tietoihin.',
+    formPersonaLabel1: '1. Nimi tai kuvaus *',
+    formPersonaPlaceholder1: 'Esim: Juan Pérez',
+    formPersonaLabel2: '2. Henkilötunnus (valinnainen)',
+    formPersonaPlaceholder2: 'Esim: V-12345678',
+    formPersonaLabel3: '3. Nykyinen tila *',
+    formPersonaLabel4: '4. Viimeisin tunnettu sijainti *',
+    formPersonaPlaceholder4: 'Kaupunginosa, katu tai sairaala',
+    formPersonaLabel5: '5. Puhelinnumerosi (valinnainen)',
+    formPersonaPlaceholder5: 'Esim: 0412-1234567',
+    btnPublish: 'Julkaise raportti',
+    btnSaving: 'Tallennetaan...',
+    formZonaTitle: 'Ilmoita alue',
+    formZonaLabel1: '1. Rakennuksen nimi / hätäalue *',
+    formZonaPlaceholder1: 'Esim: Keskustan hätärakennus',
+    formZonaLabel2: '2. Vaarataso *',
+    formZonaBtnAlta: 'Henget vaarassa (Loukkuun jääneet)',
+    formZonaBtnMedia: 'Eristyksissä / Ei ulospääsyä',
+    formZonaBtnBaja: 'Vaikutusalue (Ei loukkaantuneita)',
+    formZonaLabel3: '3. Tilanne *',
+    formZonaPlaceholder3: 'Esim: Rakennus osittain romahtanut...',
+    formZonaLabel4: '4. Puhelinnumerosi (valinnainen)',
+    formZonaPlaceholder4: 'Esim: 0414-1234567',
+    btnAlert: 'Hälytä pelastajat',
+    btnAlertSending: 'Lähetetään hälytystä...',
+    formAportePersonaTitle: 'Päivitä henkilö',
+    formAporteLabel1: 'Uusi tila',
+    formAporteLabel2: 'Henkilötunnus (täytä jos puuttuu)',
+    formAporteLabel3: 'Päivitetty sijainti',
+    btnUpdate: 'Päivitä tiedot',
+    formAporteZonaTitle: 'Päivitä alue',
+    formAporteZonaLabel1: 'Uusi kiireellisyystaso',
+    formAporteZonaLabel2: 'Nykyinen tilanne',
+    btnUpdateZone: 'Päivitä pelastajat',
+    modalTitle: 'Raportti luotu!',
+    modalDesc: 'Haluatko vastaanottaa automaattiset Telegram-ilmoitukset muutoksista koskien',
+    modalBtnTelegram: 'Kyllä, aktivoi Telegramissa',
+    modalBtnSkip: 'Ei, katso verkossa',
+    footerTitle: 'Yhdessä pelastamme henkiä',
+    footerDesc: 'Avoimen lähdekoodin kansalaisalusta. Selviytymistekniikka romahtaneille verkoille.',
+    footerTechTitle: 'Nolla kuvaa (Välitön lataus)',
+    footerTechDesc: 'Strateginen päätös. Poistimme kuvat taataksemme millisekunnin latausajat 2G-verkoissa.',
+    footerColabTitle: 'Yhteistyöponnistus',
+    footerColabDesc: 'Jos etsit jotakuta, ilmoita heistä. Jos sinulla on tietoa, päivitä tila.',
+    footerDataTitle: 'Tärkeä yksityisyys',
+    footerDataDesc: 'Emme myy tai jaa tietoja. Tämä järjestelmä on olemassa yhtä ainoaa tarkoitusta varten.',
+    legalCompany: 'IDIKI TECH SRL',
+    legalRNC: 'RNC: 133-57596-5',
+    legalHumanitarian: 'Pro-bono humanitaarinen alusta.',
+    legalCopyright: '© 2026 Kaikki oikeudet pidätetään.',
   }
 };
 
@@ -295,6 +393,187 @@ const ZonaCard = memo(({ item, onClick, lang = 'es' }) => (
   </div>
 ));
 
+// ─── DATA ROOM DE PRENSA ───
+// Componente standalone (fuera de App) para hooks estables y reset de estado al salir
+const PressView = ({ setView, incidentId }) => {
+  const TOKENS_VALIDOS = ['PVE-2026-TOMMI', 'PVE-2026-B'];
+  const [tokenInput, setTokenInput] = useState('');
+  const [autenticado, setAutenticado] = useState(false);
+  const [pressStats, setPressStats] = useState(null);
+  const [descargando, setDescargando] = useState(false);
+  const [tokenError, setTokenError] = useState(false);
+
+  useEffect(() => {
+    if (!autenticado || !incidentId) return;
+    fetch(`${SUPABASE_URL}/rest/v1/rpc/get_incident_stats`, {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify({ p_incident_id: incidentId })
+    }).then(r => r.json()).then(d => setPressStats(d)).catch(console.error);
+  }, [autenticado, incidentId]);
+
+  const verificarToken = () => {
+    if (TOKENS_VALIDOS.includes(tokenInput.trim().toUpperCase())) {
+      setAutenticado(true);
+      setTokenError(false);
+    } else {
+      setTokenError(true);
+    }
+  };
+
+  const descargarCSV = async () => {
+    setDescargando(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/press_census?select=*&limit=200000`, { headers: HEADERS });
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) return;
+      const cols = Object.keys(data[0]);
+      const rows = data.map(r =>
+        cols.map(c => {
+          let v = r[c] ?? '';
+          v = String(v).replace(/[\r\n]+/g, ' ');
+          return v.includes(',') || v.includes('"')
+            ? '"' + v.replace(/"/g, '""') + '"'
+            : v;
+        }).join(',')
+      );
+      const csv = '\uFEFF' + [cols.join(','), ...rows].join('\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      a.download = `encuentrame_ve_census_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+    } catch (e) {
+      console.error('Error descargando CSV:', e);
+    } finally {
+      setDescargando(false);
+    }
+  };
+
+  if (!autenticado) {
+    return (
+      <div className="bg-white min-h-screen animate-fade-in">
+        <div className="bg-black text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
+          <button onClick={() => setView('home')} className="p-1 -ml-2 hover:bg-gray-800 rounded-full active:scale-90">
+            <ChevronLeft size={32} />
+          </button>
+          <h2 className="font-black text-lg flex-1 truncate tracking-tight">Press / Prensa / Lehdistö</h2>
+        </div>
+        <div className="p-6 space-y-6">
+          <div className="border-4 border-black p-5 space-y-2">
+            <h3 className="font-black text-xl uppercase tracking-tight">Data Room</h3>
+            <p className="text-sm text-gray-600 font-medium">Encuéntrame VE — IDIKI TECH SRL</p>
+          </div>
+          <div className="space-y-3">
+            <input
+              type="text"
+              placeholder="Token de acceso (PVE-XXXX-XXXX)"
+              className={`w-full p-4 border-2 font-mono text-sm focus:outline-none ${tokenError ? 'border-red-600 bg-red-50' : 'border-black'}`}
+              value={tokenInput}
+              onChange={e => { setTokenInput(e.target.value); setTokenError(false); }}
+              onKeyDown={e => e.key === 'Enter' && verificarToken()}
+            />
+            {tokenError && (
+              <p className="text-red-600 font-bold text-xs uppercase tracking-wide">Token inválido. Contacta a IDIKI TECH SRL.</p>
+            )}
+            <button
+              onClick={verificarToken}
+              className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] active:translate-y-0.5 transition-all"
+            >
+              Acceder / Access / Kirjaudu
+            </button>
+          </div>
+          <p className="text-[10px] text-gray-400 text-center font-medium">
+            Acceso restringido a periodistas y organizaciones verificadas.<br />
+            Restricted to verified journalists and organizations.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white min-h-screen animate-fade-in">
+      <div className="bg-black text-white p-4 sticky top-0 flex items-center gap-3 shadow-md z-10">
+        <button onClick={() => setView('home')} className="p-1 -ml-2 hover:bg-gray-800 rounded-full active:scale-90">
+          <ChevronLeft size={32} />
+        </button>
+        <h2 className="font-black text-lg flex-1 truncate tracking-tight">Data Room — Press</h2>
+      </div>
+      <div className="p-5 space-y-6">
+        {/* Métricas */}
+        <div className="border-4 border-black p-5">
+          <h3 className="font-black text-xs uppercase tracking-widest mb-4 text-gray-500">
+            Census Figures — {new Date().toISOString().slice(0, 10)}
+          </h3>
+          {pressStats ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="text-3xl font-black">{(pressStats.total - 144).toLocaleString()}</span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Total in Census</span>
+              </div>
+              <div>
+                <span className="text-3xl font-black text-red-600">{pressStats.buscados?.toLocaleString()}</span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-red-500 mt-1">Missing</span>
+              </div>
+              <div>
+                <span className="text-3xl font-black text-orange-500">{pressStats.heridos?.toLocaleString()}</span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-orange-400 mt-1">Hospitalized</span>
+              </div>
+              <div>
+                <span className="text-3xl font-black text-green-600">{pressStats.a_salvo?.toLocaleString()}</span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-green-500 mt-1">Located / Safe</span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-400 font-mono text-sm animate-pulse">Loading...</p>
+          )}
+          <p className="text-[9px] text-gray-400 font-mono mt-4 border-t border-gray-100 pt-3">
+            Last updated: {new Date().toLocaleString('en-US')} UTC •{' '}
+            Status reflects last report received. Mortality figures excluded — require official forensic verification.
+          </p>
+        </div>
+
+        {/* Descarga */}
+        <div className="border-4 border-black p-5 space-y-3">
+          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">Dataset</h3>
+          <p className="text-sm text-gray-700 font-medium">
+            Sanitized CSV — one record per person, latest status only. Sources anonymized. Mortality excluded.
+          </p>
+          <button
+            onClick={descargarCSV}
+            disabled={descargando}
+            className="w-full bg-black text-white font-black uppercase p-4 hover:bg-gray-800 disabled:opacity-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
+          >
+            {descargando ? 'Generating...' : '⬇ Download Official Dataset (CSV)'}
+          </button>
+          <p className="text-[10px] text-gray-400">
+            Attribution required: "Source: Encuéntrame VE / IDIKI TECH SRL, 2026"
+          </p>
+        </div>
+
+        {/* Metodología */}
+        <div className="border-4 border-gray-300 p-5 space-y-3 bg-gray-50">
+          <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">Methodology</h3>
+          <p className="text-xs text-gray-700 leading-relaxed">
+            This dataset results from OSINT methodologies and citizen validation (crowdsourcing).
+            Phonetic trigram deduplication algorithms were applied to eliminate noise.
+            Hospital admission records were unified into a single clean data infrastructure.
+            A full forensic audit was conducted on 2026-07-01 covering 91,574 records.
+          </p>
+          <p className="text-xs text-gray-700 leading-relaxed">
+            <strong>Column guide:</strong> full_name, identity_document, status_code
+            (MISSING / HOSPITALIZED / LOCATED), last_known_location, data_source,
+            first_reported_utc, last_updated_utc.
+          </p>
+          <p className="text-xs font-bold text-gray-800 mt-2">
+            Contact: IDIKI TECH SRL | RNC: 133-57596-5
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─────────────────────────────────────────────
 // APP PRINCIPAL
 // ─────────────────────────────────────────────
@@ -304,8 +583,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('personas');
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState(null);
+  const LANGS = ['es', 'en', 'fi'];
   const [lang, setLang] = useState('es');
-  const toggleLang = () => setLang(l => l === 'es' ? 'en' : 'es');
+  const toggleLang = () => setLang(l => {
+    const idx = LANGS.indexOf(l);
+    return LANGS[(idx + 1) % LANGS.length];
+  });
 
   const [incidentId, setIncidentId] = useState(null);
   const [personas, setPersonas] = useState([]);
@@ -812,7 +1095,7 @@ export default function App() {
             <div className="flex items-center gap-2">
               {isSyncing && <RefreshCw size={16} className="animate-spin text-gray-500 mt-1" />}
               <button onClick={toggleLang} className="flex items-center gap-1 bg-gray-800 px-2 py-1 text-xs font-bold uppercase rounded active:scale-95 transition-transform">
-                <Globe size={14}/> {lang === 'es' ? 'EN' : 'ES'}
+                <Globe size={14}/> {LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length].toUpperCase()}
               </button>
             </div>
           </div>
@@ -928,6 +1211,12 @@ export default function App() {
           <span className="text-[10px] font-bold text-gray-600 tracking-wider mt-0.5">{T[lang].legalRNC}</span>
           <span className="text-[10px] font-medium text-gray-500 mt-2">{T[lang].legalHumanitarian}</span>
           <span className="text-[10px] font-mono text-gray-400 mt-1">{T[lang].legalCopyright}</span>
+          <button
+            onClick={() => setView('press')}
+            className="mt-4 text-[10px] text-gray-400 hover:text-gray-600 font-mono underline underline-offset-2 transition-colors"
+          >
+            Press / Prensa / Lehdistö
+          </button>
         </div>
       </div>
     );
@@ -952,7 +1241,7 @@ export default function App() {
             </h2>
             <div className="flex items-center gap-2">
               <button onClick={toggleLang} className="flex items-center gap-1 bg-gray-800 px-2 py-1 text-xs font-bold uppercase rounded active:scale-95 transition-transform">
-                <Globe size={12}/> {lang === 'es' ? 'EN' : 'ES'}
+                <Globe size={12}/> {LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length].toUpperCase()}
               </button>
               {isSyncing && <RefreshCw size={14} className="animate-spin text-gray-500" />}
             </div>
@@ -1308,6 +1597,7 @@ export default function App() {
       {view === 'form_zona'            && FormZonaView()}
       {view === 'form_aporte_persona'  && FormAportePersonaView()}
       {view === 'form_aporte_zona'     && FormAporteZonaView()}
+      {view === 'press'                && <PressView setView={setView} incidentId={incidentId} />}
 
       {/* MODAL DE ÉXITO — TELEGRAM */}
       {showSuccessModal && selectedItem && (

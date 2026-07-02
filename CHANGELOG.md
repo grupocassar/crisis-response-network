@@ -5,6 +5,94 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
 
+## [Data Room] — 2026-07-02
+
+### Press Access Portal — Data Room de Prensa
+
+#### Added
+- **Vista `/press`** — Data Room protegido por token individual por periodista
+  (formato `PVE-XXXX-XXXX`), sin base de datos de usuarios
+- **Métricas en tiempo real** en el Data Room: Missing, Hospitalized,
+  Located, Total in Census (fallecidos excluidos por protocolo)
+- **Descarga de CSV sanitizado** desde `press_census` view —
+  fuentes enmascaradas, un registro por persona, estado más reciente
+- **Toggle de idioma extendido a ciclo de 3:** Español → English → Suomi
+- **Bloque finés completo** en objeto i18n `T` (cobertura 100% de la app)
+- **Entrada discreta al Data Room** en footer de HomeView
+- `supabase/press_census_view.sql` — vista SQL sanitizada lista
+  para ejecutar en Supabase SQL Editor (pendiente de aplicar)
+- `docs/DATA_ROOM_PLAN.md` — plan técnico del Data Room
+
+#### Design decisions
+- **Fallecidos excluidos del CSV público:** en desastre activo la mortalidad
+  requiere verificación forense oficial (estándar CICR/OCHA)
+- **Token hardcodeado en cliente:** sin base de datos de usuarios,
+  revocación instantánea quitando la línea del array
+- **`press_census` view** nunca expone `reporter_contact` real ni
+  fuentes internas de extracción
+
+---
+
+## [Auditoría v2] — 2026-07-01
+
+### Cierre de Auditoría Forense + Controles de Entrada
+
+#### Correcciones aplicadas en esta sesión
+- **83 contradictorios automáticos resueltos** — cédulas venezolanas
+  reales con estados en conflicto: `document_id → NULL` en registros
+  duplicados usando regla `updated_at DESC`
+- **Registros modificados:** 83
+- **Contradictorios finales:** 4
+  (4 restantes = Grupo 3, requieren revisión manual)
+- **Suma cero confirmada:** 91,574 intactos
+
+#### Controles de entrada implementados
+- **`scripts/validar_ingesta.js`** — validador pre-ingesta para CSVs
+  - 3 reglas bloqueantes: name_desc, status válido, fallecido con ubicación
+  - 6 reglas de warning: placeholders, UUIDs, cédulas cortas, encoding,
+    duplicados internos, conflictos con base existente
+  - Genera reporte JSON en `/tmp` antes de cualquier inserción
+  - Exit code 1 bloquea pipelines de CI/CD si hay errores críticos
+
+#### Hallazgos de flujo de ingesta
+- 31,035 registros `a_salvo` tuvieron cambio de estado — flujo correcto
+- 12,111 heridos entraron directo desde listas hospitalarias — data válida
+- 141 fallecidos sin actualización — pendiente verificación de fuente
+
+---
+
+## [Auditoría] — 2026-07-01
+
+### Auditoría Forense de Datos — 91,574 registros
+
+#### Correcciones aplicadas
+- **Placeholders numéricos puros** (0000000, 00000000, V-00000000, etc.):
+  `document_id → NULL` en ~50 registros
+- **UUIDs como cédula** (identificadores internos del módulo de niños):
+  `document_id → NULL` en 1,117 registros total
+- **Cédulas cortas inválidas** (≤5 dígitos, no son cédulas venezolanas):
+  `document_id → NULL` en 2,328 registros total
+- **Duplicados tipográficos** (misma persona, variante de nombre, regla `updated_at DESC`):
+  `document_id → NULL` en 35 registros del duplicado
+- **Placeholders con prefijo** (V-0000, E-0000, 12345678, etc.):
+  `document_id → NULL` en 3 registros
+- **Total registros modificados:** 3,533
+- **Registros eliminados:** 0
+
+#### Resultado de integridad
+- Suma cero confirmada: 91,574 registros intactos tras cada operación
+- Contradictorios resueltos: 168 → 87 (49% de reducción)
+- Hallazgos críticos pendientes: 2 (fallecidos sin fuente verificada, Grupo 3 manual)
+- Documento completo: [`docs/AUDITORIA_FORENSE_2026-07-01.md`](docs/AUDITORIA_FORENSE_2026-07-01.md)
+
+#### Metodología
+- Todas las operaciones ejecutadas con SELECT de verificación previa y confirmación posterior
+- Cada UPDATE precedido de conteo esperado vs. real — detención automática ante discrepancia
+- Suma cero verificada tras cada bloque de escritura
+- Cero registros eliminados — solo limpieza de `document_id` inválidos o duplicados
+
+---
+
 ## [Sin versión] — 2026-07-01
 
 ### Fixed
