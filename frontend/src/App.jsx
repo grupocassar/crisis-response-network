@@ -482,7 +482,7 @@ const ZonaCard = memo(({ item, onClick, lang = 'es' }) => (
 const PressView = ({ setView, incidentId, lang }) => {
   const TOKENS_VALIDOS = ['PVE-2026-TOMMI', 'PVE-2026-B'];
   // Correo neutro del proyecto para prensa. Vacío = no se muestra correo.
-  const PRESS_EMAIL = '';
+  const PRESS_EMAIL = 'ttorresnelson@gmail.com';
   const DATASET_VERSION = '2026.07.02';
   const t = T[lang] || T.es;
   const [tokenInput, setTokenInput] = useState('');
@@ -581,6 +581,11 @@ const PressView = ({ setView, incidentId, lang }) => {
             </button>
           </div>
           <p className="text-[10px] text-gray-400 text-center font-medium">{t.pressRestricted}</p>
+          {PRESS_EMAIL && (
+            <p className="text-[11px] text-gray-500 text-center font-mono">
+              <a href={`mailto:${PRESS_EMAIL}`} className="underline underline-offset-2 hover:text-black">{PRESS_EMAIL}</a>
+            </p>
+          )}
         </div>
       </div>
     );
