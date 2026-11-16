@@ -1,6 +1,6 @@
 # Auditoría Forense de Datos — Encuéntrame VE
 **Fecha:** 2026-07-01  
-**Ejecutado por:** claude-sonnet-4-6 bajo dirección de IDIKI TECH SRL  
+**Ejecutado por:** claude-sonnet-4-6 bajo dirección del equipo de Encuéntrame VE  
 **Total registros auditados:** 91,574  
 **Resultado general:** APROBADO CON OBSERVACIONES
 
@@ -323,5 +323,5 @@ Exit code 1 si hay errores bloqueantes. Exit code 0 si solo warnings.
 ---
 
 *Generado automáticamente por claude-sonnet-4-6*  
-*Proyecto: crisis-response-network | IDIKI TECH SRL*  
-*RNC: 133-57596-5 | Plataforma humanitaria pro-bono*
+*Proyecto: crisis-response-network | Encuéntrame VE*  
+*Plataforma humanitaria pro-bono*

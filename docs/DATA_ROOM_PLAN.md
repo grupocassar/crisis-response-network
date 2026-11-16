@@ -1,5 +1,5 @@
 # Data Room — Plan Técnico
-**Encuéntrame VE | IDIKI TECH SRL**
+**Encuéntrame VE**
 2026-07-01
 
 ---
@@ -117,5 +117,5 @@ Los periodistas no ven tarjetas duplicadas.
 
 ## Contacto
 
-**IDIKI TECH SRL | RNC: 133-57596-5**
+**Encuéntrame VE — Iniciativa ciudadana independiente**
 Plataforma humanitaria pro-bono | 2026

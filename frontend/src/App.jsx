@@ -124,11 +124,11 @@ const T = {
     footerDataDesc: 'No comercializamos ni compartimos información. Este sistema existe con un único fin operativo.',
     pressMenu: 'Prensa / Data Room',
     pressTitle: 'Data Room de Prensa',
-    pressSubtitle: 'Encuéntrame VE — IDIKI TECH SRL',
+    pressSubtitle: 'Encuéntrame VE — Iniciativa ciudadana independiente',
     pressTokenPh: 'Token de acceso (Ej: PVE-XXXX)',
     pressBtnAccess: 'Acceder al Portal',
     pressRestricted: 'Acceso otorgado individualmente mediante token a periodistas acreditados, organizaciones humanitarias y usuarios institucionales.',
-    pressTokenErr: 'Token inválido. Contacta a IDIKI TECH SRL.',
+    pressTokenErr: 'Token inválido. Contacta al equipo de Encuéntrame VE.',
     pressMetricsTitle: 'Cifras del Censo',
     pressTotal: 'Total en Censo',
     pressTotalNote: '(Desaparecidos + Hospitalizados + Localizados. Excluye decesos)',
@@ -150,8 +150,8 @@ const T = {
     pressBtnRead: 'Leer Metodología Completa',
     pressModalTitle: 'Marco Metodológico y Codebook',
     pressModalFooterLeft: 'Equipo de Integridad de Datos — Encuéntrame VE',
-    legalCompany: 'IDIKI TECH SRL',
-    legalRNC: 'RNC: 133-57596-5',
+    legalCompany: 'Encuéntrame VE',
+    legalRNC: 'Iniciativa ciudadana independiente',
     legalHumanitarian: 'Plataforma de uso humanitario pro-bono.',
     legalCopyright: '© 2026 Todos los derechos reservados.',
   },
@@ -254,11 +254,11 @@ const T = {
     footerDataDesc: 'We do not sell or share data. This system exists for a single operational purpose.',
     pressMenu: 'Press Data Room',
     pressTitle: 'Press Data Room',
-    pressSubtitle: 'Encuéntrame VE — IDIKI TECH SRL',
+    pressSubtitle: 'Encuéntrame VE — Independent civic initiative',
     pressTokenPh: 'Access token (e.g. PVE-XXXX)',
     pressBtnAccess: 'Access Portal',
     pressRestricted: 'Access is granted individually via token to accredited journalists, humanitarian organizations, and institutional users.',
-    pressTokenErr: 'Invalid token. Contact IDIKI TECH SRL.',
+    pressTokenErr: 'Invalid token. Contact the Encuéntrame VE team.',
     pressMetricsTitle: 'Census Figures',
     pressTotal: 'Total in Census',
     pressTotalNote: '(Missing + Hospitalized + Located. Excludes mortality figures)',
@@ -280,8 +280,8 @@ const T = {
     pressBtnRead: 'Read Full Methodology',
     pressModalTitle: 'Methodological Framework & Codebook',
     pressModalFooterLeft: 'Encuéntrame VE Data Integrity Team',
-    legalCompany: 'IDIKI TECH SRL',
-    legalRNC: 'RNC: 133-57596-5',
+    legalCompany: 'Encuéntrame VE',
+    legalRNC: 'Independent civic initiative',
     legalHumanitarian: 'Pro-bono humanitarian use platform.',
     legalCopyright: '© 2026 All rights reserved.',
   },
@@ -380,11 +380,11 @@ const T = {
     footerDataDesc: 'Emme myy tai jaa tietoja. Tämä järjestelmä on olemassa yhtä ainoaa tarkoitusta varten.',
     pressMenu: 'Lehdistöhuone (Data)',
     pressTitle: 'Lehdistöhuone',
-    pressSubtitle: 'Encuéntrame VE — IDIKI TECH SRL',
+    pressSubtitle: 'Encuéntrame VE — Itsenäinen kansalaisaloite',
     pressTokenPh: 'Pääsytunnus (esim. PVE-XXXX)',
     pressBtnAccess: 'Kirjaudu Sisään',
     pressRestricted: 'Pääsy myönnetään yksilöllisesti tunnuksella akkreditoiduille journalisteille, humanitaarisille järjestöille ja instituutioille.',
-    pressTokenErr: 'Virheellinen tunnus. Ota yhteyttä IDIKI TECH SRL.',
+    pressTokenErr: 'Virheellinen tunnus. Ota yhteyttä Encuéntrame VE -tiimiin.',
     pressMetricsTitle: 'Väestönlaskennan Luvut',
     pressTotal: 'Yhteensä',
     pressTotalNote: '(Kadonnut + Sairaalassa + Löydetty. Ei sisällä kuolleita)',
@@ -406,8 +406,8 @@ const T = {
     pressBtnRead: 'Lue Koko Metodologia',
     pressModalTitle: 'Metodologia ja Koodikirja',
     pressModalFooterLeft: 'Encuentrame VE:n datan eheystiimi',
-    legalCompany: 'IDIKI TECH SRL',
-    legalRNC: 'RNC: 133-57596-5',
+    legalCompany: 'Encuéntrame VE',
+    legalRNC: 'Itsenäinen kansalaisaloite',
     legalHumanitarian: 'Pro-bono humanitaarinen alusta.',
     legalCopyright: '© 2026 Kaikki oikeudet pidätetään.',
   }
@@ -481,6 +481,8 @@ const ZonaCard = memo(({ item, onClick, lang = 'es' }) => (
 // Componente standalone (fuera de App) para hooks estables y reset de estado al salir
 const PressView = ({ setView, incidentId, lang }) => {
   const TOKENS_VALIDOS = ['PVE-2026-TOMMI', 'PVE-2026-B'];
+  // Correo neutro del proyecto para prensa. Vacío = no se muestra correo.
+  const PRESS_EMAIL = '';
   const DATASET_VERSION = '2026.07.02';
   const t = T[lang] || T.es;
   const [tokenInput, setTokenInput] = useState('');
@@ -746,9 +748,8 @@ const PressView = ({ setView, incidentId, lang }) => {
 
             {/* Firma Institucional Sobria */}
             <div className="bg-gray-50 border-t border-gray-200 p-6 text-xs text-gray-600 font-mono space-y-2">
-              <p><strong className="text-gray-900">MAINTAINER:</strong> Nelson Torres</p>
-              <p><strong className="text-gray-900">PRESS CONTACT:</strong> administrador@grupo-cassar.com</p>
-              <p><strong className="text-gray-900">LOCATION:</strong> Lahti, Finland</p>
+              <p><strong className="text-gray-900">MAINTAINED BY:</strong> Encuéntrame VE — Independent civic initiative</p>
+              <p><strong className="text-gray-900">DATA REQUESTS:</strong> {PRESS_EMAIL || 'Accredited media and humanitarian organizations, by individual token'}</p>
               <p><strong className="text-gray-900">INFRASTRUCTURE:</strong> Cloudflare Edge Network / Supabase</p>
             </div>
           </div>

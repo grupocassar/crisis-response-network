@@ -5,6 +5,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
 
+## [Privacidad] — 2026-11-16
+
+### Changed
+- Firma institucional neutral: se retiran referencias a la empresa operadora, registro fiscal, nombre, ubicación y correo personal del mantenedor.
+- Contacto de prensa centralizado en la constante `PRESS_EMAIL` (correo neutro del proyecto).
+
+---
+
 ## [Data Room] — 2026-07-02
 
 ### Press Access Portal — Data Room de Prensa
@@ -149,7 +157,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 ### Added
 - Soporte PWA completo: instalable en iOS con banner descartable, y Android con prompt nativo
 - i18n ultraligero (es/en) para interoperabilidad con ONGs internacionales
-- Footer legal corporativo minimalista (RNC, privacidad, enfoque humano)
+- Footer legal minimalista (privacidad, enfoque humano)
 
 ### Fixed
 - Referencia incorrecta a "120Beat" en el footer legal
